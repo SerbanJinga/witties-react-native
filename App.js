@@ -1,21 +1,28 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-export default class App extends Component {
-    
-  render(){
-    return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-      </View>
-    );
-  }
-}
+import { createStackNavigator } from 'react-navigation-stack'
+import AuthNavigator from './src/screens/login/AuthNavigator'
+import {createAppContainer } from 'react-navigation'
+import firebaseConfig from './src/firebaseConfig/firebase'
+import firebase from 'firebase'
+require('firebase/firestore');
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+// <=============== FIREBASE ===================>
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore()
+export const database = db;
+
+// <=============== END FIREBASE ===================>
+
+const navigator = createStackNavigator(
+  {
+    Auth: AuthNavigator,
+  },{
+    initialRouteName: 'Auth',
+    defaultNavigationOptions:{
+      header: null
+    }
+  }
+);
+
+export default createAppContainer(navigator);
