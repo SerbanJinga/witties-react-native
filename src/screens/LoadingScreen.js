@@ -11,7 +11,7 @@ export default class LoadingScreen extends Component {
             if(user){
                 this.props.navigation.navigate('Home')
             }else{
-                this.props.navigation.navigate('LogIn')
+                this.props.navigation.navigate('SignUp')
             }
         })
     }

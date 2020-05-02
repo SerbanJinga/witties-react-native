@@ -1,40 +1,26 @@
 import React, { Component } from 'react'
+import firebase from 'firebase'
+import {Text, Button, Input } from 'react-native-elements'
 import {
     StyleSheet,
     View,
     SafeAreaView,
     KeyboardAvoidingView,
-    ActivityIndicator,
     Keyboard,
+    Dimensions,
     TouchableWithoutFeedback
   } from 'react-native';
-  import { Text, Input, Button } from 'react-native-elements'
-import firebase from 'firebase'
-import 'firebase/firestore'
+ 
+const { width, height } = Dimensions.get('window')
 
-class Login extends Component{
+class ForgotPassword extends Component {
     constructor(props){
         super(props)
         this.state = {
-            email: '',
-            password: '',
-            errorMessage: '',
-            loading: false
+            email: "",
+            loading: false,
+            errorMessage: ""
         }
-    }
-    
-
-   
-
-    onLoginSuccess(){
-      this.props.navigation.navigate('Home')
-    }
-
-    onLoginFailure(errorMessage){
-        this.setState({
-            error: errorMessage, 
-            loading: false
-        })
     }
 
     renderLoading(){
@@ -47,21 +33,32 @@ class Login extends Component{
         }
     }
 
-    async signInWithEmail(){
-        await firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
-                        .then(this.onLoginSuccess.bind(this))
-                        .catch(error => {
-                            let errorCode = error.code
-                            let errorMessage = error.message
-                            if(errorCode == 'auth/weak-password'){
-                                this.onLoginFailure.bind(this)('Weak Password!')
-                            }else{
-                                this.onLoginFailure.bind(this)(errorMessage)
-                            }
-                        })
+    onResetSuccess(){
+        alert('bravo')
     }
+  
+      onResetFailure(errorMessage){
+          this.setState({
+              error: errorMessage, 
+              loading: false
+          })
+      }
+  
+   async resetPassword(){
+    await firebase.auth().sendPasswordResetEmail(this.state.email)
+    .then(this.onResetSuccess.bind(this))
+    .catch(error => {
+        let errorCode = error.code
+        let errorMessage = error.message
+        if(errorCode == 'auth/weak-password'){
+            this.onResetFailure.bind(this)('Weak Password!')
+        }else{
+            this.onResetFailure.bind(this)(errorMessage)
+        }
+    })
+   }
 
-      render(){
+    render(){
         return (
             <TouchableWithoutFeedback
               onPress={() => {
@@ -71,7 +68,7 @@ class Login extends Component{
               <SafeAreaView style={{ flex: 1 }}>
                 <KeyboardAvoidingView style={styles.container} behavior="padding">
                   <Text style={{ marginTop: 40, fontSize: 32, fontWeight: '700', color: 'gray' }}>
-                    Witties
+                    Forgot Password?
                   </Text>
                   <View style={styles.form}>
                     <Input
@@ -84,18 +81,8 @@ class Login extends Component{
                       value={this.state.email}
                       onChangeText={email => this.setState({ email })}
                     />
-                    <Input
-                      style={styles.input}
-                      placeholder="Password"
-                      placeholderTextColor="#B1B1B1"
-                      returnKeyType="done"
-                      textContentType="newPassword"
-                      secureTextEntry={true}
-                      value={this.state.password}
-                      onChangeText={password => this.setState({ password })}
-                    />
-                  </View>
-                  {this.renderLoading()}
+                </View>
+                {this.renderLoading()}
                   <Text
                     style={{
                       fontSize: 18,
@@ -106,39 +93,34 @@ class Login extends Component{
                   >
                     {this.state.error}
                   </Text>
-                    <View style={{ marginTop: 10 }}>
+                <View style={{ marginTop: 10 }}>
                    
                   <Button
-                    onPress={() => this.signInWithEmail()}
+                    onPress={() => this.resetPassword()}
                     type="solid"
-                    title="Login"
+                    title="Send reset password"
                     style={styles.button}
                     loading={this.state.loading}
-                    
-                />
+                    />
                     <Text
                       style={{ fontWeight: '200', fontSize: 17, textAlign: 'center', marginTop: 20 }}
                       onPress={() => {
-                        this.props.navigation.navigate('SignUp');
+                        this.props.navigation.navigate('LogIn');
                       }}
                     >
-                      Don't have an account?
+                      Remember Password?
                     </Text>
-                  </View>
-                  <Button
-                    type="clear"
-                     title="Forgot Password?"
-                      style={{ fontWeight: '200', fontSize: 17, textAlign: 'center', marginTop: 20 }}
-                      onPress={() => {
-                        this.props.navigation.navigate('ForgotPassword');
-                      }}
-                    />
-                </KeyboardAvoidingView>
+                </View>
+             </KeyboardAvoidingView>
               </SafeAreaView>
             </TouchableWithoutFeedback>
-          );
-      }
+        )
+    }
 }
+export default ForgotPassword
+
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -148,7 +130,7 @@ const styles = StyleSheet.create({
     },
     form: {
       width: '86%',
-      marginTop: 15
+      marginTop: 40
     },
     logo: {
       marginTop: 20
@@ -158,10 +140,9 @@ const styles = StyleSheet.create({
       borderColor: '#707070',
       borderBottomWidth: 1,
       paddingBottom: 1.5,
-      marginTop: 25.5
+      marginTop: 40
     },
     button: {
-     
     },
     googleButton: {
       backgroundColor: '#FFFFFF',
@@ -175,7 +156,3 @@ const styles = StyleSheet.create({
     }
   });
   
-
-export default Login
-
-//

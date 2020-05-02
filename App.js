@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { createStackNavigator } from 'react-navigation-stack'
 import AuthNavigator from './src/screens/login/AuthNavigator'
+import Home from './src/screens/Home'
 import {createAppContainer } from 'react-navigation'
 import firebaseConfig from './src/firebaseConfig/firebase'
 import firebase from 'firebase'
@@ -17,6 +18,7 @@ export const database = db;
 const navigator = createStackNavigator(
   {
     Auth: AuthNavigator,
+    Home: Home
   },{
     initialRouteName: 'Auth',
     defaultNavigationOptions:{
