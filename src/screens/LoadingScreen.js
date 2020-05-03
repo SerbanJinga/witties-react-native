@@ -6,7 +6,15 @@ const { width, height } = Dimensions.get('window');
 
 export default class LoadingScreen extends Component {
 
+    constructor(props){
+        super(props)
+        this.state = {
+        }
+
+    }
+
     componentDidMount = () => {
+        console.log(this.props)
         firebase.auth().onAuthStateChanged(user => {
             if(user){
                 this.props.navigation.navigate('Home')

@@ -27,10 +27,12 @@ class SignUp extends Component{
             email: '',
             password: '',
             careScore: 0,
-            discrimiator: "",
+            discriminator: "",
             profilePicture: "" ,
             errorMessage: '',
-            loading: false
+            loading: false,
+            friends: [],
+            uid: ""
         }
     }
 
@@ -42,6 +44,59 @@ class SignUp extends Component{
     //   firebase.auth().currentUser.metadata.lastSignInTime
     // }
 
+    async calculateDiscrim  (searchName) {
+      try {
+        console.log('merge')
+          //to do trb sa vezi cand un query este invalid si sa setezi in cazul acela discriminatorul cu 0001
+          //si sa schimbi in singup discrimiator
+          function pad(num) {
+              var s = "000000000" + num;
+              return s.substr(s.length - 4);
+          }
+         
+          let initialQuery = await firebase.firestore().collection("users").where("displayName", "==", searchName).orderBy("discriminator", "asc");
+          let documentSnapshots = await initialQuery.get();
+          if(documentSnapshots.empty){
+            this.setState({
+              discriminator: "0001"
+            })
+          }else{
+            let documentData = documentSnapshots.docs.map(document => document.data());
+            
+            let dis = documentData[documentData.length - 1].discriminator;
+            let nrdis = Number(dis)+1;
+          
+
+            const discrim = pad(nrdis)
+            this.setState({
+              discriminator: discrim
+            })
+            console.log(this.state.discriminator)
+        
+          }
+          await firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
+            discriminator: this.state.discriminator
+          })  
+      } catch (err) { }
+  }
+
+
+
+    _retrieveDisplayName = async () => {
+      const docRef = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid);
+      docRef.get().then(doc => {
+        if(doc.exists){
+          this.setState({displayName: doc.data().displayName})
+        }else{
+          console.log('Undefined document')
+        }
+      }).catch(function(err){
+        console.log(err)
+      })
+
+      console.log(this.state.displayName)
+      this.calculateDiscrim(this.state.displayName).then(this.props.navigation.navigate('Home'))
+    }
     
 
    
@@ -50,11 +105,16 @@ class SignUp extends Component{
         email: this.state.email,
         displayName: this.state.displayName,
         careScore: this.state.careScore,
-        discrimiator: this.state.discrimiator,
-        profilePicture: this.state.profilePicture   
-      }).then(this.props.navigation.navigate('Home'), (error) => {
+        discriminator: this.state.discriminator,
+        profilePicture: this.state.profilePicture,
+        friends: this.state.friends,
+        uid: firebase.auth().currentUser.uid
+      }).then(this._retrieveDisplayName(), (error) => {
         console.log(error)
         alert(error)
+      })
+      firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
+        prieteni: []
       })
     }
 
