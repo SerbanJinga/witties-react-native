@@ -7,10 +7,8 @@ import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 const { width, height } = Dimensions.get('window')
-let text = 'vasile'
 let arr = []
-
-export default class ReceiveFriendRequest extends Component {
+export default class FriendList extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -21,10 +19,12 @@ export default class ReceiveFriendRequest extends Component {
      
 
     _retrieveFriendRequests = async() => {
-        let initialQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("received")
-        let documentSnapshots = await initialQuery.get()
-        documentSnapshots.docs.map(doc => this.cinetiadatrequest(doc.data().sender))
-        
+        console.log('alta iteratie')
+        let receivedQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("received")
+        let documentSnapshotsReceived = await receivedQuery.get()
+        documentSnapshotsReceived.docs.map(doc => {if(doc.data().accepted === true){this.cinetiadatrequest(doc.data().sender)}})
+       
+
     }
 
 
@@ -41,38 +41,23 @@ export default class ReceiveFriendRequest extends Component {
 
     }
 
+
+
     componentDidMount(){
-        try{
-            this._retrieveFriendRequests()
-        }catch(error){
-            console.log(error)
-        }
-        console.log('=================================')
-        console.log('=================================')
-    }
-   
-    _acceptFriend = async(uid) => {
-        firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("received").doc(uid).update({
-            accepted: true,
-            request: "prieteni"
-        })
-        firebase.firestore().collection("friends").doc(uid).collection("sent").doc(firebase.auth().currentUser.uid).update({
-            accepted: true,
-            request: "prieteni"
-        })
+        this._retrieveFriendRequests()
     }
 
     render(){
         return(
             <View>
-                <Text style={{fontSize: 40, textAlign: 'center', marginTop: 20}}>ai primit cereri de la </Text>
+                <Text style={{fontSize: 40, textAlign: 'center', marginTop: 20}}>prieteni</Text>
                 <SafeAreaView style={styles.container}>
                 <FlatList
                  data = {this.state.documentData}
                  renderItem={({item}) => (
                      <View style={styles.itemContainer}>
                         <Text>{item.displayName}#{item.discriminator}</Text>
-                        <Button title="Accept friend" onPress={() => this._acceptFriend(item.uid)}/>
+                    
                      </View>
                  )}   
                 keyExtractor={(item, index) => String(index)}

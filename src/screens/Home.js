@@ -11,6 +11,7 @@ import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 import FriendRequest from '../screens/FriendRequests'
 import ReceiveFriendRequest from '../screens/ReceiveFriendRequest'
+import FriendList from '../screens/FriendList'
 const { width, height } = Dimensions.get('window')
 
 
@@ -25,7 +26,9 @@ export default class Home extends Component {
         imageURL: "",
         postText: ""
       }
+
     }
+
 
 
     _signOut = () => {
@@ -116,7 +119,7 @@ export default class Home extends Component {
                 placeholder="Introdu textul"
               /> */}
 
-              <ReceiveFriendRequest/>
+              <FriendList/>
               {/* <View style={{marginHorizontal: 32, marginTop: 32, height: 150}}>
               <Image source={{uri: this.state.imageUri}} style={{width: "100%", height: "100%"}}></Image>
               </View> */}
