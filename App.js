@@ -22,7 +22,7 @@ const navigator = createStackNavigator(
   },{
     initialRouteName: 'Auth',
     defaultNavigationOptions:{
-      header: null
+      headerShown: false
     }
   }
 );
