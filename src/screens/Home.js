@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Text, Button, Input } from 'react-native-elements'
-import { View, Dimensions, StyleSheet, ScrollView, Image } from 'react-native'
+import { View, Dimensions, StyleSheet, ScrollView, Image, Slider } from 'react-native'
 import firebase from 'firebase'
 import Swiper from 'react-native-swiper'
 import HomeContainer from '../screens/containers/HomeContainer'
@@ -13,6 +13,7 @@ import FriendRequest from '../screens/FriendRequests'
 import ReceiveFriendRequest from '../screens/ReceiveFriendRequest'
 import FriendList from '../screens/FriendList'
 const { width, height } = Dimensions.get('window')
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 
 export default class Home extends Component {
@@ -28,6 +29,17 @@ export default class Home extends Component {
       }
 
     }
+    async waitAndMakeRequest(update_rate) {
+      console.log('update')
+      this.retrieveData()
+      await delay(update_rate).then(() => {
+
+          this.waitAndMakeRequest(update_rate);}
+
+      )
+  }
+
+
 
 
 
@@ -98,32 +110,38 @@ export default class Home extends Component {
 
     render(){
         return(
-            <View>
-              <Button
-                onPress = {this._signOut}
-                style={{marginTop: 80}}
-                title="Sign Out"
-              />
-              {/* <Button
-                title="Galerie"
-                onPress={this.pickImage}
-              />
-              <Button
-                title="Posteaza"
-                onPress={this.addPost}
-              />
-              <Input
-                onChangeText={postText => this.setState({postText})}
-                value={this.state.postText}
-                style={{marginTop: 20}}
-                placeholder="Introdu textul"
-              /> */}
+               <Swiper
+                  loop={false}
+                  showsPagination={false}
+                  index={1}>
+                    <View>
+                      <FriendList/>
+                    </View>
+                    <Swiper
+                      horizontal={false}
+                      loop={false}
+                      showsPagination={false}
+                      index={1}>
+                      <View>
+                        <ReceiveFriendRequest/>
+                      </View>
+                      <View>
+                        <SearchUsers/>
+                      </View>
 
-              <FriendList/>
-              {/* <View style={{marginHorizontal: 32, marginTop: 32, height: 150}}>
-              <Image source={{uri: this.state.imageUri}} style={{width: "100%", height: "100%"}}></Image>
-              </View> */}
-            </View>
+                    <View>
+                      <Button
+                        title="Sign Out"
+                        style={{marginTop: 40}}
+                        onPress={this._signOut}
+                      />
+                    </View>
+                    </Swiper>        
+                    <View>
+                        <Text>Right</Text>
+                    </View>
+      </Swiper>
+     
             
         )
     }

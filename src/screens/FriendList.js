@@ -8,6 +8,8 @@ import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 const { width, height } = Dimensions.get('window')
 let arr = []
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
 export default class FriendList extends Component {
     constructor(props){
         super(props)
@@ -16,6 +18,17 @@ export default class FriendList extends Component {
             friendRequestsReceived: []
         }
     }
+
+    
+    async waitAndMakeRequest(update_rate) {
+        console.log('update')
+        this.retrieveData()
+        await delay(update_rate).then(() => {
+  
+            this.waitAndMakeRequest(update_rate);}
+  
+        )
+    }
      
 
     _retrieveFriendRequests = async() => {
@@ -23,7 +36,11 @@ export default class FriendList extends Component {
         let receivedQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("received")
         let documentSnapshotsReceived = await receivedQuery.get()
         documentSnapshotsReceived.docs.map(doc => {if(doc.data().accepted === true){this.cinetiadatrequest(doc.data().sender)}})
+        let sendQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("sent")
+        let documentSnapshotsSend = await sendQuery.get()
+        documentSnapshotsSend.docs.map(doc => {if(doc.data().accepted === true){this.cinetiadatrequest(doc.data().receiver)}})
        
+
 
     }
 
@@ -44,6 +61,7 @@ export default class FriendList extends Component {
 
 
     componentDidMount(){
+        // this.waitAndMakeRequest(2000)
         this._retrieveFriendRequests()
     }
 

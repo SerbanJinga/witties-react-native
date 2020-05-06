@@ -7,7 +7,8 @@ import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 const { width, height } = Dimensions.get('window')
-  
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+const arr = []
 export default class SearchUsers extends Component {
     constructor(props){
         super(props)
@@ -22,10 +23,22 @@ export default class SearchUsers extends Component {
             friendRequsts: []
         }
     }
+
+    
+    async waitAndMakeRequest(update_rate) {
+        console.log('update')
+        this.retrieveData()
+        await delay(update_rate).then(() => {
+  
+            this.waitAndMakeRequest(update_rate);}
+  
+        )
+    }
+  
      
     componentDidMount = () => {
-        console.log(firebase.auth().currentUser.uid)
-      try{
+        this.waitAndMakeRequest(10000)
+        try{
             this.retrieveData()
         }catch(error){
             console.log(error)
@@ -146,7 +159,6 @@ export default class SearchUsers extends Component {
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
                      <View style={styles.itemContainer}>
-                         
                 <Text>{item.displayName}#{item.discriminator}</Text>
                           <Button
                               title="Add friend"
