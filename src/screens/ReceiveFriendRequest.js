@@ -23,7 +23,6 @@ export default class ReceiveFriendRequest extends Component {
 
 
     async waitAndMakeRequest(update_rate) {
-        console.log('update')
         this.retrieveData()
         await delay(update_rate).then(() => {
   
@@ -49,11 +48,9 @@ export default class ReceiveFriendRequest extends Component {
         let documentSnapshots = await initialQuery.get()
         let documentData = documentSnapshots.data()
         arr.push(documentData)
-        console.log(arr.length)
         this.setState({
             documentData: arr
         })
-        console.log(this.state.documentData)
 
     }
 
@@ -64,8 +61,6 @@ export default class ReceiveFriendRequest extends Component {
         }catch(error){
             console.log(error)
         }
-        console.log('=================================')
-        console.log('=================================')
     }
    
     _acceptFriend = async(uid) => {

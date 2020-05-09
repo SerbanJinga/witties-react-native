@@ -18,6 +18,7 @@ import 'firebase/firestore'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'
 import wallp from "../../../assets/b1.png"
+require('firebase/functions')
 //function pad(num) {
 //    var s = "000000000" + num;
  //   return s.substr(s.length - 4);

@@ -8,7 +8,7 @@ const AuthNavigator = createSwitchNavigator(
         Loading: { screen: Loading },
         SignUp: { screen: SignUp },
         LogIn: { screen: Login },
-        ForgotPassword: { screen: ForgotPassword }
+        ForgotPassword: { screen: ForgotPassword },
     },{
         initialRouteName: 'Loading'
     }

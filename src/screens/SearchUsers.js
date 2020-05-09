@@ -26,7 +26,6 @@ export default class SearchUsers extends Component {
 
     
     async waitAndMakeRequest(update_rate) {
-        console.log('update')
         this.retrieveData()
         await delay(update_rate).then(() => {
   
@@ -91,8 +90,10 @@ export default class SearchUsers extends Component {
 
             let documentSnapshots = await initialQuery.get()
             let documentData = documentSnapshots.docs.map(document => document.data())
-            let lastVisible = documentData[documentData.length - 1].id
+            
 
+            let lastVisible = documentData[documentData.length - 1].id
+            
             this.setState({
                 documentData: documentData,
                 lastVisible: lastVisible,
@@ -126,15 +127,7 @@ export default class SearchUsers extends Component {
         }
     }
     
-    _extractDataAndSendNotification = async() => {
-      let initialQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("parents")
-      let documentSnapshots = await initialQuery.get()
-      let requestData = documentSnapshots.docs.map(document => document.data().request)
-      requestData.forEach(doc => {if(doc === 'pending') console.log('esti bun')})
-      let idData = documentSnapshots.docs.map(document => document.data().uid)
-      idData.forEach(doc => console.log(doc))
-      
-    }
+   
 
     _sendRequest = (uid) => {
         this.state.friendRequsts.push(uid)
@@ -164,10 +157,7 @@ export default class SearchUsers extends Component {
                               title="Add friend"
                               onPress={() => this._sendRequest(item.uid)}
                           />
-                    <Button
-                      title="random"
-                      onPress={this._extractDataAndSendNotification}
-                    />
+                   
                      </View>
                  )}   
                 keyExtractor={(item, index) => String(index)}
