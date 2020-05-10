@@ -12,6 +12,7 @@ import { Notifications } from 'expo'
 import * as ImagePicker from 'expo-image-picker'
 import ReceiveFriendRequest from '../screens/ReceiveFriendRequest'
 import FriendList from '../screens/FriendList'
+import ChatRoomsList from '../screens/chatRoom/ChatRoomsList' 
 const { width, height } = Dimensions.get('window')
 require('firebase/functions')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -215,7 +216,7 @@ export default class Home extends Component {
                     </View>
                     </Swiper>        
                     <View>
-                        <Text>Right</Text>
+                      <ChatRoomsList/>
                     </View>
       </Swiper>
       

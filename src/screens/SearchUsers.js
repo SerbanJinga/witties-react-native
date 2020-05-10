@@ -108,7 +108,7 @@ export default class SearchUsers extends Component {
 
     retrieveMore = async() => {
         try{
-            this.state({
+            this.setState({
                 refreshing: true
             })
 

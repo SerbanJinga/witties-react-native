@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, Button } from 'react-native'
-import { Text, Divider, CheckBox } from 'react-native-elements'
+import { Text, Divider, CheckBox, Input } from 'react-native-elements'
 import firebase from 'firebase'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 import ChatRoom from '../screens/chatRoom/ChatRoom'
+import Friend from '../components/Friend'
 const { width, height } = Dimensions.get('window')
 import { withNavigation } from 'react-navigation';
 
@@ -19,7 +20,8 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
         this.state = {
             documentData: [],
             friendRequestsReceived: [],
-            chatRoomIds: []
+            chatRoomIds: [],
+            groupName : ""
         }
 
         this.addUserToChatRoom = this.addUserToChatRoom.bind(this)
@@ -30,6 +32,10 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
         const chatRoomIdsFinal = this.state.chatRoomIds
         chatRoomIdsFinal.push(uid)
         this.setState({chatRoomIds: chatRoomIdsFinal})
+        console.log('======================================')
+        console.log(this.state.chatRoomIds)
+
+
     }
 
     removeUserFromChatRoom = (uid) => {
@@ -38,6 +44,9 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
             if(chatRoomIdsFinal[i] == uid)
                 chatRoomIdsFinal.splice(i, 1)
         this.setState({chatRoomIds: chatRoomIdsFinal})
+        console.log('======================================')
+
+        console.log(this.state.chatRoomIds)
     }
 
     _storeItemsInArr(){
@@ -94,9 +103,19 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
     }
 
+    createChatRoom = () => {
+        firebase.firestore().collection("messages").add({
+            usersParticipating: this.state.chatRoomIds,
+            messages: [],
+            roomId: firebase.firestore().collection("messages").doc().id,
+            chatRoomName: this.state.groupName
+        }).then(this.props.navigation.navigate('ChatRoom')).catch(err => console.log(err))
+    }
 
 
     componentDidMount(){
+        this.state.chatRoomIds.push(firebase.auth().currentUser.uid)
+
         this.waitAndMakeRequest(2000)
         this._retrieveFriendRequests()
     }
@@ -105,21 +124,24 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
         return(
             <View>
                 <Text style={{fontSize: 40, textAlign: 'center', marginTop: 20}}>prieteni</Text>
-                
+                <Input
+                    placeholder="Group Name"
+                    returnKeyType="next"
+                    textContentType="name"
+                    inputContainerStyle={styles.input}
+                    value={this.state.groupName}
+                    onChangeText={groupName => this.setState({ groupName })}
+                />
             <Button
-                title="Sign Out"
-                onPress={this._signOut}
+                title="Create Chat"
+                onPress={this.createChatRoom}
             />
                 <SafeAreaView style={styles.container}>
                 <FlatList
                  data = {this.state.documentData}
-                 renderItem={({item}) => (
-                     <View style={styles.itemContainer}>
-                        <Text>{item.displayName}#{item.discriminator}</Text>
-                        <Button title="Open Chat" onPress={() => this.props.navigation.navigate('ChatRoom', {userId: item.uid, currentUser: firebase.auth().currentUser.uid})}/>
-                        <CheckBox checked={true}/>
-                     </View>
-                 )}   
+                    renderItem={({item}) => (
+                        <Friend mama={this.addUserToChatRoom} tata={this.removeUserFromChatRoom} name={item.displayName} uid={item.uid} />
+                    )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
                 ListFooterComponent={this.renderFooter}
@@ -164,3 +186,4 @@ const styles = StyleSheet.create({
     color: '#000',
   },
 });
+
