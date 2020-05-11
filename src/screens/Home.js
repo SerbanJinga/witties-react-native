@@ -12,6 +12,8 @@ import * as ImagePicker from 'expo-image-picker'
 import ReceiveFriendRequest from '../screens/friendSystem/ReceiveFriendRequest'
 import FriendList from '../screens/friendSystem/FriendList'
 import ChatRoomsList from '../screens/chatRoom/ChatRoomsList' 
+import UserProfile from '../screens/UserProfile'
+import { ScrollView } from 'react-native-gesture-handler'
 const { width, height } = Dimensions.get('window')
 require('firebase/functions')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -144,44 +146,51 @@ export default class Home extends Component {
 
     render(){
         return(
-               <Swiper
-                  loop={false}
-                  showsPagination={false}
-                  index={1}>
-                    <View>
-                      <FriendList/>
-                    </View>
-                    <Swiper
-                      horizontal={false}
-                      loop={false}
-                      showsPagination={false}
-                      index={1}>
-                      <View>
-                        <ReceiveFriendRequest/>
-                      </View>
-                      <View>
-                        <SearchUsers/>
-                      </View>
+      //          <Swiper
+      //             loop={false}
+      //             showsPagination={false}
+      //             index={1}>
+      //               <View>
+      //                 <FriendList/>
+      //               </View>
+      //               <Swiper
+      //                 horizontal={false}
+      //                 loop={false}
+      //                 showsPagination={false}
+      //                 index={1}>
+      //                 <View>
+      //                   <ReceiveFriendRequest/>
+      //                 </View>
+      //                 <View>
+      //                   <SearchUsers/>
+      //                 </View>
 
-                    <View>
+      //               <View>
                      
-                       <Button
-                        title="Send Notification"
-                        style={{marginTop: 80}}
-                        onPress={() => this.props.navigation.navigate('ChatRoom')}
-                      />
-                       <Button
-                        title="Send Notification"
-                        style={{marginTop: 80}}
-                        onPress={() => this._signOut()}
-                      />
-                    </View>
-                    </Swiper>        
-                    <View>
-                      <ChatRoomsList/>
-                    </View>
-      </Swiper>
-      
+      //                  <Button
+      //                   title="Send Notification"
+      //                   style={{marginTop: 80}}
+      //                   onPress={() => this.props.navigation.navigate('ChatRoom')}
+      //                 />
+      //                  <Button
+      //                   title="Send Notification"
+      //                   style={{marginTop: 80}}
+      //                   onPress={() => this._signOut()}
+      //                 />
+      //               </View>
+      //               </Swiper>        
+      //               <View>
+      //                 <ChatRoomsList/>
+      //               </View>
+      // </Swiper>
+          <ScrollView>
+            <UserProfile/>
+            <Button
+              style={{marginTop: 20}}
+              title="Sign Out"
+              onPress={this._signOut}
+            />
+          </ScrollView>
         )
     }
 }
