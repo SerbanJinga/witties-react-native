@@ -1,23 +1,19 @@
 import React, { Component } from 'react';
 import { createStackNavigator } from 'react-navigation-stack'
 import AuthNavigator from './src/screens/login/AuthNavigator'
-import FriendList from './src/screens/FriendList'
 import ChatRoom from './src/screens/chatRoom/ChatRoom'
 import Home from './src/screens/Home'
+import { YellowBox } from 'react-native'
 import {createAppContainer } from 'react-navigation'
 import firebaseConfig from './src/firebaseConfig/firebase'
 import firebase from 'firebase'
 
+
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
 require('firebase/firestore');
-console.disableYellowBox=true;
-YellowBox.ignoreWarnings(['Setting a timer']);
-const _console = _.clone(console);
-console.warn = message => {
-  if (message.indexOf('Setting a timer') <= -1) {
-    _console.warn(message);
-  }
-};
+console.disableYellowBox = true;
+
+YellowBox.ignoreWarnings(['Warning: ReactNative.createElement']);
 // <=============== FIREBASE ===================>
 firebase.initializeApp(firebaseConfig);
 

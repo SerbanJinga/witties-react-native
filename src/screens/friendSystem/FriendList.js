@@ -6,8 +6,8 @@ import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
-import ChatRoom from '../screens/chatRoom/ChatRoom'
-import Friend from '../components/Friend'
+import ChatRoom from '../../screens/chatRoom/ChatRoom'
+import Friend from '../../components/Friend'
 const { width, height } = Dimensions.get('window')
 import { withNavigation } from 'react-navigation';
 

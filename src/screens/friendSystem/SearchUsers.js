@@ -100,7 +100,7 @@ export default class SearchUsers extends Component {
                 loading: false
             })
         }catch(error){
-            console.log(error)
+            // console.log(error)
         }
     }   
 
@@ -123,7 +123,7 @@ export default class SearchUsers extends Component {
                 refreshing: false 
             })
         }catch(error){
-            console.log(error)
+            // console.log(error)
         }
     }
     

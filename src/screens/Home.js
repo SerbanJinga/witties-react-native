@@ -5,13 +5,12 @@ import firebase from 'firebase'
 import Swiper from 'react-native-swiper'
 import HomeContainer from '../screens/containers/HomeContainer'
 import TestContainer from '../screens/TestContainer'
-import SearchUsers from '../screens/SearchUsers'
-import Constants from 'expo-constants'
+import SearchUsers from '../screens/friendSystem/SearchUsers'
 import * as Permissions from 'expo-permissions'
 import { Notifications } from 'expo'
 import * as ImagePicker from 'expo-image-picker'
-import ReceiveFriendRequest from '../screens/ReceiveFriendRequest'
-import FriendList from '../screens/FriendList'
+import ReceiveFriendRequest from '../screens/friendSystem/ReceiveFriendRequest'
+import FriendList from '../screens/friendSystem/FriendList'
 import ChatRoomsList from '../screens/chatRoom/ChatRoomsList' 
 const { width, height } = Dimensions.get('window')
 require('firebase/functions')
@@ -34,38 +33,8 @@ export default class Home extends Component {
 
     }
 
-    registerForPushNotificationsAsync = async () => {
-      if (Constants.isDevice) {
-        const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-          finalStatus = status;
-        }
-        if (finalStatus !== 'granted') {
-          alert('Failed to get push token for push notification!');
-          return;
-        }
-        token = await Notifications.getExpoPushTokenAsync();
-        this.setState({ expoPushToken: token });
-      } else {
-        alert('Must use physical device for Push Notifications');
-      }
-  
-      if (Platform.OS === 'android') {
-        Notifications.createChannelAndroidAsync('default', {
-          name: 'default',
-          sound: true,
-          priority: 'max',
-          vibrate: [0, 250, 250, 250],
-        });
-      }
-    };
-
+    
     componentDidMount(){
-      this.getPhotoPermission()
-      this.registerForPushNotificationsAsync()
-      this._notificationSubscription = Notifications.addListener(this._handleNotification)
       const { data } = firebase.functions().httpsCallable('listProducts')({
         page: 1, 
         limit: 14
@@ -166,14 +135,7 @@ export default class Home extends Component {
   
 
   
-  getPhotoPermission = async() => {
-    if(Constants.platform.android || Constants.platform.ios){
-      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if(status != "granted"){
-        alert("We need permission to access your camera roll.")
-      }
-    }
-  }
+
 
  
    

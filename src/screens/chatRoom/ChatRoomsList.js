@@ -5,13 +5,14 @@ import firebase from 'firebase'
 import { render } from 'react-dom'
 import { FlatList } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { withNavigation } from 'react-navigation';
 
 const { width, height } = Dimensions.get('window')
 const groupsIn = []
 const arr = []
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-export default class ChatRoomsList extends Component {
+class ChatRoomsList extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -75,9 +76,11 @@ export default class ChatRoomsList extends Component {
            <FlatList
                 data={this.state.documentData}
                  renderItem={({item}) => (
+                     
                      <View style={styles.itemContainer}>
                     <Text>{item.chatRoomName}</Text>
-                    <Text>roomId: {item.roomId}</Text>    
+                    <Text>roomId: {item.roomId}</Text>   
+                    <Button title="Go to room" onPress={()=>{this.props.navigation.navigate("ChatRoom",{iqdif:item.chatRoomName,roomId:item.roomId})}}/> 
                    
                      </View>
                  )}   
@@ -93,6 +96,7 @@ export default class ChatRoomsList extends Component {
     }
 }
 
+export default withNavigation(ChatRoomsList)
 const styles = StyleSheet.create({
     itemContainer: {
         width: width,
