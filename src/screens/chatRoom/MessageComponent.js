@@ -18,6 +18,7 @@ export default class MessageComponent extends Component {
         }
     }
     componentDidMount() {
+        console.log(this.state.sender)
         console.log("-----------------------------------------")
         console.log(this.state.date)
         console.log("-----------------------------------------")
@@ -25,15 +26,15 @@ export default class MessageComponent extends Component {
         let dateString = theDate.toGMTString();
         this.setState({ translatedDate: dateString })
         console.log("Data este", dateString)
-        if (this.state.sender === firebase.auth().currentUser.uid)
-            this.setState({
-                marginRight: 50,
-                marginLeft: 0
-            })
-        else
+        if (this.state.sender == firebase.auth().currentUser.uid)
             this.setState({
                 marginLeft: 50,
                 marginRight: 0
+            })
+        else
+            this.setState({
+                marginLeft: 0,
+                marginRight: 50
             })
     }
     //{this.state.translatedDate}

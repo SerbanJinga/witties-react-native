@@ -5,18 +5,19 @@ import MessageComponent from '../chatRoom/MessageComponent'
 import firebase from 'firebase'
 
 import _ from "lodash"
+import { withNavigation } from 'react-navigation'
 const arr = []
 
 
 require('firebase/functions')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const { width, height } = Dimensions.get('window')
-export default class ChatRoom extends Component {
+ class ChatRoom extends Component {
     constructor(props) {
         super(props)
         this.state = {
             //tu esti 
-            currentUser: "",
+            currentUser: firebase.auth().currentUser.uid,
             //cu asta vorbesti acum 
             roomId: props.navigation.state.params.roomId,
             roomName: props.navigation.state.params.iqdif,
@@ -42,7 +43,7 @@ export default class ChatRoom extends Component {
         const newMessage = {
             timestamp: timestamp,
             msg: msg,
-            sender: sender
+            sender: firebase.auth().currentUser.uid
         }
         //Adauga pe ecran instant
         let aru =[]
@@ -53,63 +54,29 @@ export default class ChatRoom extends Component {
 
 
         //seteaza in baza de date
-        firebase.firestore().collection("messages").doc('p4SN9pvlRYeJMCyXJFQZ').update({
+        firebase.firestore().collection("messages").doc(this.state.roomId).update({
             messages: firebase.firestore.FieldValue.arrayUnion(newMessage)
         })
     }
 
     componentDidMount() {
-        // console.log("--------------------------------------------------------")
-        // console.log(this.props)
-
-        // console.log(this.props.navigation.state.params.iqdif)
-        // arr.push(this.state.currentUser)
-        // arr.push(this.state.userId)
-        // firebase.firestore().collection("messages").doc("p4SN9pvlRYeJMCyXJFQZ").add({
-        //     userParticipating: arr,
-        //     messages: []
-        // })
-        // console.log(this.state.currentUser)
-        // console.log(this.state.userId)
-        //this.createMessage("salut, va pup in cur pe toti")
-        // this.waitAndMakeRequest(30000)
+        this.retrieveData()
+       
     }
 
     retrieveData = async () => {
         let arrMsg =[];
-        let receivedQuery = await firebase.firestore().collection("messages").where("roomId", "==", "jSwlzeEEDjR30ot01dWY")
+        let receivedQuery = await firebase.firestore().collection("messages").where("roomId", "==", this.state.roomId)
         let documentSnapshots = await receivedQuery.get()
         let documentData = documentSnapshots.docs.map(doc => doc.data())
-        console.log("--------------------------------------------------------")
         documentData[0].messages.forEach(Element => {
-            console.log(Element)
             arrMsg.push(Element)
         });
         var isEqual = _.isEqual(arrMsg, this.state.messages);
         if (this.state.messages.length === 0)
             this.setState({ messages: arrMsg })
-        console.log(isEqual);
         if (!isEqual)
             this.setState({ messages: arrMsg })
-
-
-        console.log("Aici conteaza", this.state.messages)
-
-        console.log("--------------------------------------------------------")
-
-
-        
-
-        //    console.log(this.state.messages)
-
-        // or lodash
-
-
-
-
-
-
-
     }
 
 
@@ -140,7 +107,7 @@ export default class ChatRoom extends Component {
                     <FlatList
                         data={this.state.messages}
                         renderItem={({ item }) => (
-                            <MessageComponent msg={item.msg} date={item.timestamp} sender={'florin salam'}/>
+                            <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender}/>
                             
                         )}
                         keyExtractor={(item, index) => String(index)}
@@ -157,6 +124,8 @@ export default class ChatRoom extends Component {
     }
 }
 
+
+export default withNavigation(ChatRoom)
 const styles = StyleSheet.create({
     container: {
         flex: 1,

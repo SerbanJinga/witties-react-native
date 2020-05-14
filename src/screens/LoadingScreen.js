@@ -13,7 +13,6 @@ export default class LoadingScreen extends Component {
     }
 
     componentDidMount = () => {
-        console.log(this.props.navigation.getParam('text'))
         firebase.auth().onAuthStateChanged(user => {
             if(user){
                 this.props.navigation.navigate('Home')

@@ -15,12 +15,13 @@ export default class SearchUsers extends Component {
         this.state = {
             searchText: "",
             documentData: [],
-            limit: 9,
+            limit: 20,
             lastVisible: null,
             loading: false,
             refreshing: false,
             filteredData:[],
-            friendRequsts: []
+            friendRequsts: [],
+            currentUser: ""
         }
     }
 
@@ -33,10 +34,23 @@ export default class SearchUsers extends Component {
   
         )
     }
+
+    getCurrentUser = async() => {
+        const uid = firebase.auth().currentUser.uid
+        let initialQuery = await firebase.firestore().collection('users').where('uid', '==', uid)
+        let documentSnapshots = await initialQuery.get()
+        let documentData = documentSnapshots.docs.map(doc => doc.data().displayName)
+        this.setState({
+            currentUser: documentData[0]
+        })
+
+        console.log(this.state.currentUser)
+    }
   
      
     componentDidMount = () => {
-        this.waitAndMakeRequest(10000)
+        this.getCurrentUser()
+        // this.waitAndMakeRequest(10000)
         try{
             this.retrieveData()
         }catch(error){
@@ -70,7 +84,7 @@ export default class SearchUsers extends Component {
 
     renderFooter = () => {
         try{
-            if(this.state.loading){
+            if(this.state.loading || this.state.refreshing){
                 return(<ActivityIndicator/>)
             }else{
                 return null
@@ -86,13 +100,13 @@ export default class SearchUsers extends Component {
                 loading: true
             })
 
-            let initialQuery = await firebase.firestore().collection('users').limit(this.state.limit)
+            let initialQuery = await firebase.firestore().collection('users').orderBy('uid').limit(this.state.limit)
 
             let documentSnapshots = await initialQuery.get()
             let documentData = documentSnapshots.docs.map(document => document.data())
             
 
-            let lastVisible = documentData[documentData.length - 1].id
+            let lastVisible = documentData[documentData.length - 1].uid
             
             this.setState({
                 documentData: documentData,
@@ -112,10 +126,11 @@ export default class SearchUsers extends Component {
                 refreshing: true
             })
 
-            let additionalQuery = await firebase.firestore().collection("users").startAfter(this.state.lastVisible).limit(this.state.limit)
+            let additionalQuery = await firebase.firestore().collection("users").orderBy('uid').startAfter(this.state.lastVisible).limit(this.state.limit)
             let documentSnapshots = await additionalQuery.get()
             let documentData = documentSnapshots.docs.map(document => document.data())
-            let lastVisible = documentData[documentData.length - 1].id
+            console.log(documentData)
+            let lastVisible = documentData[documentData.length - 1].uid
 
             this.setState({
                 documentData: [...this.state.documentData, ...documentData],
@@ -127,8 +142,34 @@ export default class SearchUsers extends Component {
         }
     }
     
-   
 
+    sendNotification = async(token, uid, name) => {
+        const message = {
+            to: token,
+            sound: 'default',
+            title: uid,
+            body: 'Ai primit cerere de la ' + this.state.currentUser,
+            data: {data: 'goes here'},
+            _displayInForeground: true
+        }
+        
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      });
+    }
+   
+    getToken = async(uid, name) => {
+        let initialQuery = await firebase.firestore().collection("users").where('uid', '==', uid)
+        let documentSnapshots = initialQuery.get()
+        let documentData = (await documentSnapshots).docs.map(doc => doc.data().tokens)
+        this.sendNotification(documentData[0], uid, name)
+    }
     _sendRequest = (uid) => {
         this.state.friendRequsts.push(uid)
     
@@ -156,6 +197,10 @@ export default class SearchUsers extends Component {
                           <Button
                               title="Add friend"
                               onPress={() => this._sendRequest(item.uid)}
+                          />
+                          <Button
+                              title="Get notification token"
+                              onPress={() => this.getToken(item.uid, item.displayName)}
                           />
                    
                      </View>

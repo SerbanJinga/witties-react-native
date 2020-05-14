@@ -17,23 +17,23 @@ class ChatRoomsList extends Component {
         super(props)
         this.state = {
             documentData: [],
-            groupsIn: []
+            groupsIn: [],
+            refreshing: false
         }
     }
 
     componentDidMount = () => {
-        console.log('se randeazaa')
         this._retrieveData()
         // this.waitAndMakeRequest(2000)
         this._getDataFromId()
     }
 
-    async waitAndMakeRequest(update_rate) {
-       try{ this.retrieveData()
-       }catch(err){
-           console.log(err)
-       }
-    }
+    // async waitAndMakeRequest(update_rate) {
+    //    this._retrieveData()
+    //    await delay(update_rate).then(() => {
+    //        this.waitAndMakeRequest(update_rate)
+    //    })
+    // }
 
     
 
@@ -52,7 +52,6 @@ class ChatRoomsList extends Component {
         })
 
         this.setState({groupsIn: groupsIn})
-        // console.log(this.state.groupsIn)
         
         this.state.groupsIn.forEach(group => this._getDataFromId(group))
     }
@@ -66,7 +65,6 @@ class ChatRoomsList extends Component {
         this.setState({
             documentData: arr
         })
-        console.log(this.state.documentData)
     }
     
 
@@ -106,27 +104,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
 })
-// Array [
-//     Array [
-//       "QCLKoR1skhUEExopmeZLqQ7a9Ir1",
-//       "6dzUyVMOP1YVQG48OHTe6iOSz5l1",
-//     ],
-//     Array [
-//       "QCLKoR1skhUEExopmeZLqQ7a9Ir1",
-//     ],
-//     Array [
-//       "QCLKoR1skhUEExopmeZLqQ7a9Ir1",
-//       "6dzUyVMOP1YVQG48OHTe6iOSz5l1",
-//       "Opa2XaEoO2Y8NJtQrDatCgLsIMx2",
-//     ],
-//     Array [
-//       "QCLKoR1skhUEExopmeZLqQ7a9Ir1",
-//       "6dzUyVMOP1YVQG48OHTe6iOSz5l1",
-//     ],
-//     Array [
-//       "6dzUyVMOP1YVQG48OHTe6iOSz5l1",
-//     ],
-//     Array [
-//       "QCLKoR1skhUEExopmeZLqQ7a9Ir1",
-//     ],
-//   ]

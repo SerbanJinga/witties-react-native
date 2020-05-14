@@ -32,8 +32,6 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
         const chatRoomIdsFinal = this.state.chatRoomIds
         chatRoomIdsFinal.push(uid)
         this.setState({chatRoomIds: chatRoomIdsFinal})
-        console.log('======================================')
-        console.log(this.state.chatRoomIds)
 
 
     }
@@ -44,22 +42,18 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
             if(chatRoomIdsFinal[i] == uid)
                 chatRoomIdsFinal.splice(i, 1)
         this.setState({chatRoomIds: chatRoomIdsFinal})
-        console.log('======================================')
 
-        console.log(this.state.chatRoomIds)
     }
 
     _storeItemsInArr(){
         let ids = []
         firebase.firestore().collection("users").get().then(querySnapshot => {
             querySnapshot.forEach(documentSnapshot => {
-                console.log(this.state.chatRoomIds)
                 if(this.state.chatRoomIds.includes(documentSnapshot.get('uid'))){
                     ids.push(documentSnapshot.ref)
                 }
             })
 
-            console.log(ids)
 
             firebase.firestore().collection("users")
         })
@@ -104,12 +98,13 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
     }
 
     createChatRoom = () => {
-        firebase.firestore().collection("messages").add({
+        const uid = firebase.firestore().collection("messages").doc().id
+        firebase.firestore().collection("messages").doc(uid).set({
             usersParticipating: this.state.chatRoomIds,
             messages: [],
-            roomId: firebase.firestore().collection("messages").doc().id,
+            roomId: uid,
             chatRoomName: this.state.groupName
-        }).then(this.props.navigation.navigate('ChatRoom')).catch(err => console.log(err))
+        }).then(this.props.navigation.navigate('ChatRoom', {iqdif:this.state.groupName, roomId: uid})).catch(err => console.log(err))
     }
 
 

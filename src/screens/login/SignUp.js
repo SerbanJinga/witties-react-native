@@ -12,6 +12,9 @@ import {
     Dimensions
 
 } from 'react-native';
+import * as Permissions from 'expo-permissions'
+import { Notifications } from 'expo'
+
 import { Text, Input, Button } from 'react-native-elements'
 import firebase from 'firebase'
 import 'firebase/firestore'
@@ -37,17 +40,11 @@ class SignUp extends Component {
             errorMessage: '',
             loading: false,
             friends: [],
-            uid: ""
+            uid: "",
+            notifToken: ""
         }
     }
-
-    // recievedDiscrim(rez, nume) {
-    //   console.log("Rez este ", rez)
-
-
-    //   firebase.firestore().collection("users").doc().set({ displayName: nume, discriminator:rez })
-    //   firebase.auth().currentUser.metadata.lastSignInTime
-    // }
+   
 
     async calculateDiscrim(searchName) {
         try {
@@ -113,7 +110,8 @@ class SignUp extends Component {
             discriminator: this.state.discriminator,
             profilePicture: this.state.profilePicture,
             friends: this.state.friends,
-            uid: firebase.auth().currentUser.uid
+            uid: firebase.auth().currentUser.uid,
+
         }).then(this._retrieveDisplayName(), (error) => {
             console.log(error)
             alert(error)

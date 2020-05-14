@@ -7,13 +7,19 @@ import { YellowBox } from 'react-native'
 import {createAppContainer } from 'react-navigation'
 import firebaseConfig from './src/firebaseConfig/firebase'
 import firebase from 'firebase'
-
+import _ from 'lodash'
 
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
 require('firebase/firestore');
-console.disableYellowBox = true;
 
-YellowBox.ignoreWarnings(['Warning: ReactNative.createElement']);
+console.disableYellowBox=true;
+YellowBox.ignoreWarnings(['Setting a timer']);
+const _console = _.clone(console);
+_console.warn = message => {
+  if (message.indexOf('Setting a timer') <= -1) {
+    _console.warn(message);
+  }
+};
 // <=============== FIREBASE ===================>
 firebase.initializeApp(firebaseConfig);
 
