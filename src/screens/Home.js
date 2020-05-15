@@ -18,6 +18,7 @@ import MessageComponent from '../screens/MapComponent'
 import MapComponent from '../screens/MapComponent'
 import Constants from 'expo-constants'
 import Notification from '../screens/Notification'
+import MediaDemo from '../screens/MediaDemo'
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -163,25 +164,28 @@ export default class Home extends Component {
       //                 <ChatRoomsList/>
       //               </View>
       // </Swiper>
-     <View>
-      <Button
-        title="Sign out"
-        onPress={this._signOut}
-      />
-      <Button
-              style={{marginTop: 20}}
-              title="Notification"
-              onPress={this.da}
-            />   
-   
-     <SearchUsers/>
+    
+          //<MediaDemo/>
+                    <Swiper
+                  loop={false}
+                  showsPagination={false}
+                  index={1}>
+                    <View>
+                      <MapComponent/>
+                    </View>
+                    <Swiper
+                      horizontal={false}
+                      loop={false}
+                      showsPagination={false}
+                      index={1}>
 
-        </View>
-      /* <ScrollView>
-            <UserProfile/>
-            >
-         </ScrollView> */
-          // <Notification/>
-         )
+                    <View>
+                        <MediaDemo/>                   
+                    </View>
+                    </Swiper>        
+                    <View>
+                    </View>
+      </Swiper>
+          )
     }
 }

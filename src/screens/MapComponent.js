@@ -73,6 +73,8 @@ export default class MapComponent extends React.Component {
         }
     }
     componentDidMount() {
+        console.log('dadadad')
+        console.log(firebase.auth().currentUser.uid)
         this.retrieveLocation()
         this.retrieveData()
         console.log("De aici vine", this.state.displayName)
@@ -93,9 +95,11 @@ export default class MapComponent extends React.Component {
 
 
     async retrieveData() {
-        let initialQuery = await firebase.firestore().collection("media").where("userId", "==", "3tHCTgdV7cP8pklBEVytjshNo1A2")
+        let initialQuery = await firebase.firestore().collection("media").where("uid", "==", this.state.currentuser)
         let documentSnapshots = await initialQuery.get()
         let documentData = documentSnapshots.docs.map(doc => doc.data())
+        console.log('hai tati')
+        console.log(documentData)
         this.setState({ markerData: documentData })
         console.log('-------------------------------------------------')
         console.log(this.state.markerData)
@@ -135,10 +139,10 @@ export default class MapComponent extends React.Component {
         let text = ''
         text = JSON.stringify(this.state.location)
         return (<View style={styles.container}>
-            <Button style={{ marginTop: 40 }} onPress={() => { console.log(this.state.region) }} title='salll' />
+            {/* <Button style={{ marginTop: 40 }} onPress={() => { console.log(this.state.region) }} title='salll' />
             <Button style={{ marginTop: 40 }} onPress={() => { console.log(this.state.region) }} title='salll2' />
             <Button style={{ marginTop: 40 }} onPress={() => { this.changeMarkerSize() }} title='salll3' />
-            <Text style={{ marginTop: 50 }}>{text}</Text>
+            <Text style={{ marginTop: 50 }}>{text}</Text> */}
             <MapView style={styles.mapStyle} mapType='hybrid'
                 region={this.state.region}
                 // initialRegion={{
@@ -149,7 +153,7 @@ export default class MapComponent extends React.Component {
                 // }}
                 onRegionChangeComplete={(region) => {
                     this.setState({ region: region })
-                    this.changeMarkerSize()
+                  //  this.changeMarkerSize()
                 }}
             >
 
@@ -158,20 +162,18 @@ export default class MapComponent extends React.Component {
                         <Marker
                             coordinate={{ latitude: marker.location.lat, longitude: marker.location.lng }}
                             title={marker.text}>
-                        <View style={{height:this.state.sizeImage *2,width:this.state.sizeImage *2,  }}>
+                        {/* <View style={{height:this.state.sizeImage *2,width:this.state.sizeImage *2,  }}> */}
                             <Image
                                 source={{ uri: marker.image }}
                                 
                                 style={{
-                                    flex: 1,
-                                    alignSelf: 'stretch',
-                                    width: undefined,
-                                    height: undefined,
+                                    width: 50,
+                                    height: 50,
                                     resizeMode:'cover'
                                 }}
 
                             />
-                        </View>
+                        {/* </View> */}
                         </Marker>
                     </View>
                 ))}
