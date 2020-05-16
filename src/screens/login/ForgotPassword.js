@@ -9,10 +9,11 @@ import {
     Keyboard,
     Dimensions,
     ImageBackground,
-    TouchableWithoutFeedback
+    TouchableOpacity,
+    ScrollView
 } from 'react-native';
 import wallp from "../../../assets/b1.png"
-
+import { Font } from 'expo-font'
 const { width, height } = Dimensions.get('window')
 
 class ForgotPassword extends Component {
@@ -23,6 +24,13 @@ class ForgotPassword extends Component {
             loading: false,
             errorMessage: ""
         }
+    }
+    async componentDidMount(){
+        await Font.loadAsync({
+            //font1 or 2 can be any name. This'll be used in font-family
+             
+            font1: require('../../../assets/SourceSansPro-Black.ttf'),                         
+        });
     }
 
     renderLoading() {
@@ -47,6 +55,9 @@ class ForgotPassword extends Component {
     }
 
     async resetPassword() {
+        if(this.state.email === ''){
+            alert('introdu emailu')
+        }
         await firebase.auth().sendPasswordResetEmail(this.state.email)
             .then(this.onResetSuccess.bind(this))
             .catch(error => {
@@ -61,67 +72,55 @@ class ForgotPassword extends Component {
     }
 
     render() {
-        return (<ImageBackground source={wallp} style={styles.backgroundContainer}>
-            <TouchableWithoutFeedback
-                onPress={() => {
-                    Keyboard.dismiss();
-                }}
-            >
-                <SafeAreaView style={{ flex: 1, width: width - 455, alignItems: 'center' }}>
-                    
-                        <Text style={{ marginTop: 40, fontSize: 32, fontWeight: '700', color: '#f5f6fa' }}>
-                            Forgot Password?
-                        </Text>
-                        <View style={styles.form}>
-                            <Input
-                                style={styles.textInput}
-                                inputStyle={styles.textInput}
-                                inputContainerStyle={styles.input}
-                                placeholder="Email"
-                                placeholderTextColor={'rgba(255,255,255,0.9)'}
+        return (
+            <ScrollView style={styles.container}>
+            <View>
+            <View style={{ marginTop: 60, alignItems: "center", justifyContent: "center" }}>
+                      {/* <Image source={require("../../../assets/logo.png")} /> */}
+                      <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500",marginBottom: 40 }]}>Forgot Password?</Text>
+            </View>
 
-                                returnKeyType="next"
-                                keyboardType="email-address"
-                                textContentType="emailAddress"
-                                value={this.state.email}
-                                onChangeText={email => this.setState({ email })}
-                            />
-                        </View>
-                        {this.renderLoading()}
-
-                    <View style={{ width: width * 0.6 }}>
-
-                            <Button
-                                onPress={() => this.resetPassword()}
-                                type="solid"
-                                title="Send reset password"
-                                
-                                loading={this.state.loading}
-                            />
-                            <Text
-                                style={{
-                                    paddingTop:10,
-                                    fontSize: 18,
-                                    textAlign: 'center',
-                                    color: 'red',
-                                    width: width * 0.6,
-                                }}
-                            >
-                                {this.state.error}
-                            </Text>
-                            <Text
-                                style={{ fontWeight: '200', fontSize: 17, textAlign: 'center',color: '#f5f6fa' }}
-                                onPress={() => {
-                                    this.props.navigation.navigate('LogIn');
-                                }}
-                            >
-                                Remember Password?
-                            </Text>
-                        </View>
-                    
-                </SafeAreaView>
-            </TouchableWithoutFeedback>
-        </ImageBackground>
+                        <Input 
+                            label="Email"
+                            labelStyle={{fontFamily: "font1"}}
+                            style={{marginTop: 32, marginBottom: 8}}
+                            returnKeyType="next"
+                            textContentType="name"
+                            value={this.state.email}
+                            onChangeText={email => this.setState({ email })}
+                      />
+                      <TouchableOpacity 
+                  style={styles.submitContainer}
+                  onPress={() => this.resetPassword()}
+                  >
+                      <Text                            
+                          style={[
+                              styles.text,
+                              {
+                                  color: "#FFF",
+                                  fontWeight: "600",
+                                  fontSize: 16
+                              }
+                          ]}
+                      >
+                          Reset password
+                      </Text>
+                  </TouchableOpacity>
+                  <Text
+                      style={[
+                          styles.text,
+                          {
+                              fontSize: 14,
+                              color: "#ABB4BD",
+                              textAlign: "center",
+                              marginTop: 24
+                          }
+                      ]}
+                  >
+                      Remember your password?<Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}>Login here</Text>
+                  </Text>
+            </View>
+        </ScrollView>
         )
     }
 }
@@ -133,45 +132,52 @@ export default ForgotPassword
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'column',
-        alignItems: 'center'
+        backgroundColor: "#fff",
+        paddingHorizontal: 30
     },
-    backgroundContainer: {
-        flex: 1,
-        width: width,
-        height: height,
-        position: 'absolute',
+    text: {
+        fontFamily: 'font1',
+        color: "#1D2029"
+    },
+    socialButton: {
+        flexDirection: "row",
+        marginHorizontal: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: "rgba(171, 180, 189, 0.65)",
+        borderRadius: 4,
+        backgroundColor: "#fff",
+        shadowColor: "rgba(171, 180, 189, 0.35)",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 1,
+        shadowRadius: 20,
+        elevation: 5
+    },
+    socialLogo: {
+        width: 16,
+        height: 16,
+        marginRight: 8
+    },
+    link: {
+        color: "#0984e3",
+        fontSize: 14,
+        fontWeight: "500"
+    },
+    submitContainer: {
+        backgroundColor: "#0984e3",
+        fontSize: 16,
+        borderRadius: 4,
+        paddingVertical: 12,
+        marginTop: 20,
+        alignItems: "center",
         justifyContent: "center",
-        alignItems: 'center'
-    },
-    form: {
-        width: width * 0.8,
-        marginTop: 15
-    },
-    logo: {
-        marginTop: 20
-    },
-    input: {
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        color: 'rgba(255,255,255,0.7)',
-        marginHorizontal: 25,
-    },
-    button: {
-    },
-    googleButton: {
-        backgroundColor: '#FFFFFF',
-        height: 44,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 22,
-        borderWidth: 1,
-        borderColor: '#707070'
-    },
-    textInput: {
-        paddingLeft: 50,
-        color: "#f5f6fa"
+        color: "#FFF",
+        shadowColor: "rgba(9,132,227, 0.24)",
+        shadowOffset: { width: 0, height: 9 },
+        shadowOpacity: 1,
+        shadowRadius: 20,
+        elevation: 5
     }
-});
+  });
+  

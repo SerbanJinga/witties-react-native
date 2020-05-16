@@ -9,11 +9,14 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
     ImageBackground,
-    Dimensions
+    Dimensions,
+    Image
 
 } from 'react-native';
+import GoogleSignIn from 'expo-google-sign-in'
 import * as Permissions from 'expo-permissions'
 import { Notifications } from 'expo'
+import * as Font from 'expo-font'
 
 import { Text, Input, Button } from 'react-native-elements'
 import firebase from 'firebase'
@@ -21,6 +24,7 @@ import 'firebase/firestore'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'
 import wallp from "../../../assets/b1.png"
+import { ScrollView } from 'react-native-gesture-handler';
 require('firebase/functions')
 //function pad(num) {
 //    var s = "000000000" + num;
@@ -43,6 +47,13 @@ class SignUp extends Component {
             uid: "",
             notifToken: ""
         }
+    }
+    async componentDidMount(){
+        await Font.loadAsync({
+            //font1 or 2 can be any name. This'll be used in font-family
+             
+            font1: require('../../../assets/SourceSansPro-Black.ttf'),                         
+        });
     }
    
 
@@ -111,6 +122,7 @@ class SignUp extends Component {
             profilePicture: this.state.profilePicture,
             friends: this.state.friends,
             uid: firebase.auth().currentUser.uid,
+            status: ""
 
         }).then(this._retrieveDisplayName(), (error) => {
             console.log(error)
@@ -153,107 +165,96 @@ class SignUp extends Component {
     }
 
     async signInWithGoogle() {
-        try {
-            await GoogleSignIn.askForPlayServicesAsync();
-            const { type, user } = await GoogleSignIn.signInAsync();
-            if (type === 'success') {
-                await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                const credential = firebase.auth.GoogleAuthProvider.credential(user.auth.idToken, user.auth.accessToken);
-                const googleProfileData = await firebase.auth().signInWithCredential(credential);
-                this.onLoginSuccess.bind(this);
-            }
-        } catch ({ message }) {
-            alert('login: Error:' + message);
-        }
+      const provider = firebase.auth.GoogleAuthProvider()
+        firebase.auth().signInWithPopup(provider).then(function(result){
+            const token = result.credential.accessToken;
+            console.log('a mers')
+        })
     }
 
     render() {
-        return (<ImageBackground source={wallp} style={styles.backgroundContainer}>
-            <TouchableWithoutFeedback
-                onPress={() => {
-                    Keyboard.dismiss();
-                }}
-            >
-                <SafeAreaView style={{ flex: 1, width: WIDTH - 55, alignItems: 'center' }}>
-
-
-                    <Text style={{ marginTop: 40, fontSize: 32, fontWeight: '700', color: '#f5f6fa' }}>
-                        Titties
-                  </Text>
-                    <View style={styles.form}>
-                        <Input
-                            style={styles.textInput}
-                            inputStyle={styles.textInput}
-                            placeholder="Name"
-                            leftIcon={<Icon name={'ios-person'} size={28} color={'rgba(255,255,255,0.9)'} style={{ paddingLeft:15 }} />}
-                            placeholderTextColor={'rgba(255,255,255,0.9)'}
-                            returnKeyType="next"
-                            textContentType="name"
-                            inputContainerStyle={styles.input}
-                            value={this.state.displayName}
-                            onChangeText={displayName => this.setState({ displayName })}
-                        />
-                        <Input
-                            style={styles.textInput}
-                            inputStyle={styles.textInput}
-                            leftIcon={<Icon2 name={'email'} size={28} color={'rgba(255,255,255,0.9)'} style={{ paddingLeft: 15 }} />}
-                            placeholder="Email"
-                            placeholderTextColor={'rgba(255,255,255,0.9)'}
-                            returnKeyType="next"
-                            keyboardType="email-address"
-                            textContentType="emailAddress"
-                            inputContainerStyle={styles.input}
-                            value={this.state.email}
-                            onChangeText={email => this.setState({ email })}
-                        />
-                        <Input
-                            inputStyle={styles.textInput}
-                            style={styles.textInput}
-                            placeholder="Password"
-                            placeholderTextColor={'rgba(255,255,255,0.9)'}
-                            returnKeyType="done"
-                            inputContainerStyle={styles.input}
-
-                            textContentType="newPassword"
-                            secureTextEntry={true}
-                            value={this.state.password}
-                            onChangeText={password => this.setState({ password })}
-                        />
+        return (<ScrollView style={styles.container}>
+            <View>
+            <View style={{ marginTop: 60, alignItems: "center", justifyContent: "center" }}>
+                        {/* <Image source={require("../../../assets/logo.png")} /> */}
+                        <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500" }]}>Witties</Text>
                     </View>
-                    {this.renderLoading()}
-                    <Text
-                        style={{
-                            fontSize: 18,
-                            textAlign: 'center',
-                            color: 'red',
-                            width: '80%'
-                        }}
+                    <View style={{ marginTop: 48, flexDirection: "row", justifyContent: "center" }}>
+                        <TouchableOpacity>
+                            <View style={styles.socialButton}>
+                                <Image source={require("../../../assets/facebook.png")} style={styles.socialLogo} />
+                                <Text style={styles.text}>Facebook</Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.socialButton} onPress={console.log('da')}>
+                            <Image source={require("../../../assets/google.png")} style={styles.socialLogo} />
+                            <Text style={styles.text}>Google</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={[styles.text, { color: "#ABB4BD", fontSize: 15, textAlign: "center", marginVertical: 20 }]}>or</Text>
+
+                <Input 
+                    label="Name"
+                    labelStyle={{fontFamily: "font1"}}
+                    style={styles.inputTitle}
+                    returnKeyType="next"
+                    textContentType="name"
+                    value={this.state.displayName}
+                    onChangeText={displayName => this.setState({ displayName })}
+                />
+                <Input 
+                    label="Email"
+                    style={{marginTop: 32, marginBottom: 8}}
+                    returnKeyType="next"
+                    textContentType="name"
+                    labelStyle={{fontFamily: "font1"}}
+                    value={this.state.email}
+                    onChangeText={email => this.setState({ email })}
+                />
+                <Input 
+                    label="Password"
+                    style={styles.inputTitle}
+                    returnKeyType="next"
+                    secureTextEntry={true}
+                    labelStyle={{fontFamily: "font1"}}
+                    textContentType="newPassword"
+                    value={this.state.password}
+                    onChangeText={password => this.setState({ password })}
+                />
+                <TouchableOpacity 
+                    style={styles.submitContainer}
+                    onPress={() => this.signInWithEmail()}
                     >
-                        {this.state.error}
-                    </Text>
-                    <View style={{ marginTop: 10 }}>
-
-                        <Button
-                            onPress={() => this.signInWithEmail()}
-                            type="solid"
-                            title="Sign Up"
-                            style={styles.button}
-                            loading={this.state.loading}
-
-                        />
-                        <Text
-                            style={{ fontWeight: '200', fontSize: 17, textAlign: 'center', marginTop: 20, color:'#f5f6fa'}}
-                            onPress={() => {
-                                this.props.navigation.navigate('LogIn');
-                            }}
+                        <Text                            
+                            style={[
+                                styles.text,
+                                {
+                                    color: "#FFF",
+                                    fontWeight: "600",
+                                    fontSize: 16
+                                }
+                            ]}
                         >
-                            Already have an account?
+                            Signup
+                        </Text>
+                    </TouchableOpacity>
+                    <Text
+                        style={[
+                            styles.text,
+                            {
+                                fontSize: 14,
+                                color: "#ABB4BD",
+                                textAlign: "center",
+                                marginTop: 24,
+                                marginBottom: 20
+                            }
+                        ]}
+                    >
+                        Already have an account? <Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}>Login Now</Text>
                     </Text>
-                    </View>
-
-                </SafeAreaView>
-            </TouchableWithoutFeedback>
-        </ImageBackground>
+            </View>        
+        </ScrollView>
         );
     }
 }
@@ -261,53 +262,66 @@ class SignUp extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'column',
-        alignItems: 'center'
+        backgroundColor: "#fff",
+        paddingHorizontal: 30
     },
-    backgroundContainer: {
-        flex: 1,
-        width: WIDTH,
-        height: HEIGHT,
-        position:'absolute',
+    text: {
+        fontFamily: "font1",
+        color: "#1D2029"
+    },
+    socialButton: {
+        flexDirection: "row",
+        marginHorizontal: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: "rgba(171, 180, 189, 0.65)",
+        borderRadius: 4,
+        backgroundColor: "#fff",
+        shadowColor: "rgba(171, 180, 189, 0.35)",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 1,
+        shadowRadius: 20,
+        elevation: 5
+    },
+    socialLogo: {
+        width: 16,
+        height: 16,
+        marginRight: 8
+    },
+    link: {
+        color: "#0984e3",
+        fontSize: 14,
+        fontWeight: "500"
+    },
+    submitContainer: {
+        backgroundColor: "#0984e3",
+        fontSize: 16,
+        borderRadius: 4,
+        paddingVertical: 12,
+        marginTop: 32,
+        alignItems: "center",
         justifyContent: "center",
-        alignItems: 'center'
+        color: "#FFF",
+        shadowColor: "rgba(9,132,227, 0.24)",
+        shadowOffset: { width: 0, height: 9 },
+        shadowOpacity: 1,
+        shadowRadius: 20,
+        elevation: 5
     },
-    form: {
-        width: WIDTH * 0.8,
-        marginTop: 15
-    },
-    logo: {
-        marginTop: 20
+    inputTitle: {
+        color: "#ABB4BD",
+        fontSize: 14,
+        fontFamily: "font1"
     },
     input: {
-        height: 50,
-        borderRadius: 25,        
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        color: 'rgba(255,255,255,0.7)',
-        marginHorizontal: 25,
-    },
-    button: {
-
-    },
-    googleButton: {
-        backgroundColor: '#FFFFFF',
-        height: 44,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 22,
-        borderWidth: 1,
-        borderColor: '#707070'
-    },
-    textInput: {
-        paddingLeft: 50,
-        color: "#f5f6fa"
-
-
-
+        paddingVertical: 12,
+        color: "#1D2029",
+        fontSize: 14,
+        fontFamily: "font1"
     }
-});
-
+  });
+  
 
 export default SignUp
 

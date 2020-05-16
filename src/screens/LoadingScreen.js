@@ -9,10 +9,15 @@ export default class LoadingScreen extends Component {
     constructor(props){
         super(props)
         this.state = {
+            fontLoaded: false
         }
     }
 
-    componentDidMount = () => {
+     componentDidMount =  () => {
+        
+      
+        
+        
         firebase.auth().onAuthStateChanged(user => {
             if(user){
                 this.props.navigation.navigate('Home')
@@ -21,6 +26,7 @@ export default class LoadingScreen extends Component {
             }
         })
     }
+
 
     render(){
         return(

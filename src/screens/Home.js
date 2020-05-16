@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Text, Button, Input } from 'react-native-elements'
-import { View, Dimensions, Vibration, Platform, Image, Slider } from 'react-native'
+import { View, Dimensions, Vibration, Platform, Image, Slider, TouchableOpacity } from 'react-native'
 import * as firebase from 'firebase'
 import Swiper from 'react-native-swiper'
 import HomeContainer from '../screens/containers/HomeContainer'
@@ -19,6 +19,8 @@ import MapComponent from '../screens/MapComponent'
 import Constants from 'expo-constants'
 import Notification from '../screens/Notification'
 import MediaDemo from '../screens/MediaDemo'
+import CameraScreen from './Camera'
+import ActivityPopup from '../screens/ActivityPop/ActivityPopup'
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -33,12 +35,24 @@ export default class Home extends Component {
         imageURL: "",
         postText: "",
         expoPushToken: '',
-        notification: {}
+        notification: {},
+        cameraPermission: false
       }
 
     }
+
+    requestCamera = async () => {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA);
+      if(status === 'granted'){
+        this.setState({cameraPermission: true })
+      }else{
+        alert('hai suge-o')
+      }
+    }
     
     componentDidMount = () => {
+      console.log(firebase.auth().currentUser.uid)
+      this.requestCamera()
       console.log('se executa........')
     }
 
@@ -164,28 +178,19 @@ export default class Home extends Component {
       //                 <ChatRoomsList/>
       //               </View>
       // </Swiper>
-    
-          //<MediaDemo/>
-                    <Swiper
-                  loop={false}
-                  showsPagination={false}
-                  index={1}>
-                    <View>
-                      <MapComponent/>
-                    </View>
-                    <Swiper
-                      horizontal={false}
-                      loop={false}
-                      showsPagination={false}
-                      index={1}>
-
-                    <View>
-                        <MediaDemo/>                   
-                    </View>
-                    </Swiper>        
-                    <View>
-                    </View>
-      </Swiper>
-          )
+    <View>
+    <ActivityPopup/>
+       <Button
+          title="Send Notification"
+          style={{marginTop: 80}}
+          onPress={() => this._signOut()}
+        />   
+        <Button
+          title="Send Notification"
+          style={{marginTop: 80}}
+          onPress={() => this._signOut()}
+        />
+      </View>
+      )
     }
 }
