@@ -13,10 +13,12 @@ import {
     Image
 
 } from 'react-native';
-import GoogleSignIn from 'expo-google-sign-in'
+import * as Facebook from 'expo-facebook'
+import * as Google from 'expo-google-app-auth'
 import * as Permissions from 'expo-permissions'
 import { Notifications } from 'expo'
 import * as Font from 'expo-font'
+import * as Expo from 'expo'
 
 import { Text, Input, Button } from 'react-native-elements'
 import firebase from 'firebase'
@@ -45,7 +47,9 @@ class SignUp extends Component {
             loading: false,
             friends: [],
             uid: "",
-            notifToken: ""
+            notifToken: "",
+            googleUser: null,
+            fonstLoaded: false
         }
     }
     async componentDidMount(){
@@ -54,6 +58,7 @@ class SignUp extends Component {
              
             font1: require('../../../assets/SourceSansPro-Black.ttf'),                         
         });
+        this.setState({fonstLoaded: true})
     }
    
 
@@ -112,7 +117,6 @@ class SignUp extends Component {
     }
 
 
-
     onLoginSuccess() {
         firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).set({
             email: this.state.email,
@@ -122,8 +126,8 @@ class SignUp extends Component {
             profilePicture: this.state.profilePicture,
             friends: this.state.friends,
             uid: firebase.auth().currentUser.uid,
-            status: ""
-
+            status: "",
+            customActivities: []
         }).then(this._retrieveDisplayName(), (error) => {
             console.log(error)
             alert(error)
@@ -164,30 +168,153 @@ class SignUp extends Component {
             })
     }
 
-    async signInWithGoogle() {
-      const provider = firebase.auth.GoogleAuthProvider()
-        firebase.auth().signInWithPopup(provider).then(function(result){
-            const token = result.credential.accessToken;
-            console.log('a mers')
-        })
+    isUserEqual = (googleUser, firebaseUser) => {
+        if (firebaseUser) {
+          var providerData = firebaseUser.providerData;
+          for (var i = 0; i < providerData.length; i++) {
+            if (
+              providerData[i].providerId ===
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+              providerData[i].uid === googleUser.getBasicProfile().getId()
+            ) {
+              // We don't need to reauth the Firebase connection.
+              return true;
+            }
+          }
+        }
+        return false;
+      };
+
+      onSignIn = googleUser => {
+        console.log('Google Auth Response', googleUser);
+        // We need to register an Observer on Firebase Auth to make sure auth is initialized.
+        var unsubscribe = firebase.auth().onAuthStateChanged(
+          firebaseUser => {
+            unsubscribe();
+            // Check if we are already signed-in Firebase with the correct user.
+            if (!this.isUserEqual(googleUser, firebaseUser)) {
+              // Build Firebase credential with the Google ID token.
+              var credential = firebase.auth.GoogleAuthProvider.credential(
+                googleUser.idToken,
+                googleUser.accessToken
+              );
+              // Sign in with credential from the Google user.
+              firebase
+                .auth()
+                .signInAndRetrieveDataWithCredential(credential)
+                .then(result => {
+                    console.log(firebase.auth().currentUser.uid)
+                    firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).set({
+                        email: result.user.email,
+                        displayName: result.user.displayName,
+                        careScore: this.state.careScore,
+                        discriminator: this.state.discriminator,
+                        profilePicture: result.user.photoURL,
+                        friends: this.state.friends,
+                        uid: firebase.auth().currentUser.uid,
+                        status: "",
+                        customActivities: []
+                    }).then(this._retrieveDisplayName(), (error) => {
+                        console.log(error)
+                        alert(error)
+                    })
+                    firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
+                        prieteni: []
+                    })
+                })
+
+                            
+            } else {
+              console.log('User already signed-in Firebase.');
+            }
+          }
+        );
+      };
+
+    signInWithGoogleAsync = async() => {
+        try{
+            const result = await Google.logInAsync({
+                iosClientId: '178061533357-0hii23b04uupl074ggdpfg53s92thkvk.apps.googleusercontent.com',
+                androidClientId: '178061533357-qv4brh779ah25i7m20lrfh9vbf2q00dn.apps.googleusercontent.com',
+                scopes: ['profile', 'email'],
+                behavior: 'web'
+            });
+
+            if(result.type === 'success'){
+                this.onSignIn(result);
+                return result.accessToken
+            }else {
+                return { cancelled: true }
+            }
+        }catch(e){
+            return { error: true }
+        }
     }
 
+
+    loginWithFacebook = async() => {
+        try{
+            await Facebook.initializeAsync('175604747105532');
+           const result= await Facebook.logInWithReadPermissionsAsync({
+                permissions: ['public_profile', 'email'],
+              }); 
+            if(result.type === 'success'){
+            const token = result.token;
+            console.log(token)
+            const credential = firebase.auth.FacebookAuthProvider.credential(token)    
+            const response = await fetch(
+                `https://graph.facebook.com/me?access_token=${token}&fields=id,name,birthday,email,picture.type(large)`
+            );
+              const { picture, name, birthday, email } = await response.json();
+              console.log(email)
+            firebase.auth().signInWithCredential(credential).catch((error) => {
+                console.log(error)
+            }) .then(result => {
+                console.log(firebase.auth().currentUser.uid)
+                firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).set({
+                    email: email,
+                    displayName: name,
+                    careScore: this.state.careScore,
+                    discriminator: this.state.discriminator,
+                    profilePicture: picture.data.url,
+                    friends: this.state.friends,
+                    uid: firebase.auth().currentUser.uid,
+                    status: "",
+                    customActivities: []
+                }).then(this._retrieveDisplayName(), (error) => {
+                    console.log(error)
+                    alert(error)
+                })
+                firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
+                    prieteni: []
+                })
+            })
+            }     
+        }catch(e){
+            console.log(e)
+        }
+    }
+   
     render() {
-        return (<ScrollView style={styles.container}>
+        const loaded = this.state.fonstLoaded
+        if(loaded){
+        return (
+        
+        <ScrollView style={styles.container}>
             <View>
             <View style={{ marginTop: 60, alignItems: "center", justifyContent: "center" }}>
                         {/* <Image source={require("../../../assets/logo.png")} /> */}
                         <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500" }]}>Witties</Text>
                     </View>
                     <View style={{ marginTop: 48, flexDirection: "row", justifyContent: "center" }}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress = {() => this.loginWithFacebook()}>
                             <View style={styles.socialButton}>
                                 <Image source={require("../../../assets/facebook.png")} style={styles.socialLogo} />
                                 <Text style={styles.text}>Facebook</Text>
                             </View>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.socialButton} onPress={console.log('da')}>
+                        <TouchableOpacity style={styles.socialButton} onPress={() => this.signInWithGoogleAsync()}>
                             <Image source={require("../../../assets/google.png")} style={styles.socialLogo} />
                             <Text style={styles.text}>Google</Text>
                         </TouchableOpacity>
@@ -255,7 +382,13 @@ class SignUp extends Component {
                     </Text>
             </View>        
         </ScrollView>
-        );
+        );}else{
+            return(
+                <View style={styles.container}>
+                    <ActivityIndicator size={'large'}/>
+                </View>
+            )
+        }
     }
 }
 

@@ -178,19 +178,14 @@ export default class Home extends Component {
       //                 <ChatRoomsList/>
       //               </View>
       // </Swiper>
-    <View>
-    <ActivityPopup/>
-       <Button
-          title="Send Notification"
-          style={{marginTop: 80}}
-          onPress={() => this._signOut()}
-        />   
-        <Button
-          title="Send Notification"
-          style={{marginTop: 80}}
-          onPress={() => this._signOut()}
-        />
-      </View>
+        <View>
+          {/* <UserProfile/> */}
+          <Button
+            title="Send Notification"
+            style={{marginTop: 80}}
+            onPress={() => this._signOut()}
+          />
+        </View>
       )
     }
 }

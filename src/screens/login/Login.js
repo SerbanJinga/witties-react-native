@@ -13,7 +13,8 @@ import {
 import firebase from 'firebase'
 import 'firebase/firestore'
 import * as Font from 'expo-font'
-
+import * as Google from 'expo-google-app-auth'
+import * as Facebook from 'expo-facebook'
 class Login extends Component{
     constructor(props){
         super(props)
@@ -31,6 +32,76 @@ class Login extends Component{
              
             font1: require('../../../assets/SourceSansPro-Black.ttf'),                         
         });
+    }
+
+    isUserEqual = (googleUser, firebaseUser) => {
+        if (firebaseUser) {
+          var providerData = firebaseUser.providerData;
+          for (var i = 0; i < providerData.length; i++) {
+            if (
+              providerData[i].providerId ===
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+              providerData[i].uid === googleUser.getBasicProfile().getId()
+            ) {
+              // We don't need to reauth the Firebase connection.
+              return true;
+            }
+          }
+        }
+        return false;
+      };
+
+      onSignIn = googleUser => {
+        console.log('Google Auth Response', googleUser);
+        // We need to register an Observer on Firebase Auth to make sure auth is initialized.
+        var unsubscribe = firebase.auth().onAuthStateChanged(
+          firebaseUser => {
+            unsubscribe();
+            // Check if we are already signed-in Firebase with the correct user.
+            if (!this.isUserEqual(googleUser, firebaseUser)) {
+              // Build Firebase credential with the Google ID token.
+              var credential = firebase.auth.GoogleAuthProvider.credential(
+                googleUser.idToken,
+                googleUser.accessToken
+              );
+              // Sign in with credential from the Google user.
+              firebase
+                .auth()
+                .signInAndRetrieveDataWithCredential(credential)
+                .then(result => {
+                    console.log(firebase.auth().currentUser.uid)
+                    
+                    firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
+                        prieteni: []
+                    })
+                })
+
+                            
+            } else {
+              console.log('User already signed-in Firebase.');
+            }
+          }
+        );
+      };
+
+    signInWithGoogleAsync = async() => {
+        try{
+            const result = await Google.logInAsync({
+                iosClientId: '178061533357-0hii23b04uupl074ggdpfg53s92thkvk.apps.googleusercontent.com',
+                androidClientId: '178061533357-qv4brh779ah25i7m20lrfh9vbf2q00dn.apps.googleusercontent.com',
+                scopes: ['profile', 'email'],
+                behavior: 'web'
+            });
+
+            if(result.type === 'success'){
+                this.onSignIn(result);
+                return result.accessToken
+            }else {
+                return { cancelled: true }
+            }
+        }catch(e){
+            return { error: true }
+        }
     }
 
     onLoginSuccess(){
@@ -68,6 +139,28 @@ class Login extends Component{
                         })
     }
 
+    loginWithFacebook = async() => {
+        try{
+            await Facebook.initializeAsync('175604747105532');
+           const result= await Facebook.logInWithReadPermissionsAsync({
+                permissions: ['public_profile', 'email'],
+              }); 
+            if(result.type === 'success'){
+            const token = result.token;
+            console.log(token)
+            const credential = firebase.auth.FacebookAuthProvider.credential(token)    
+            
+            firebase.auth().signInWithCredential(credential).catch((error) => {
+                console.log(error)
+            }) .then(() => {
+                this.props.navigation.navigate('Loading')
+            })
+            }     
+        }catch(e){
+            console.log(e)
+        }
+    }
+
       render(){
         return (
           <ScrollView style={styles.container}>
@@ -77,14 +170,14 @@ class Login extends Component{
                       <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500" }]}>Witties</Text>
                   </View>
                   <View style={{ marginTop: 48, flexDirection: "row", justifyContent: "center" }}>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={() => this.loginWithFacebook()}>
                           <View style={styles.socialButton}>
                               <Image source={require("../../../assets/facebook.png")} style={styles.socialLogo} />
                               <Text style={styles.text}>Facebook</Text>
                           </View>
                       </TouchableOpacity>
 
-                      <TouchableOpacity style={styles.socialButton}>
+                      <TouchableOpacity style={styles.socialButton} onPress={() => this.signInWithGoogleAsync()}>
                           <Image source={require("../../../assets/google.png")} style={styles.socialLogo} />
                           <Text style={styles.text}>Google</Text>
                       </TouchableOpacity>

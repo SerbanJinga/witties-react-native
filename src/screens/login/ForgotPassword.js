@@ -15,7 +15,6 @@ import {
 import wallp from "../../../assets/b1.png"
 import { Font } from 'expo-font'
 const { width, height } = Dimensions.get('window')
-
 class ForgotPassword extends Component {
     constructor(props) {
         super(props)
