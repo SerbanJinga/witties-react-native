@@ -20,6 +20,7 @@ import { Notifications } from 'expo'
 import * as Font from 'expo-font'
 import * as Expo from 'expo'
 
+import Toast, { DURATION } from 'react-native-easy-toast'
 import { Text, Input, Button } from 'react-native-elements'
 import firebase from 'firebase'
 import 'firebase/firestore'
@@ -53,6 +54,7 @@ class SignUp extends Component {
         }
     }
     async componentDidMount(){
+        // this.refs.toast.show('hello gigica')
         await Font.loadAsync({
             //font1 or 2 can be any name. This'll be used in font-family
              
@@ -135,13 +137,21 @@ class SignUp extends Component {
         firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
             prieteni: []
         })
+        firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid).set({
+            statuses: []
+        })
+        firebase.firestore().collection("status-public").doc(firebase.auth().currentUser.uid).set({
+            statuses: []
+        })
     }
 
     onLoginFailure(errorMessage) {
         this.setState({
-            error: errorMessage,
+            errorMessage: errorMessage,
             loading: false
         })
+        const err = this.state.errorMessage
+        this.refs.error.show(err)
     }
 
     renderLoading() {
@@ -380,7 +390,15 @@ class SignUp extends Component {
                     >
                         Already have an account? <Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}>Login Now</Text>
                     </Text>
-            </View>        
+                    <Toast 
+                        ref="error"
+                        style={{backgroundColor: '#282828'}}
+                        textStyle={{color: '#fff'}}
+                        position='bottom'
+                        opacity={0.8}
+                        fadeInDuration={750}
+                    /> 
+                </View>        
         </ScrollView>
         );}else{
             return(

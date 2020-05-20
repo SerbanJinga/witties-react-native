@@ -72,6 +72,19 @@ export default class ReceiveFriendRequest extends Component {
             accepted: true,
             request: "prieteni"
         })
+
+        firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+    
+        firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+
+        
+        firebase.firestore().collection("users").doc(uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
     }
 
     render(){

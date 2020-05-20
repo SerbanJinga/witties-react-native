@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import wallp from "../../../assets/b1.png"
 import { Font } from 'expo-font'
+import Toast, { DURATION } from 'react-native-easy-toast'
 const { width, height } = Dimensions.get('window')
 class ForgotPassword extends Component {
     constructor(props) {
@@ -43,20 +44,20 @@ class ForgotPassword extends Component {
     }
 
     onResetSuccess() {
-        alert('bravo')
+        alert('An email has been sent to ' + this.state.email)
     }
 
     onResetFailure(errorMessage) {
         this.setState({
-            error: errorMessage,
+            errorMessage: errorMessage,
             loading: false
         })
+        const err = this.state.errorMessage
+        this.refs.error.show(err)
     }
 
     async resetPassword() {
-        if(this.state.email === ''){
-            alert('introdu emailu')
-        }
+        
         await firebase.auth().sendPasswordResetEmail(this.state.email)
             .then(this.onResetSuccess.bind(this))
             .catch(error => {
@@ -117,7 +118,16 @@ class ForgotPassword extends Component {
                       ]}
                   >
                       Remember your password?<Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}>Login here</Text>
+                     
                   </Text>
+                  <Toast 
+                        ref="error"
+                        style={{backgroundColor: '#282828'}}
+                        textStyle={{color: '#fff'}}
+                        position='bottom'
+                        opacity={0.8}
+                        fadeInDuration={750}
+                 />
             </View>
         </ScrollView>
         )

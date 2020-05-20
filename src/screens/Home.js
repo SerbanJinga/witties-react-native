@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, Button, Input } from 'react-native-elements'
+import { Text, Button, Input, Icon } from 'react-native-elements'
 import { View, Dimensions, Vibration, Platform, Image, Slider, TouchableOpacity } from 'react-native'
 import * as firebase from 'firebase'
 import Swiper from 'react-native-swiper'
@@ -9,6 +9,7 @@ import SearchUsers from '../screens/friendSystem/SearchUsers'
 import * as Permissions from 'expo-permissions'
 import { Notifications } from 'expo'
 import * as ImagePicker from 'expo-image-picker'
+import SwipeablePanel from "rn-swipeable-panel";
 import ReceiveFriendRequest from '../screens/friendSystem/ReceiveFriendRequest'
 import FriendList from '../screens/friendSystem/FriendList'
 import ChatRoomsList from '../screens/chatRoom/ChatRoomsList' 
@@ -21,6 +22,10 @@ import Notification from '../screens/Notification'
 import MediaDemo from '../screens/MediaDemo'
 import CameraScreen from './Camera'
 import ActivityPopup from '../screens/ActivityPop/ActivityPopup'
+import Toast, { DURATION } from 'react-native-easy-toast'
+import StoriesPublic from '../screens/StoriesPublic'
+import { Col, Row, Grid } from "react-native-easy-grid";
+
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -36,10 +41,26 @@ export default class Home extends Component {
         postText: "",
         expoPushToken: '',
         notification: {},
-        cameraPermission: false
+        cameraPermission: false,
+        swipeablePanelActive: false,
+
       }
 
     }
+
+    static navigationOptions = {
+      headerTitle: <Text>Welcome</Text>,
+      
+    }
+
+    openPanel = () => {
+      this.setState({ swipeablePanelActive: true });
+    };
+  
+    closePanel = () => {
+      this.setState({ swipeablePanelActive: false });
+    };
+  
 
     requestCamera = async () => {
       const { status } = await Permissions.askAsync(Permissions.CAMERA);
@@ -51,6 +72,7 @@ export default class Home extends Component {
     }
     
     componentDidMount = () => {
+
       console.log(firebase.auth().currentUser.uid)
       this.requestCamera()
       console.log('se executa........')
@@ -129,11 +151,6 @@ export default class Home extends Component {
 
    
 
-  
-
-  
-
-
  
    
 
@@ -141,6 +158,8 @@ export default class Home extends Component {
 
     render(){
         return(
+
+          //SWIPERE DE TEST
       //          <Swiper
       //             loop={false}
       //             showsPagination={false}
@@ -178,14 +197,37 @@ export default class Home extends Component {
       //                 <ChatRoomsList/>
       //               </View>
       // </Swiper>
-        <View>
-          {/* <UserProfile/> */}
-          <Button
-            title="Send Notification"
-            style={{marginTop: 80}}
-            onPress={() => this._signOut()}
-          />
-        </View>
-      )
+
+    //   SLIDER CARE MERGE
+    //  <View>
+    //  <Button style={{marginTop: 40}} title="Deschide" onPress={() => this.openPanel()}/>
+    //  <SwipeablePanel
+    //       fullWidth
+    //       isActive={this.state.swipeablePanelActive}
+    //       onClose={this.closePanel}
+    //       onPressCloseButton={this.closePanel}
+    //       closeOnTouchOutside={true}
+    //       fullWidth={true}
+    //       showCloseButton={true}
+    //       closeRootStyle={{backgroundColor: '#f0f0f0'}}
+    //     >
+    //       <ActivityPopup/>
+    //     </SwipeablePanel>  
+
+
+    // // </View>
+    <ScrollView>
+    <Grid>
+      <Row size={2}>
+        <StoriesPublic/> 
+      </Row>
+      <Row size={1}><Text>Coloana 2</Text></Row>
+      <Row size={1}><Text>Coloana 3</Text></Row>
+
+    </Grid>
+    </ScrollView>
+
+    )
+
     }
 }

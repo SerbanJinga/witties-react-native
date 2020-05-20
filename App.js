@@ -32,14 +32,23 @@ export const database = db;
 const navigator = createStackNavigator(
   {
     Auth: AuthNavigator,
-    Home: Home,
-    Chat: ChatNavigator
+    Home: {
+      name: 'Home',
+      screen: Home,
+      navigationOptions: {
+        gesturesEnabled: false
+      }
+    },
+    Chat: ChatNavigator,
+
   },{
     initialRouteName: 'Auth',
     defaultNavigationOptions:{
-      headerShown: false
-    }
+   
+      header: false
+  },
+  
   }
-);
+  );
 
 export default createAppContainer(navigator);

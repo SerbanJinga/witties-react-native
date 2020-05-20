@@ -15,6 +15,8 @@ import 'firebase/firestore'
 import * as Font from 'expo-font'
 import * as Google from 'expo-google-app-auth'
 import * as Facebook from 'expo-facebook'
+import Toast, { DURATION } from 'react-native-easy-toast'
+
 class Login extends Component{
     constructor(props){
         super(props)
@@ -110,9 +112,11 @@ class Login extends Component{
 
     onLoginFailure(errorMessage){
         this.setState({
-            error: errorMessage, 
+            errorMessage: errorMessage, 
             loading: false
         })
+        const err = this.state.errorMessage
+        this.refs.error.show(err)
     }
 
     renderLoading(){
@@ -235,6 +239,14 @@ class Login extends Component{
                   >
                       Don't have an account? <Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('SignUp')}>Register Now</Text>
                   </Text>
+                  <Toast 
+                        ref="error"
+                        style={{backgroundColor: '#282828'}}
+                        textStyle={{color: '#fff'}}
+                        position='bottom'
+                        opacity={0.8}
+                        fadeInDuration={750}
+                    />
           </View>        
       </ScrollView>
           );
