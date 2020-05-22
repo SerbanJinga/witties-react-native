@@ -12,10 +12,13 @@ import {
     ImageBackground,
     Dimensions,
     FlatList,
-    ScrollView
+    ScrollView,
+    Image
 
 
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker'
+
 import Icon3 from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -59,7 +62,9 @@ export default class ActivityPopup extends React.Component {
             refreshing: false,
             filteredData: [],
             currentUser: "",
-            limit: 20
+            limit: 20,
+            imageUri: '',
+            imageURL: "",
 
         }
     }
@@ -73,6 +78,39 @@ export default class ActivityPopup extends React.Component {
 
 
     }
+
+
+    pickImage = async() => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [4, 3]
+        })
+  
+        if(!result.cancelled){
+          this.setState({imageUri: result.uri})
+        }
+  
+      }
+
+      uploadPhoto = async() => {
+        const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
+        const response = await fetch(this.state.imageUri)
+        const file = await response.blob()
+  
+        let upload = firebase.storage().ref(path).put(file)
+        upload.on("state_changed", snapshot => {}, err => {
+          console.log(err)
+        },
+          async () => {
+            const url = await upload.snapshot.ref.getDownloadURL()
+            console.log(url)
+            this.setState({imageURL: url})
+            this.sendActivity(this.state.imageURL)
+          })
+      }
+
+      
 
     search = (searchText) => {
         this.setState({ searchText: searchText })
@@ -121,41 +159,28 @@ export default class ActivityPopup extends React.Component {
 
     }
 
-    sendActivity() {
+    sendActivity = (url) => {
         let foo = {
             mood: this.state.mood,
             text: this.state.postText,
             taggedUsers: this.state.taggedUsers,
             activity: this.state.selectedActivity,
-            public: this.state.public,
             //AICI SCHIMB 
-            creatorId: firebase.auth().currentUser.uid,
-            whoSee: firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+            image: url,
+            timestamp: Date.now()
         }
         console.log(foo)
 
         if (this.state.public)
-            firebase.firestore().collection('status-public').add({
-                mood: this.state.mood,
-                text: this.state.postText,
-                taggedUsers: this.state.taggedUsers,
-                activity: this.state.selectedActivity,
-                public: this.state.public,
-                //AICI SCHIMB 
-                creatorId: firebase.auth().currentUser.uid,
-                whoSee: firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+            firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).update({
+              statuses: firebase.firestore.FieldValue.arrayUnion(foo)
             })
 
 
-        firebase.firestore().collection('private').add({
-            mood: this.state.mood,
-            text: this.state.postText,
-            taggedUsers: this.state.taggedUsers,
-            activity: this.state.selectedActivity,
-            public: this.state.public,
-            //AICI SCHIMB 
-            creatorId: firebase.auth().currentUser.uid,
-            whoSee: firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).update({
+            statuses: firebase.firestore.FieldValue.arrayUnion(foo)
+
+
         })
 
         firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
@@ -520,16 +545,19 @@ export default class ActivityPopup extends React.Component {
                     />
                 </View>
                 <View style={styles.moodView}>
+                <Button title="Pick Image" onPress={this.pickImage}/>
                     <Button
                         title=" Done"
                         type="clear"
                         containerStyle={styles.button}
-                        onPress={() => { this.sendActivity() }}
+                        onPress={() => { this.uploadPhoto() }}
 
                     />
 
-                </View>
+                    
 
+                </View>
+<Image style={{width: 50, height: 50}} source={{uri: this.state.imageUri}}/>
             </View>
 
         </View>)

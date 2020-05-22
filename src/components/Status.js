@@ -18,7 +18,7 @@ export default class Status extends Component {
   } 
     render(){
         return(
-            <TouchableOpacity activeOpacity={0.8}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => this.props.press()}>
             <ImageBackground
               style={[styles.flex, styles.destination, styles.shadow]}
               imageStyle={{ borderRadius: theme.sizes.radius }}

@@ -25,7 +25,8 @@ import ActivityPopup from '../screens/ActivityPop/ActivityPopup'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import StoriesPublic from '../screens/StoriesPublic'
 import { Col, Row, Grid } from "react-native-easy-grid";
-
+import ChannelStatus from '../components/ChannelStatus'
+import Timeline from '../screens/Timeline'
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -48,10 +49,6 @@ export default class Home extends Component {
 
     }
 
-    static navigationOptions = {
-      headerTitle: <Text>Welcome</Text>,
-      
-    }
 
     openPanel = () => {
       this.setState({ swipeablePanelActive: true });
@@ -215,19 +212,13 @@ export default class Home extends Component {
     //     </SwipeablePanel>  
 
 
-    // // </View>
-    <ScrollView>
-    <Grid>
-      <Row size={2}>
-        <StoriesPublic/> 
-      </Row>
-      <Row size={1}><Text>Coloana 2</Text></Row>
-      <Row size={1}><Text>Coloana 3</Text></Row>
-
-    </Grid>
-    </ScrollView>
-
-    )
+    // </View>
+        // <StoriesPublic/> 
+      // <Timeline/>          
+            // <ActivityPopup/>
+           <ActivityPopup/>
+          // <Button title="da" onPress={this._signOut}/>
+          )
 
     }
 }

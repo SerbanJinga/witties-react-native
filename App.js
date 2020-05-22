@@ -8,6 +8,7 @@ import {createAppContainer } from 'react-navigation'
 import firebaseConfig from './src/firebaseConfig/firebase'
 import firebase from 'firebase'
 import _ from 'lodash'
+import FullScreenStory from './src/screens/FullScreenStory'
 
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
 require('firebase/firestore');
@@ -40,12 +41,12 @@ const navigator = createStackNavigator(
       }
     },
     Chat: ChatNavigator,
-
+    FullScreenStory: FullScreenStory
   },{
     initialRouteName: 'Auth',
     defaultNavigationOptions:{
    
-      header: false
+      header: null
   },
   
   }

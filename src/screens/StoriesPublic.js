@@ -3,9 +3,11 @@ import { View, StyleSheet, Dimensions, Button, FlatList, Animated, SafeAreaView,
 import firebase from 'firebase'
 import Status from '../components/Status'
 import * as theme from '../styles/theme'
+import { withNavigation } from 'react-navigation'
+
 const arr = []
 const { height, width } = Dimensions.get('window')
-export default class StoriesPublic extends Component{
+ class StoriesPublic extends Component{
     scrollX = new Animated.Value(0)
     constructor(props){
         super(props)
@@ -61,15 +63,13 @@ export default class StoriesPublic extends Component{
         for(let i = 0; i < this.state.myFriends.length; i++)
         {
 
-            firebase.firestore().collection('status-public').where('creatorId', '==', this.state.myFriends[i]).get().then(res => {
-                const query = res.docs.map(doc => doc.data())
-                query.forEach(doc =>{
-                    this.setState(prevState => ({
-                        documentData: [...prevState.documentData, doc]
-                    }))
-                })
+            await firebase.firestore().collection('status-public').where('creatorId', '==', this.state.myFriends[i]).get().then(res => {
+              console.log('Prietenul ' + i)
+              const query = res.docs.map(doc => doc.data().statuses)
+              query.forEach(doc => doc.forEach(altDoc => arr.push(altDoc)))
             })
         }
+        this.setState({documentData: arr})
         console.log(this.state.documentData)
         // console.log(this.state.myFriends)
 
@@ -86,10 +86,13 @@ export default class StoriesPublic extends Component{
         let documentData = documentSnapshots.data().displayName
         return documentData
     }
+    onPress = (item) => {
+      this.props.navigation.navigate('FullScreenStory', { status: item})
+    }
     render(){
         return(
-            <View style={[ styles.column, styles.destinations ]}>
-                <SafeAreaView style={styles.container}>
+            <View style={[ styles.column, styles.destinations ], { marginTop: 40}}>
+                <SafeAreaView style={styles.container} >
                 <FlatList
                 decelerationRate={0}
                 horizontal
@@ -101,7 +104,7 @@ export default class StoriesPublic extends Component{
                 style={[styles.shadow, { overflow: 'visible' }]}
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp}/>
+                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} press={() => this.onPress(item)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
@@ -113,7 +116,7 @@ export default class StoriesPublic extends Component{
                 />
                 {this.renderDots()}
             </SafeAreaView>
-            <Button title="Retrieve" onPress={() => this.retrieveData()}/>
+            <Button title="Retrieve" onPress={this.retrieveData}/>
 
             </View>
             )
@@ -238,3 +241,5 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.active,
   }
 });
+
+export default withNavigation(StoriesPublic)

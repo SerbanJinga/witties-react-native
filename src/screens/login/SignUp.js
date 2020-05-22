@@ -141,7 +141,8 @@ class SignUp extends Component {
             statuses: []
         })
         firebase.firestore().collection("status-public").doc(firebase.auth().currentUser.uid).set({
-            statuses: []
+            statuses: [],
+            creatorId: firebase.auth().currentUser.uid
         })
     }
 
