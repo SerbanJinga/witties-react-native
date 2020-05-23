@@ -20,14 +20,14 @@ const { height, width } = Dimensions.get('window')
 
 
     componentDidMount = async() => {
-        try{
-            this.retrieveData()
-        }catch(err){
-            console.log(err)
-        }
+      await this.retrieveData()
     }
 
 
+
+    vasile = async() => {
+      this.getDisplayName(firebase.auth().currentUser.uid)
+    }
     renderDots = () => {
         const dotPosition = Animated.divide(this.scrollX, width);
         return(
@@ -50,7 +50,6 @@ const { height, width } = Dimensions.get('window')
     }
 
     retrieveData = async() => {
-        
         const currentId = firebase.auth().currentUser.uid
         // firebase.firestore().collection(z
         //friends of user
@@ -66,7 +65,7 @@ const { height, width } = Dimensions.get('window')
             await firebase.firestore().collection('status-public').where('creatorId', '==', this.state.myFriends[i]).get().then(res => {
               console.log('Prietenul ' + i)
               const query = res.docs.map(doc => doc.data().statuses)
-              query.forEach(doc => doc.forEach(altDoc => arr.push(altDoc)))
+              query.forEach(doc => doc.forEach(altDoc => {arr.push(altDoc)}))
             })
         }
         this.setState({documentData: arr})
@@ -80,15 +79,20 @@ const { height, width } = Dimensions.get('window')
         // })
     }
 
-    _getNameFromId = async(uid) => {
-        let initialQuery = await firebase.firestore().collection('users').doc(uid)
-        let documentSnapshots = await initialQuery.get()
-        let documentData = documentSnapshots.data().displayName
-        return documentData
-    }
+    getDisplayName = async(uid) =>{
+      let displayName = ''
+      await firebase.firestore().collection('users').doc(uid).get().then(res => {
+        displayName = res.data().displayName
+      }).then(() => {
+      return displayName
+    })
+      } 
+
+  
     onPress = (item) => {
       this.props.navigation.navigate('FullScreenStory', { status: item})
     }
+
     render(){
         return(
             <View style={[ styles.column, styles.destinations ], { marginTop: 40}}>
@@ -104,7 +108,7 @@ const { height, width } = Dimensions.get('window')
                 style={[styles.shadow, { overflow: 'visible' }]}
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} press={() => this.onPress(item)}/>
+                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
@@ -116,7 +120,7 @@ const { height, width } = Dimensions.get('window')
                 />
                 {this.renderDots()}
             </SafeAreaView>
-            <Button title="Retrieve" onPress={this.retrieveData}/>
+            <Button title="Retrieve" onPress={() => this.retrieveData()}/>
 
             </View>
             )

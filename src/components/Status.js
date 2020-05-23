@@ -3,11 +3,19 @@ import { View, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, Text, 
 import * as theme from '../styles/theme'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Octicons from 'react-native-vector-icons/Octicons'
+import firebase from 'firebase'
 const { height, width } = Dimensions.get('window')
 export default class Status extends Component {
   
+  constructor(props){
+    super(props)
+    this.state = {
+      displayName: "",
+      profilePicture: ""
+    }
+  }
 
-  _renderTimestamps = (timestamp) =>{
+  _renderTimestamps = (timestamp) => {
     let date = new Date(timestamp * 1000)
     let hours = date.getHours()
     let minutes = "0" + date.getMinutes()
@@ -16,20 +24,33 @@ export default class Status extends Component {
     let formattedTime = hours + ":" + minutes.substr(-2) + ':' + seconds.substr(-2)
     return formattedTime
   } 
+
+  getData = async(uid) => {
+    await firebase.firestore().collection('users').doc(uid).get().then(res => {
+      let displayName = res.data().displayName
+      let profilePicture = res.data().profilePicture
+      this.setState({displayName: displayName, profilePicture: profilePicture})
+    })
+
+  }
+  componentDidMount = async() => {
+    await this.getData(this.props.creatorId)
+  }
+  
     render(){
         return(
             <TouchableOpacity activeOpacity={0.8} onPress={() => this.props.press()}>
             <ImageBackground
               style={[styles.flex, styles.destination, styles.shadow]}
               imageStyle={{ borderRadius: theme.sizes.radius }}
-              source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/witties.appspot.com/o/profiles_picture%2FQCLKoR1skhUEExopmeZLqQ7a9Ir1?alt=media&token=4058b5af-d554-426a-82d2-c28da6b3ef18' }}
+              source={{ uri: this.props.image }}
             >
               <View style={[styles.row, { justifyContent: 'space-between' }]}>
                 <View style={{ flex: 0 }}>
-                  <Image source={{ uri: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80' }} style={styles.avatar} />
+                  <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
                 </View>
                 <View style={[styles.column, { flex: 2, paddingHorizontal: theme.sizes.padding / 2 }]}>
-                  <Text style={{ color: theme.colors.white, fontWeight: 'bold' }}>{this.props.activity}</Text>
+                  <Text style={{ color: theme.colors.white, fontWeight: 'bold' }}>{this.state.displayName}</Text>
                   <Text style={{ color: theme.colors.white }}>
                     <Octicons
                       name="smiley"

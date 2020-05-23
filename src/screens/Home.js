@@ -27,6 +27,7 @@ import StoriesPublic from '../screens/StoriesPublic'
 import { Col, Row, Grid } from "react-native-easy-grid";
 import ChannelStatus from '../components/ChannelStatus'
 import Timeline from '../screens/Timeline'
+
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -213,11 +214,11 @@ export default class Home extends Component {
 
 
     // </View>
-        // <StoriesPublic/> 
+        <StoriesPublic/> 
       // <Timeline/>          
-            // <ActivityPopup/>
-           <ActivityPopup/>
+          //  <ActivityPopup/>
           // <Button title="da" onPress={this._signOut}/>
+        
           )
 
     }
