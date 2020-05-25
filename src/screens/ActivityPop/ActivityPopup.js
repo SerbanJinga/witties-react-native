@@ -13,8 +13,8 @@ import {
     Dimensions,
     FlatList,
     ScrollView,
-    Image
-
+    Image,
+    Picker
 
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker'
@@ -27,8 +27,11 @@ import FriendList from '../friendSystem/FriendList'
 import firebase from 'firebase';
 import ActivitySelect from '../ActivityPop/ActivitySelect'
 import Friend from "../../components/Friend";
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 const Frie = new FriendList;
 const arr = [];
+import SwipeablePanel from 'rn-swipeable-panel'
+import PlacesInput from 'react-native-places-input';
 
 export default class ActivityPopup extends React.Component {
     constructor(props) {
@@ -65,10 +68,16 @@ export default class ActivityPopup extends React.Component {
             limit: 20,
             imageUri: '',
             imageURL: "",
+            selectedValueHours: "",
+            swipeablePanelActive: false,
+            location: ""
 
         }
     }
+
+
     componentDidMount() {
+        console.log(firebase.auth().currentUser.uid)
         console.log("De aici vine", this.state.displayName)
         this._retrieveFriendRequests()
         this.retrieveData()
@@ -167,7 +176,9 @@ export default class ActivityPopup extends React.Component {
             activity: this.state.selectedActivity,
             //AICI SCHIMB 
             image: url,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            hoursPosted: this.state.selectedValueHours,
+            location: this.state.location
         }
         console.log(foo)
 
@@ -255,6 +266,7 @@ export default class ActivityPopup extends React.Component {
 
     render() {
         return (<View style={styles.container}>
+        
 
             <View style={{ marginTop: 40, width: width * 0.8, height: height }}>{/*aici scriu tot*/}
 
@@ -545,6 +557,7 @@ export default class ActivityPopup extends React.Component {
                     />
                 </View>
                 <View style={styles.moodView}>
+                    
                 <Button title="Pick Image" onPress={this.pickImage}/>
                     <Button
                         title=" Done"
@@ -557,9 +570,37 @@ export default class ActivityPopup extends React.Component {
                     
 
                 </View>
+
+                <View style={styles.moodView}>
+
+                <PlacesInput
+                    googleApiKey="AIzaSyBV_c_ySGNav7CWXBhIWPvWpJIaKIWBP88"
+                    placeHolder={"Search for location"}
+                    language={"en-US"}
+                    onSelect={place => {
+                        this.setState({location: place.result.name})
+                    //   console.log(place.result.name)
+                    }}
+                    
+                />
+                <Picker
+                        selectedValue={this.state.selectedValueHours}
+                        style={{height: 50, width: 150 }}
+                        onValueChange={(itemValue, itemIndex) => {this.setState({selectedValueHours: itemValue})}}
+                    >
+                        <Picker.Item label="30min" value="30min"/>
+                        <Picker.Item label="1h" value="1h"/>
+                        <Picker.Item label="2h" value="2h"/>
+                        <Picker.Item label="4h" value="4h"/>
+                        <Picker.Item label="6h" value="6h"/>
+                        <Picker.Item label="8h" value="8h"/>
+
+                    </Picker>
+               
+                </View>
 <Image style={{width: 50, height: 50}} source={{uri: this.state.imageUri}}/>
             </View>
-
+            
         </View>)
     }
 
