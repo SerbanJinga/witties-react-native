@@ -1,3 +1,4 @@
+
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { Camera } from 'expo-camera'
@@ -8,14 +9,27 @@ export default class CameraScreen extends Component {
         super(props)
         this.state = {
             type : Camera.Constants.Type.back,
+            hasPermission: null
         }
     }
+
+
+    componentDidMount  = async() =>  {
+        const { status } = await Camera.requestPermissionsAsync()
+        this.setState({hasPermission: status})
+        if (this.state.hasPermission === null){
+            console.log('esti prost')
+        }else if (this.state.hasPermission === false){
+            console.log('n a mers')
+        }
+    }
+
 
     handleCameraType=()=>{
         const { type } = this.state
     
         this.setState({cameraType:
-          typex === Camera.Constants.Type.back
+          type === Camera.Constants.Type.back
           ? Camera.Constants.Type.front
           : Camera.Constants.Type.back
         })
@@ -23,7 +37,8 @@ export default class CameraScreen extends Component {
 
     render(){
         return(
-            <Camera style={{ flex: 1 }} type={this.state.cameraType}>
+            <View style={{flex: 1}}>
+                <Camera style={{ flex: 1 }} type={this.state.cameraType}>
 
             <View style={{flex:1, flexDirection:"row",justifyContent:"space-between",margin:20}}>
               
@@ -65,6 +80,7 @@ export default class CameraScreen extends Component {
             </TouchableOpacity>
           </View>
           </Camera>
+          </View>
 
         )
     }

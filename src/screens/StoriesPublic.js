@@ -98,9 +98,9 @@ const { height, width } = Dimensions.get('window')
             <View style={[ styles.column, styles.destinations ], { marginTop: 40}}>
                 <SafeAreaView style={styles.container} >
                 <FlatList
-                decelerationRate={0}
+                // decelerationRate={0}
                 horizontal
-                pagingEnabled
+                // pagingEnabled
                 scrollEnabled
                 showsHorizontalScrollIndicator={false}
                 scrollEventThrottle={16}
@@ -116,11 +116,11 @@ const { height, width } = Dimensions.get('window')
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
-                onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: this.scrollX }} }])}
                 />
-                {this.renderDots()}
             </SafeAreaView>
-            <Button title="Retrieve" onPress={() => this.retrieveData()}/>
+            <Button title="Retrieve"
+              color="#fff"
+             onPress={() => this.retrieveData()}/>
 
             </View>
             )

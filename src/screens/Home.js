@@ -20,17 +20,22 @@ import MapComponent from '../screens/MapComponent'
 import Constants from 'expo-constants'
 import Notification from '../screens/Notification'
 import MediaDemo from '../screens/MediaDemo'
-import CameraScreen from './Camera'
 import ActivityPopup from '../screens/ActivityPop/ActivityPopup'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import StoriesPublic from '../screens/StoriesPublic'
 import { Col, Row, Grid } from "react-native-easy-grid";
 import ChannelStatus from '../components/ChannelStatus'
 import Timeline from '../screens/Timeline'
+import PlacesInput from 'react-native-places-input';
+import CameraScreen from '../screens/Camera'
+import { Container, Content } from 'native-base'
+
 
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
+const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } }};
+const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } }};
 
 export default class Home extends Component {
   constructor(props){
@@ -43,8 +48,9 @@ export default class Home extends Component {
         postText: "",
         expoPushToken: '',
         notification: {},
-        cameraPermission: false,
         swipeablePanelActive: false,
+        outerScrollEnabled: true
+
 
       }
 
@@ -60,19 +66,11 @@ export default class Home extends Component {
     };
   
 
-    requestCamera = async () => {
-      const { status } = await Permissions.askAsync(Permissions.CAMERA);
-      if(status === 'granted'){
-        this.setState({cameraPermission: true })
-      }else{
-        alert('hai suge-o')
-      }
-    }
+  
     
     componentDidMount = () => {
 
       console.log(firebase.auth().currentUser.uid)
-      this.requestCamera()
       console.log('se executa........')
     }
 
@@ -147,7 +145,18 @@ export default class Home extends Component {
 
     }
 
-   
+    verticalScroll = (index) => {
+      if (index !== 1) {
+        this.setState({
+          outerScrollEnabled: false
+        })
+      }
+      else {
+        this.setState({
+          outerScrollEnabled: true
+        })
+      }
+    }
 
  
    
@@ -156,69 +165,58 @@ export default class Home extends Component {
 
     render(){
         return(
+          // <CameraScreen/>
+               <Swiper
+                  loop={false}
+                  showsPagination={false}
+                  index={1}>
+                    <View style={{flex: 1}}>
+                      <CameraScreen/>
+                    </View>
+                    <Swiper
+                      horizontal={false}
+                      loop={false}
+                      showsPagination={false}
+                      index={1}>
+                      <View>
+                        <UserProfile/>
+                      </View>
+                      <View>
+                        <Timeline/>
+                      </View>
 
-          //SWIPERE DE TEST
-      //          <Swiper
-      //             loop={false}
-      //             showsPagination={false}
-      //             index={1}>
-      //               <View>
-      //                 <FriendList/>
-      //               </View>
-      //               <Swiper
-      //                 horizontal={false}
-      //                 loop={false}
-      //                 showsPagination={false}
-      //                 index={1}>
-      //                 <View>
-      //                   <ReceiveFriendRequest/>
-      //                 </View>
-      //                 <View>
-      //                   <SearchUsers/>
-      //                 </View>
-
-      //               <View>
+                    <View>
                      
-      //                  <Button
-      //                   title="Send Notification"
-      //                   style={{marginTop: 80}}
-      //                   onPress={() => this.sendPushNotification()}
-      //                 />
-      //                  <Button
-      //                   title="Send Notification"
-      //                   style={{marginTop: 80}}
-      //                   onPress={() => this._signOut()}
-      //                 />
-      //               </View>
-      //               </Swiper>        
-      //               <View>
-      //                 <ChatRoomsList/>
-      //               </View>
-      // </Swiper>
+                       <Button
+                        title="Send Notification"
+                        style={{marginTop: 80}}
+                        onPress={() => this.sendPushNotification()}
+                      />
+                       <Button
+                        title="Send Notification"
+                        style={{marginTop: 80}}
+                        onPress={() => this._signOut()}
+                      />
+                    </View>
+                    </Swiper>        
+                    <ScrollView style={{backgroundColor: '#fff', flex: 1}}>
+                      <StoriesPublic/>
+                      <ChannelStatus/>
+                      <ChannelStatus/>
+                      <ChannelStatus/>
 
+                    </ScrollView>
+       </Swiper>
     //   SLIDER CARE MERGE
-    //  <View>
-    //  <Button style={{marginTop: 40}} title="Deschide" onPress={() => this.openPanel()}/>
-    //  <SwipeablePanel
-    //       fullWidth
-    //       isActive={this.state.swipeablePanelActive}
-    //       onClose={this.closePanel}
-    //       onPressCloseButton={this.closePanel}
-    //       closeOnTouchOutside={true}
-    //       fullWidth={true}
-    //       showCloseButton={true}
-    //       closeRootStyle={{backgroundColor: '#f0f0f0'}}
-    //     >
-    //       <ActivityPopup/>
-    //     </SwipeablePanel>  
+          // <Button title="da" onPress={this._signOut()}/>
+          // <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
+          //   <StoriesPublic/>
+          //   <ChannelStatus/>
+          //   <ChannelStatus/>
+          //   <ChannelStatus/>
 
-
-    // </View>
-        <StoriesPublic/> 
-      // <Timeline/>          
-          //  <ActivityPopup/>
-          // <Button title="da" onPress={this._signOut}/>
-        
+          //   </ScrollView>
+          
           )
 
     }

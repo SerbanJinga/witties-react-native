@@ -45,13 +45,11 @@ export default class Status extends Component {
               imageStyle={{ borderRadius: theme.sizes.radius }}
               source={{ uri: this.props.image }}
             >
-              <View style={[styles.row, { justifyContent: 'space-between' }]}>
-                <View style={{ flex: 0 }}>
+              <View style={[styles.column, { justifyContent: 'center' }]}>
                   <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
-                </View>
-                <View style={[styles.column, { flex: 2, paddingHorizontal: theme.sizes.padding / 2 }]}>
-                  <Text style={{ color: theme.colors.white, fontWeight: 'bold' }}>{this.state.displayName}</Text>
-                  <Text style={{ color: theme.colors.white }}>
+
+                  <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
+                  <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
                     <Octicons
                       name="smiley"
                       size={theme.sizes.font * 0.8}
@@ -59,27 +57,11 @@ export default class Status extends Component {
                     />
                     <Text> {this.props.mood}</Text>
                   </Text>
-                </View>
-                <View style={{ flex: 0, justifyContent: 'center', alignItems: 'flex-end', }}>
-              <Text style={styles.rating}>{this._renderTimestamps(this.props.timestamp)}</Text>
-            </View>
+                {/* </View> */}
+              
               </View>
             </ImageBackground>
-              <View style={[styles.column, styles.destinationInfo, styles.shadow]}>
-                <Text style={{ fontSize: theme.sizes.font * 1.25, fontWeight: '500', paddingBottom: 8, }}>
-                  {this.props.activity}
-                </Text>
-                <View style={[ styles.row, { justifyContent: 'space-between', alignItems: 'flex-end', }]}>
-                  <Text style={{ color: theme.colors.caption }}>
-                    {this.props.text}
-                  </Text>
-                  <FontAwesome
-                    name="chevron-right"
-                    size={theme.sizes.font * 0.75}
-                    color={theme.colors.caption}
-                  />
-                </View>
-              </View>
+            
           </TouchableOpacity>
         )
     }
@@ -111,10 +93,10 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   destination: {
-    width: width - (theme.sizes.padding * 2),
-    height: width * 0.6,
-    marginHorizontal: theme.sizes.margin,
-    paddingHorizontal: theme.sizes.padding,
+    width: width - (theme.sizes.padding * 7),
+    height: width * 0.5,
+    marginHorizontal: theme.sizes.margin / 4,
+    paddingHorizontal: theme.sizes.padding / 4,
     paddingVertical: theme.sizes.padding * 0.66,
     borderRadius: theme.sizes.radius,
   },
@@ -168,9 +150,13 @@ const styles = StyleSheet.create({
     height: (width - (theme.sizes.padding * 2)) / 2,
   },
   avatar: {
-    width: theme.sizes.padding,
+    width: theme.sizes.padding * 1.1,
     height: theme.sizes.padding,
     borderRadius: theme.sizes.padding / 2,
+    marginTop: theme.sizes.padding * 2,
+    marginBottom: 10,
+    marginLeft: theme.sizes.padding
+
   },
   rating: {
     fontSize: theme.sizes.font,
