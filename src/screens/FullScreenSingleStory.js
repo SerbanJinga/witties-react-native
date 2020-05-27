@@ -1,5 +1,4 @@
-import React from "react"
-import { Text, Button, Input, SearchBar, Divider } from 'react-native-elements'
+import React, { Component } from 'react'
 import {
     StyleSheet,
     View,
@@ -14,125 +13,52 @@ import {
     FlatList,
     ScrollView,
     Image,
-    Animated
+    Animated,
+    Text
 
 } from 'react-native';
+import * as theme from '../styles/theme'
+
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Octicons from 'react-native-vector-icons/Octicons'
 import Icon3 from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import * as Progress from 'react-native-progress'
-
-import * as theme from '../styles/theme'
-
-const { width, height } = Dimensions.get('window')
-
-import firebase from 'firebase';
-import { divide } from "react-native-reanimated";
-import { withNavigation } from "react-navigation";
-import ViewPager from '@react-native-community/viewpager'
-import FullScreenSignleStory from "./FullScreenSingleStory";
-
-
-class FullScreenStorty extends React.Component {
-    animation = new Animated.Value(0)
-
-    constructor(props) {
-        super(props)
-        this.state = {
-           paused:false,
-            item: props.navigation.state.params.status,
-            displayName: "",
-            profilePicture: "",
-            progress: 0 ,
-            indeterminate: true,
-            allStories: props.navigation.state.params.allStories,
-            currentStory: 0
-            
-        
-
-        }
-
-    }
-
-
-    animate(){
-      let progress = 0
-      this.setState({progress})
-      setTimeout(()=>{
-        this.setState({indeterminate: false})
-        setInterval(() => {
-          progress += 0.1
-          if(progress > 1){
-            progress = 1
-          }
-          this.setState({progress})
-        }, 500)
-      }, 1500)
-    }
-   
-    _renderTimestamps = (timestamp) => {
-        let date = new Date(timestamp * 1000)
-        let hours = date.getHours()
-        let minutes = "0" + date.getMinutes()
-        let seconds = "0" + date.getSeconds()
+const { width, height } = Dimensions.get('screen')
+export default class FullScreenSignleStory extends Component{
+render(){
+    return(
+        <TouchableOpacity activeOpacity={0.8} onPress={() => console.log('da')}>
+<ImageBackground
+  style={[styles.flex, styles.destination]}
+  source={{uri: this.props.image}}
+>
+    {/* <Progress.Bar style={styles.progress} progress={this.state.progress} indeterminate={this.state.indeterminate} width={width} height={2}/> */}
     
-        let formattedTime = hours + ":" + minutes.substr(-2) + ':' + seconds.substr(-2)
-        return formattedTime
-      } 
-    
-    componentDidUpdate(prevProps,prevState){
-        // if (this.state.paused !== prevState.pause) {
-        //     console.log("I have changed")
-        //   }
-          // console.log(this.state.item.hoursPosted)
-    }
 
-    
-  getData = async(uid) => {
-    await firebase.firestore().collection('users').doc(uid).get().then(res => {
-      let displayName = res.data().displayName
-      let profilePicture = res.data().profilePicture
-      this.setState({displayName: displayName, profilePicture: profilePicture})
-    })
+  <View style={[styles.row, { justifyContent: 'space-between' }]}>
+    <View style={{ flex: 0 }}>
+      <Image source={{ uri: this.props.profilePicture }} style={styles.avatar} />
+    </View>
 
-  }
+    <View style={[styles.column, { flex: 2, paddingHorizontal: theme.sizes.padding / 2, marginTop: 10 }]}>
+      <Text style={{ color: theme.colors.white, fontWeight: 'bold' }}>{this.props.displayName}</Text>
+      <Text style={{ color: theme.colors.white }}>
+        <Octicons
+          name="smiley"
+          size={theme.sizes.font * 0.8}
+          color={theme.colors.white}
+        />
+        <Text> {this.props.mood}</Text>
+      </Text>
+    </View>
+  </View>
+</ImageBackground>   
+</TouchableOpacity>
 
-  componentDidMount = async() => {
-    await this.getData(this.state.item.creatorId)
-   this.animate()
-   await console.log(this.state.allStories)
-  }
-  
-
-  renderStories(){
-    return this.state.allStories.map((item) => {
-      return(
-        <FullScreenSignleStory image={item.image}/>
-        )
-    })
-  }
-
-    render() {
-      
-        return (
-          <View style={{flex: 1}}>
-          <ViewPager pageMargin="10" transitionStyle='scroll' orientation='horizontal' style={{flex: 1}} initialPage={0}>
-          {this.state.allStories.map((item) => {
-            return(
-              <View key={item.creatorId}>
-                <FullScreenSignleStory displayName={this.state.displayName} profilePicture={this.state.profilePicture} image={item.image} mood={item.mood} activity={item.activity}/>
-
-              </View>
-            )
-          })}
-        </ViewPager>
-        </View>
-        )
-
-    }
+    )
+}
 }
 
 const styles = StyleSheet.create({
@@ -254,6 +180,3 @@ const styles = StyleSheet.create({
       marginRight: 10
     }
   });
-  
-
-export default withNavigation(FullScreenStorty)

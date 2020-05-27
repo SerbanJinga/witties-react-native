@@ -134,16 +134,7 @@ class SignUp extends Component {
             console.log(error)
             alert(error)
         })
-        firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
-            prieteni: []
-        })
-        firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid).set({
-            statuses: []
-        })
-        firebase.firestore().collection("status-public").doc(firebase.auth().currentUser.uid).set({
-            statuses: [],
-            creatorId: firebase.auth().currentUser.uid
-        })
+      //the rest works in backend 
     }
 
     onLoginFailure(errorMessage) {
@@ -229,9 +220,7 @@ class SignUp extends Component {
                         console.log(error)
                         alert(error)
                     })
-                    firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
-                        prieteni: []
-                    })
+                    
                 })
 
                             
@@ -296,9 +285,7 @@ class SignUp extends Component {
                     console.log(error)
                     alert(error)
                 })
-                firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).set({
-                    prieteni: []
-                })
+                
             })
             }     
         }catch(e){

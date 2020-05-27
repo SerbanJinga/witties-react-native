@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ImageBackground } from 'react-native'
 import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
@@ -9,7 +9,8 @@ export default class CameraScreen extends Component {
         super(props)
         this.state = {
             type : Camera.Constants.Type.back,
-            hasPermission: null
+            hasPermission: null,
+            pictureTaken: null
         }
     }
 
@@ -28,17 +29,30 @@ export default class CameraScreen extends Component {
     handleCameraType=()=>{
         const { type } = this.state
     
-        this.setState({cameraType:
+        this.setState({type:
           type === Camera.Constants.Type.back
           ? Camera.Constants.Type.front
           : Camera.Constants.Type.back
         })
       }
 
+takePicture = () => {
+  if(this.camera){
+    this.camera.takePictureAsync({onPictureSaved: this.onPictureSaved})
+  }
+}
+
+onPictureSaved = photo => {
+  this.setState({
+    pictureTaken: photo
+  })
+}
+
     render(){
+      if(this.state.pictureTaken === null){
         return(
             <View style={{flex: 1}}>
-                <Camera style={{ flex: 1 }} type={this.state.cameraType}>
+                <Camera style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}}>
 
             <View style={{flex:1, flexDirection:"row",justifyContent:"space-between",margin:20}}>
               
@@ -54,6 +68,7 @@ export default class CameraScreen extends Component {
               />
             </TouchableOpacity>
             <TouchableOpacity
+              onPress={this.takePicture}
               style={{
                 alignSelf: 'flex-end',
                 alignItems: 'center',
@@ -80,8 +95,17 @@ export default class CameraScreen extends Component {
             </TouchableOpacity>
           </View>
           </Camera>
-          </View>
+          </View>)
+      }else{
+        return(
+          <View>
+            <ImageBackground source={{uri: this.state.pictureTaken.uri}} style={{width: this.state.pictureTaken.width, height: this.state.pictureTaken.height}}>
+          <Text>Felicitari</Text>
 
+            </ImageBackground>
+            </View>
         )
+      }
+        
     }
 }

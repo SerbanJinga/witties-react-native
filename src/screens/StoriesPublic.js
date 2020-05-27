@@ -6,6 +6,7 @@ import * as theme from '../styles/theme'
 import { withNavigation } from 'react-navigation'
 
 const arr = []
+const stories = []
 const { height, width } = Dimensions.get('window')
  class StoriesPublic extends Component{
     scrollX = new Animated.Value(0)
@@ -14,7 +15,8 @@ const { height, width } = Dimensions.get('window')
         this.state = {
             documentData: [],
             whoSee: [],
-            myFriends: []
+            myFriends: [],
+            allStories: []
         }
     }
 
@@ -53,7 +55,7 @@ const { height, width } = Dimensions.get('window')
         const currentId = firebase.auth().currentUser.uid
         // firebase.firestore().collection(z
         //friends of user
-        firebase.firestore().collection('users').doc(currentId).get().then(res => {
+        await firebase.firestore().collection('users').doc(currentId).get().then(res => {
             this.setState({myFriends: res.data().friends})
         })
 
@@ -89,8 +91,17 @@ const { height, width } = Dimensions.get('window')
       } 
 
   
+      getAllStoriesFromId = async(uid) => {
+        let initialQuery = await firebase.firestore().collection("status-public").where('creatorId', '==', uid)
+        let documentSnapshots = initialQuery.get()
+        let allStories = (await documentSnapshots).docs.map(doc => doc.data().statuses)
+        allStories.forEach(story => this.setState({allStories: story}))
+
+      }
+
     onPress = (item) => {
-      this.props.navigation.navigate('FullScreenStory', { status: item})
+      this.getAllStoriesFromId(item.creatorId)
+      this.props.navigation.navigate('FullScreenStory', { status: item, allStories: this.state.allStories})
     }
 
     render(){
@@ -108,7 +119,7 @@ const { height, width } = Dimensions.get('window')
                 style={[styles.shadow, { overflow: 'visible' }]}
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
+                     <Status postedFor={item.hoursPosted} activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}

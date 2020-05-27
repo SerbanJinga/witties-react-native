@@ -29,8 +29,6 @@ import Timeline from '../screens/Timeline'
 import PlacesInput from 'react-native-places-input';
 import CameraScreen from '../screens/Camera'
 import { Container, Content } from 'native-base'
-
-
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -165,13 +163,14 @@ export default class Home extends Component {
 
     render(){
         return(
-          // <CameraScreen/>
+
+          // asa va arata swiper-ul final
                <Swiper
                   loop={false}
                   showsPagination={false}
                   index={1}>
                     <View style={{flex: 1}}>
-                      <CameraScreen/>
+                      <ReceiveFriendRequest/>
                     </View>
                     <Swiper
                       horizontal={false}
@@ -182,7 +181,7 @@ export default class Home extends Component {
                         <UserProfile/>
                       </View>
                       <View>
-                        <Timeline/>
+                        <SearchUsers/>
                       </View>
 
                     <View>
@@ -207,6 +206,7 @@ export default class Home extends Component {
 
                     </ScrollView>
        </Swiper>
+
     //   SLIDER CARE MERGE
           // <Button title="da" onPress={this._signOut()}/>
           // <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
@@ -216,7 +216,6 @@ export default class Home extends Component {
           //   <ChannelStatus/>
 
           //   </ScrollView>
-          
           )
 
     }

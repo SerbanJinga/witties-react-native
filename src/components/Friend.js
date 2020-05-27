@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { View, Dimensions, StyleSheet } from 'react-native'
-import { CheckBox } from 'react-native-elements'
+import { CheckBox, ListItem, Text } from 'react-native-elements'
 const { width, height } = Dimensions.get('window')
 export default class Friend extends Component {
     constructor(props){
@@ -22,9 +22,11 @@ export default class Friend extends Component {
 
     render(){
         return(
-        <View style={styles.itemContainer}>
+            <ListItem leftAvatar={{source: {uri: this.props.profilePicture }, title: this.state.name.charAt(0)}} title={this.state.name} subtitle={
+        <View>
+        <Text>#{this.props.discriminator}</Text>
             <CheckBox
-             title={this.state.name}
+             title="Add to new channel"
              checked={this.state.selection}
              onPress={()=> {
                  if(this.state.selection === false){
@@ -37,7 +39,9 @@ export default class Friend extends Component {
              }}    
              />
          </View>
+            }/>
         )
+
     }
 }
 

@@ -111,7 +111,7 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
     componentDidMount(){
         this.state.chatRoomIds.push(firebase.auth().currentUser.uid)
 
-        this.waitAndMakeRequest(2000)
+        // this.waitAndMakeRequest(2000)
         this._retrieveFriendRequests()
     }
 
@@ -135,7 +135,7 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
                 <FlatList
                  data = {this.state.documentData}
                     renderItem={({item}) => (
-                        <Friend mama={this.addUserToChatRoom} tata={this.removeUserFromChatRoom} name={item.displayName} uid={item.uid} />
+                        <Friend discriminator={item.discriminator} mama={this.addUserToChatRoom} tata={this.removeUserFromChatRoom} profilePicture={item.profilePicture} name={item.displayName} uid={item.uid} />
                     )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}

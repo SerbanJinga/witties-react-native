@@ -6,6 +6,7 @@ import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
+import ReceiveFriend from '../ReceiveFriend'
 const { width, height } = Dimensions.get('window')
 let text = 'vasile'
 let arr = []
@@ -95,10 +96,7 @@ export default class ReceiveFriendRequest extends Component {
                 <FlatList
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <View style={styles.itemContainer}>
-                        <Text>{item.displayName}#{item.discriminator}</Text>
-                        <Button title="Accept friend" onPress={() => this._acceptFriend(item.uid)}/>
-                     </View>
+                     <ReceiveFriend displayName={item.displayName} discriminator={item.discriminator} profilePicture={item.profilePicture} press={() => this._acceptFriend(item.uid)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}

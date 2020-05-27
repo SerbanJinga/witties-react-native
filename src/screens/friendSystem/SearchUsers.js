@@ -6,6 +6,7 @@ import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
+import AddFriend from '../AddFriend'
 const { width, height } = Dimensions.get('window')
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const arr = []
@@ -171,6 +172,7 @@ export default class SearchUsers extends Component {
         this.sendNotification(documentData[0], uid, name)
     }
     _sendRequest = (uid) => {
+        console.log('se trimite')
         this.state.friendRequsts.push(uid)
     
       firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("sent").doc(uid).set({
@@ -192,18 +194,7 @@ export default class SearchUsers extends Component {
                 <FlatList
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
-                     <View style={styles.itemContainer}>
-                <Text>{item.displayName}#{item.discriminator}</Text>
-                          <Button
-                              title="Add friend"
-                              onPress={() => this._sendRequest(item.uid)}
-                          />
-                          <Button
-                              title="Get notification token"
-                              onPress={() => this.getToken(item.uid, item.displayName)}
-                          />
-                   
-                     </View>
+                    <AddFriend discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
