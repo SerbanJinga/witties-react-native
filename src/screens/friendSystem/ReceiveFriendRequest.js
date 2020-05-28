@@ -10,7 +10,6 @@ import ReceiveFriend from '../ReceiveFriend'
 const { width, height } = Dimensions.get('window')
 let text = 'vasile'
 let arr = []
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default class ReceiveFriendRequest extends Component {
     constructor(props){
@@ -23,14 +22,7 @@ export default class ReceiveFriendRequest extends Component {
      
 
 
-    async waitAndMakeRequest(update_rate) {
-        this.retrieveData()
-        await delay(update_rate).then(() => {
   
-            this.waitAndMakeRequest(update_rate);}
-  
-        )
-    }
 
     
 
@@ -39,7 +31,7 @@ export default class ReceiveFriendRequest extends Component {
     _retrieveFriendRequests = async() => {
         let initialQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("received")
         let documentSnapshots = await initialQuery.get()
-        documentSnapshots.docs.map(doc => {if(doc.data().accepted !== true) {this.cinetiadatrequest(doc.data().sender)}})
+        await documentSnapshots.docs.map(doc => {if(doc.data().accepted !== true) {this.cinetiadatrequest(doc.data().sender)}})
         
     }
 
@@ -55,13 +47,8 @@ export default class ReceiveFriendRequest extends Component {
 
     }
 
-    componentDidMount(){
-        this.waitAndMakeRequest(2000)
-        try{
-            this._retrieveFriendRequests()
-        }catch(error){
-            console.log(error)
-        }
+    componentDidMount = async() =>{
+       await this._retrieveFriendRequests()
     }
    
     _acceptFriend = async(uid) => {

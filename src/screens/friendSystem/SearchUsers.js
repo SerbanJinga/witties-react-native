@@ -8,7 +8,6 @@ import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 import AddFriend from '../AddFriend'
 const { width, height } = Dimensions.get('window')
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const arr = []
 export default class SearchUsers extends Component {
     constructor(props){
@@ -26,15 +25,7 @@ export default class SearchUsers extends Component {
         }
     }
 
-    
-    async waitAndMakeRequest(update_rate) {
-        this.retrieveData()
-        await delay(update_rate).then(() => {
-  
-            this.waitAndMakeRequest(update_rate);}
-  
-        )
-    }
+   
 
     getCurrentUser = async() => {
         const uid = firebase.auth().currentUser.uid
@@ -49,14 +40,10 @@ export default class SearchUsers extends Component {
     }
   
      
-    componentDidMount = () => {
-        this.getCurrentUser()
-        // this.waitAndMakeRequest(10000)
-        try{
-            this.retrieveData()
-        }catch(error){
-            console.log(error)
-        }
+    componentDidMount = async() => {
+        await this.getCurrentUser()
+        await this.retrieveData()
+        
     }
 
     search = (searchText) => {
@@ -98,53 +85,39 @@ export default class SearchUsers extends Component {
     retrieveData = async() => {
         try{
             this.setState({
-                loading: true
+                loading: true,
+                refreshing: true
             })
 
             let initialQuery = await firebase.firestore().collection('users').orderBy('uid').limit(this.state.limit)
 
             let documentSnapshots = await initialQuery.get()
-            let documentData = documentSnapshots.docs.map(document => document.data())
-            
-
-            let lastVisible = documentData[documentData.length - 1].uid
-            
-            this.setState({
-                documentData: documentData,
-                lastVisible: lastVisible,
-                loading: false
+            await documentSnapshots.docs.map(function(document){
+                console.log(document.data().uid)
+                if(document.data().uid === firebase.auth().currentUser.uid){
+                    console.log('asta esti tu')
+                }else if(arr.includes(document.data())){
+                    console.log('am deja')
+                }
+                else{
+                    arr.push(document.data())
+                }
             })
+            // console.log(arr)
+            this.setState({
+                documentData: arr
+            })
+            this.setState({
+                loading: false,
+                refreshing: false
+            })
+            console.log(this.state.documentData)
         }catch(error){
-            // console.log(error)
+            console.log(error)
         }
     }   
-
-
-
-    retrieveMore = async() => {
-        try{
-            this.setState({
-                refreshing: true
-            })
-
-            let additionalQuery = await firebase.firestore().collection("users").orderBy('uid').startAfter(this.state.lastVisible).limit(this.state.limit)
-            let documentSnapshots = await additionalQuery.get()
-            let documentData = documentSnapshots.docs.map(document => document.data())
-            console.log(documentData)
-            let lastVisible = documentData[documentData.length - 1].uid
-
-            this.setState({
-                documentData: [...this.state.documentData, ...documentData],
-                lastVisible: lastVisible,
-                refreshing: false 
-            })
-        }catch(error){
-            // console.log(error)
-        }
-    }
     
-
-    sendNotification = async(token, uid, name) => {
+    sendNotification = async(token, uid) => {
         const message = {
             to: token,
             sound: 'default',
@@ -165,16 +138,16 @@ export default class SearchUsers extends Component {
       });
     }
    
-    getToken = async(uid, name) => {
+    getToken = async(uid) => {
         let initialQuery = await firebase.firestore().collection("users").where('uid', '==', uid)
         let documentSnapshots = initialQuery.get()
         let documentData = (await documentSnapshots).docs.map(doc => doc.data().tokens)
-        this.sendNotification(documentData[0], uid, name)
+        this.sendNotification(documentData[0], uid)
     }
-    _sendRequest = (uid) => {
+    _sendRequest = async(uid) => {
         console.log('se trimite')
         this.state.friendRequsts.push(uid)
-    
+        await this.getToken(uid)
       firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("sent").doc(uid).set({
         accepted: false,
         request: "pending",

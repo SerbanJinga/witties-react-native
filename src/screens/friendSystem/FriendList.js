@@ -12,7 +12,6 @@ const { width, height } = Dimensions.get('window')
 import { withNavigation } from 'react-navigation';
 
 let arr = []
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
  class FriendList extends Component {
     constructor(props){
@@ -45,51 +44,21 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
     }
 
-    _storeItemsInArr(){
-        let ids = []
-        firebase.firestore().collection("users").get().then(querySnapshot => {
-            querySnapshot.forEach(documentSnapshot => {
-                if(this.state.chatRoomIds.includes(documentSnapshot.get('uid'))){
-                    ids.push(documentSnapshot.ref)
-                }
-            })
+   
 
-
-            firebase.firestore().collection("users")
-        })
-    }
-
-    _signOut = () => {
-        firebase.auth().signOut().then(()=> this.props.navigation.navigate('Loading'))
-    }
-    
-    async waitAndMakeRequest(update_rate) {
-        this.retrieveData()
-        await delay(update_rate).then(() => {
-  
-            this.waitAndMakeRequest(update_rate);}
-  
-        )
-    }
-     
-
-    _retrieveFriendRequests = async() => {
-        let receivedQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("received")
-        let documentSnapshotsReceived = await receivedQuery.get()
-        documentSnapshotsReceived.docs.map(doc => {if(doc.data().accepted === true){this.cinetiadatrequest(doc.data().sender)}})
-        let sendQuery = await firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("sent")
-        let documentSnapshotsSend = await sendQuery.get()
-        documentSnapshotsSend.docs.map(doc => {if(doc.data().accepted === true){this.cinetiadatrequest(doc.data().receiver)}})
-       
-
+    _retrieveFriends = async() => {
+        let initialQuery = await firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid)
+        let documentSnapshots = await initialQuery.get()
+        let documentData = await documentSnapshots.data().friends
+        documentData.forEach(document => this._getUserFromUid(document))
 
     }
 
 
-    cinetiadatrequest = async(uid) => {
+    _getUserFromUid = async(uid) => {
         let initialQuery = await firebase.firestore().collection("users").doc(uid)
         let documentSnapshots = await initialQuery.get()
-        let documentData = documentSnapshots.data()
+        let documentData = await documentSnapshots.data()
         arr.push(documentData)
         this.setState({
             documentData: arr
@@ -108,11 +77,10 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
     }
 
 
-    componentDidMount(){
+    componentDidMount = async() => {
         this.state.chatRoomIds.push(firebase.auth().currentUser.uid)
 
-        // this.waitAndMakeRequest(2000)
-        this._retrieveFriendRequests()
+        await this._retrieveFriends()
     }
 
     render(){

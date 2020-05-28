@@ -4,13 +4,14 @@ import { View, Text, TouchableOpacity, Image, ImageBackground } from 'react-nati
 import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
+import Gallery from './Gallery'
 export default class CameraScreen extends Component {
     constructor(props){
         super(props)
         this.state = {
             type : Camera.Constants.Type.back,
             hasPermission: null,
-            pictureTaken: null
+            pictureTaken: null,
         }
     }
 
@@ -46,65 +47,69 @@ onPictureSaved = photo => {
   this.setState({
     pictureTaken: photo
   })
+  console.log(photo)
+}
+renderCamera = () => {
+  return(
+    <View style={{flex: 1}}>
+        <Camera style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}}>
+
+    <View style={{flex:1, flexDirection:"row",justifyContent:"space-between",margin:20}}>
+      
+    <TouchableOpacity
+      style={{
+        alignSelf: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: 'transparent',                  
+      }}>
+      <Ionicons
+          name="ios-photos"
+          style={{ color: "#fff", fontSize: 40}}
+      />
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={this.takePicture}
+      style={{
+        alignSelf: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+      }}>
+      <FontAwesome
+          name="camera"
+          style={{ color: "#fff", fontSize: 40}}
+      />
+    </TouchableOpacity>
+    <TouchableOpacity
+      style={{
+        alignSelf: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+      }}
+      onPress={()=>this.handleCameraType()}
+
+      >
+      <MaterialCommunityIcons
+          name="camera-switch"
+          style={{ color: "#fff", fontSize: 40}}
+      />
+    </TouchableOpacity>
+  </View>
+  </Camera>
+  </View>)
+}
+
+renderGallery = () => {
+  
+  return(
+    <Gallery image={this.state.pictureTaken} close={() => this.renderCamera()}/>
+    )
 }
 
     render(){
       if(this.state.pictureTaken === null){
-        return(
-            <View style={{flex: 1}}>
-                <Camera style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}}>
-
-            <View style={{flex:1, flexDirection:"row",justifyContent:"space-between",margin:20}}>
-              
-            <TouchableOpacity
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',                  
-              }}>
-              <Ionicons
-                  name="ios-photos"
-                  style={{ color: "#fff", fontSize: 40}}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={this.takePicture}
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}>
-              <FontAwesome
-                  name="camera"
-                  style={{ color: "#fff", fontSize: 40}}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}
-              onPress={()=>this.handleCameraType()}
-
-              >
-              <MaterialCommunityIcons
-                  name="camera-switch"
-                  style={{ color: "#fff", fontSize: 40}}
-              />
-            </TouchableOpacity>
-          </View>
-          </Camera>
-          </View>)
+        return this.renderCamera()
       }else{
-        return(
-          <View>
-            <ImageBackground source={{uri: this.state.pictureTaken.uri}} style={{width: this.state.pictureTaken.width, height: this.state.pictureTaken.height}}>
-          <Text>Felicitari</Text>
-
-            </ImageBackground>
-            </View>
-        )
+        return this.renderGallery()
       }
         
     }
