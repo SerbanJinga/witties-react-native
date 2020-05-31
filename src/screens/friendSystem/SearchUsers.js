@@ -42,7 +42,8 @@ let arr = []
             profileOverlay: false,
             displayName: '',
             discriminator: '',
-            email: firebase.auth().currentUser.email
+            email: firebase.auth().currentUser.email,
+            allUsersUid: []
         }
     }
 
@@ -85,9 +86,9 @@ let arr = []
     componentDidMount = async() => {
         arr = []
         await this.getCurrentUser()
-        await this.retrieveData()
+        await this.retrieveData().then(this.setState({documentData: arr}))
         await this._retrieveProfilePicture()
-
+console.log(arr)
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf')
         });
@@ -133,39 +134,36 @@ let arr = []
     }
 
     retrieveData = async() => {
+        let documentT;
+        const func = firebase.functions().httpsCallable('friendSystem')
         try{
             this.setState({
                 loading: true,
                 refreshing: true
             })
+         
+        func().then(async res => {
+             documentT = await res.data.documentData
+            documentT.forEach(element => {
+                this._getUserFromUid(element)
+            })
+        })
 
-            let initialQuery = await firebase.firestore().collection('users').orderBy('uid').limit(this.state.limit)
-
-            let documentSnapshots = await initialQuery.get()
-            await documentSnapshots.docs.map(function(document){
-                console.log(document.data().uid)
-                if(document.data().uid === firebase.auth().currentUser.uid){
-                    console.log('asta esti tu')
-                }else if(arr.includes(document.data())){
-                    console.log('am deja')
-                }
-                else{
-                    arr.push(document.data())
-                }
-            })
-            // console.log(arr)
-            this.setState({
-                documentData: arr
-            })
-            this.setState({
-                loading: false,
-                refreshing: false
-            })
-            console.log(this.state.documentData)
-        }catch(error){
+        this.setState({
+            loading: false,
+            refreshing: false
+        })
+    }catch(error){
             console.log(error)
         }
     }   
+    _getUserFromUid = async (uid) => {
+        let initialQuery = await firebase.firestore().collection('users').doc(uid)
+        let documentSnapshots = await initialQuery.get()
+        let documentData = await documentSnapshots.data()
+        arr.push(documentData)
+        console.log(arr)
+    }
     
     sendNotification = async(token, uid) => {
         const message = {

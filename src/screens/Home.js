@@ -52,7 +52,13 @@ export default class Home extends Component {
       await this._getProfilePicture()
       console.log(firebase.auth().currentUser.uid)
       console.log('se executa........')
-    }
+      // const func = await firebase.functions().httpsCallable('friendSystem');
+      // func({
+      //   param: ''
+      // }).then(res => {
+      //   console.log('MERGE MERGE MERGE MERGE') 
+      //   console.log(res.data)})
+  }
 
 
     _getProfilePicture = async() => {
