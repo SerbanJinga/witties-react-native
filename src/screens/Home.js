@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import { Text, Button, Input, Icon } from 'react-native-elements'
 import { View, Dimensions, Vibration, Platform, Image, Slider, TouchableOpacity } from 'react-native'
+import { Avatar, Header } from 'react-native-elements'
 import * as firebase from 'firebase'
 import Swiper from 'react-native-swiper'
-import HomeContainer from '../screens/containers/HomeContainer'
-import TestContainer from '../screens/TestContainer'
 import SearchUsers from '../screens/friendSystem/SearchUsers'
 import * as Permissions from 'expo-permissions'
 import { Notifications } from 'expo'
@@ -22,16 +21,18 @@ import Notification from '../screens/Notification'
 import MediaDemo from '../screens/MediaDemo'
 import ActivityPopup from '../screens/ActivityPop/ActivityPopup'
 import Toast, { DURATION } from 'react-native-easy-toast'
-import StoriesPublic from '../screens/StoriesPublic'
+import StoriesPublic from '../screens/stories/StoriesPublic'
 import { Col, Row, Grid } from "react-native-easy-grid";
 import ChannelStatus from '../components/ChannelStatus'
 import Timeline from '../screens/Timeline'
 import PlacesInput from 'react-native-places-input';
-import CameraScreen from '../screens/Camera'
-import { Container, Content } from 'native-base'
+import CameraScreen from '../screens/camera/Camera'
 const { width, height } = Dimensions.get('window')
 
 export default class Home extends Component {
+
+
+
   constructor(props){
       super(props)
       this.state = {
@@ -39,17 +40,33 @@ export default class Home extends Component {
         discriminator: '',
         expoPushToken: '',
         notification: {},
+        profilePicture: ""
       }
 
     }
 
+    
 
     componentDidMount = async() => {
       await this._getToken()
+      await this._getProfilePicture()
       console.log(firebase.auth().currentUser.uid)
       console.log('se executa........')
     }
 
+
+    _getProfilePicture = async() => {
+      let initialQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+      let documents = await initialQuery.get()
+      let documentData = documents.data().profilePicture
+      console.log('---------------------------')
+      console.log(documentData)
+      console.log('---------------------------')
+      this.setState({
+        profilePicture: documentData
+      })
+
+    }
 
     _getToken = async() => {
       let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
@@ -71,14 +88,14 @@ export default class Home extends Component {
     }
 
     
-    
+
     
 
     render(){
         return(
 
-          // asa va arata swiper-ul final
-               <Swiper
+         
+          <Swiper
                   loop={false}
                   showsPagination={false}
                   index={1}>
@@ -90,10 +107,10 @@ export default class Home extends Component {
                       loop={false}
                       showsPagination={false}
                       index={1}>
-                      <View>
+                      <View style={{flex: 1}}>
                         <UserProfile/>
                       </View>
-                      <View>
+                      <View style={{flex: 1}}>
                         <SearchUsers/>
                       </View>
 

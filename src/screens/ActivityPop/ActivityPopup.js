@@ -178,7 +178,8 @@ export default class ActivityPopup extends React.Component {
             image: url,
             timestamp: Date.now(),
             hoursPosted: this.state.selectedValueHours,
-            location: this.state.location
+            location: this.state.location,
+            creatorId: firebase.auth().currentUser.uid
         }
         console.log(foo)
 

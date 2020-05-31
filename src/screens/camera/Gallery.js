@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity }
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
 import { withNavigation } from 'react-navigation'
 import SwipeablePanel from 'rn-swipeable-panel'
-import ActivityPopup from './ActivityPop/ActivityPopup'
+import ActivityPopup from '../ActivityPop/ActivityPopup'
 
 const { width, height } = Dimensions.get('window')
 class Gallery extends Component{

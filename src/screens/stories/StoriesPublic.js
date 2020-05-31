@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, Button, FlatList, Animated, SafeAreaView, Text } from 'react-native'
 import firebase from 'firebase'
-import Status from '../components/Status'
-import * as theme from '../styles/theme'
+import Status from '../../components/Status'
+import * as theme from '../../styles/theme'
 import { withNavigation } from 'react-navigation'
 
-const arr = []
+let arr = []
 const stories = []
 const { height, width } = Dimensions.get('window')
  class StoriesPublic extends Component{
@@ -22,14 +22,13 @@ const { height, width } = Dimensions.get('window')
 
 
     componentDidMount = async() => {
+      arr = []
       await this.retrieveData()
     }
 
 
 
-    vasile = async() => {
-      this.getDisplayName(firebase.auth().currentUser.uid)
-    }
+   
     renderDots = () => {
         const dotPosition = Animated.divide(this.scrollX, width);
         return(
@@ -53,13 +52,16 @@ const { height, width } = Dimensions.get('window')
 
     retrieveData = async() => {
         const currentId = firebase.auth().currentUser.uid
-        // firebase.firestore().collection(z
-        //friends of user
-        await firebase.firestore().collection('users').doc(currentId).get().then(res => {
-            this.setState({myFriends: res.data().friends})
+     
+        let friendsQuery = firebase.firestore().collection('users').doc(currentId)
+        let friendSnapshots = await friendsQuery.get()
+        let friendsData = await friendSnapshots.data().friends
+        this.setState({
+          myFriends: friendsData
         })
+        console.log(this.state.myFriends)
 
-        // console.log(this.state.myFriends)
+        // this.state.myFriends.forEach
 
         for(let i = 0; i < this.state.myFriends.length; i++)
         {
@@ -71,36 +73,21 @@ const { height, width } = Dimensions.get('window')
             })
         }
         this.setState({documentData: arr})
-        console.log(this.state.documentData)
-        // console.log(this.state.myFriends)
-
-        // firebase.firestore().collection('status-public').onSnapshot(querySnapshot => {
-            // querySnapshot.forEach(doc => {
-                // const query = doc.data()
-            // })
-        // })
+       
     }
 
-    getDisplayName = async(uid) =>{
-      let displayName = ''
-      await firebase.firestore().collection('users').doc(uid).get().then(res => {
-        displayName = res.data().displayName
-      }).then(() => {
-      return displayName
-    })
-      } 
 
   
       getAllStoriesFromId = async(uid) => {
         let initialQuery = await firebase.firestore().collection("status-public").where('creatorId', '==', uid)
-        let documentSnapshots = initialQuery.get()
+        let documentSnapshots = await initialQuery.get()
         let allStories = (await documentSnapshots).docs.map(doc => doc.data().statuses)
         allStories.forEach(story => this.setState({allStories: story}))
-
+        console.log(this.state.allStories)
       }
 
-    onPress = (item) => {
-      this.getAllStoriesFromId(item.creatorId)
+    onPress = async (item) => {
+      await this.getAllStoriesFromId(item.creatorId)
       this.props.navigation.navigate('FullScreenStory', { status: item, allStories: this.state.allStories})
     }
 

@@ -17,7 +17,7 @@ import {
     Text
 
 } from 'react-native';
-import * as theme from '../styles/theme'
+import * as theme from '../../styles/theme'
 
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
@@ -26,15 +26,44 @@ import Icon3 from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 const { width, height } = Dimensions.get('screen')
+import * as Progress from 'react-native-progress'
 export default class FullScreenSignleStory extends Component{
+
+constructor(props){
+  super(props)
+  this.state = {
+    progress: 0,
+    indeterminate: true
+  }
+}
+
+  animate = () => {
+    let progress = 0;
+    this.setState({progress})
+    setTimeout(()=>{
+      this.setState({indeterminate: false})
+      setInterval(() => {
+        progress += 0.1
+        if(progress > 1){
+          progress = 1
+        }
+        this.setState({progress})
+      }, 500)
+    }, 1500)
+  }
+
+  componentDidMount = () => {
+    this.animate()
+  }
 render(){
     return(
-        <TouchableOpacity activeOpacity={0.8} onPress={() => console.log('da')}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => this.props.apasa()}>
 <ImageBackground
   style={[styles.flex, styles.destination]}
   source={{uri: this.props.image}}
 >
-    {/* <Progress.Bar style={styles.progress} progress={this.state.progress} indeterminate={this.state.indeterminate} width={width} height={2}/> */}
+
+    <Progress.Bar style={{marginLeft: 10, marginRight: 10}} progress={this.state.progress} indeterminate={this.state.indeterminate} width={width} height={2}/>
     
 
   <View style={[styles.row, { justifyContent: 'space-between' }]}>
@@ -53,7 +82,9 @@ render(){
         <Text> {this.props.mood}</Text>
       </Text>
     </View>
+
   </View>
+
 </ImageBackground>   
 </TouchableOpacity>
 

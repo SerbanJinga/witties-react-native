@@ -25,7 +25,7 @@ import Icon2 from 'react-native-vector-icons/MaterialIcons'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import * as Progress from 'react-native-progress'
 
-import * as theme from '../styles/theme'
+import * as theme from '../../styles/theme'
 
 const { width, height } = Dimensions.get('window')
 
@@ -49,7 +49,8 @@ class FullScreenStorty extends React.Component {
             progress: 0 ,
             indeterminate: true,
             allStories: props.navigation.state.params.allStories,
-            currentStory: 0
+            currentStory: 0,
+            currentIndex: 0
             
         
 
@@ -102,7 +103,6 @@ class FullScreenStorty extends React.Component {
 
   componentDidMount = async() => {
     await this.getData(this.state.item.creatorId)
-   this.animate()
    await console.log(this.state.allStories)
   }
   
@@ -114,16 +114,38 @@ class FullScreenStorty extends React.Component {
         )
     })
   }
+  changeIndexPlus = () => {
+    if (this.state.currentIndex > this.state.allStories.length){
+      this.state.currentIndex = 0
+    }
+    let newIndex = this.state.currentIndex + 1
+    this.setState({
+      currentIndex: newIndex
+    })
+    this.viewPager.setPage(this.state.currentIndex)
+  }
+
+  changeIndexMinus = () => {
+
+    if (this.state.currentIndex > this.state.allStories.length){
+      this.state.currentIndex = this.state.currentIndex
+    }
+    let newIndex = this.state.currentIndex - 1
+    this.setState({
+      currentIndex: newIndex
+    })
+    this.viewPager.setPage(this.state.currentIndex)
+  }
 
     render() {
       
         return (
           <View style={{flex: 1}}>
-          <ViewPager pageMargin="10" transitionStyle='scroll' orientation='horizontal' style={{flex: 1}} initialPage={0}>
-          {this.state.allStories.map((item) => {
+          <ViewPager ref={(viewPager) => this.viewPager = viewPager} pageMargin="10" transitionStyle='scroll' orientation='vertical ' style={{flex: 1}} initialPage={this.state.currentIndex}>
+          {this.state.allStories.map((item, index) => {
             return(
-              <View key={item.creatorId}>
-                <FullScreenSignleStory displayName={this.state.displayName} profilePicture={this.state.profilePicture} image={item.image} mood={item.mood} activity={item.activity}/>
+              <View key={index}>
+                <FullScreenSignleStory displayName={this.state.displayName} profilePicture={this.state.profilePicture} image={item.image} mood={item.mood} activity={item.activity} apasainapoi={() => this.changeIndexMinus()} apasa={() => this.changeIndexPlus()}/>
 
               </View>
             )

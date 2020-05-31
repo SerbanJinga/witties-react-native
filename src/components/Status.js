@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, Text, Image } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, Text, Image, ActivityIndicator } from 'react-native'
 import * as theme from '../styles/theme'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Octicons from 'react-native-vector-icons/Octicons'
 import firebase from 'firebase'
+import * as Font from 'expo-font'
 const { height, width } = Dimensions.get('window')
 export default class Status extends Component {
   
@@ -11,7 +12,8 @@ export default class Status extends Component {
     super(props)
     this.state = {
       displayName: "",
-      profilePicture: ""
+      profilePicture: "",
+      fontsLoaded: false
     }
   }
 
@@ -35,9 +37,14 @@ export default class Status extends Component {
   }
   componentDidMount = async() => {
     await this.getData(this.props.creatorId)
+    await Font.loadAsync({
+      font1: require('../../assets/SourceSansPro-Black.ttf')
+    })
+    this.setState({fontsLoaded: true})
   }
   
     render(){
+      if(this.state.fontsLoaded){
         return(
             <TouchableOpacity activeOpacity={0.8} onPress={() => this.props.press()}>
             <ImageBackground
@@ -48,8 +55,8 @@ export default class Status extends Component {
               <View style={[styles.column, { justifyContent: 'center' }]}>
                   <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
 
-                  <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
-                  <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
+                  <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4, fontFamily: 'font1' }}>{this.state.displayName}</Text>
+                  <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4, fontFamily: 'font1' }}>
                     <Octicons
                       name="smiley"
                       size={theme.sizes.font * 0.8}
@@ -63,7 +70,11 @@ export default class Status extends Component {
             </ImageBackground>
             
           </TouchableOpacity>
-        )
+        )}else{
+          return(
+            <ActivityIndicator size={'large'}/>
+          )
+        }
     }
 }
 

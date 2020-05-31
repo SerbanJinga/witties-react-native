@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { View, Dimensions, StyleSheet } from 'react-native'
+import { View, Dimensions, StyleSheet, ActivityIndicator } from 'react-native'
 import { CheckBox, ListItem, Text } from 'react-native-elements'
+import * as Font from 'expo-font'
 const { width, height } = Dimensions.get('window')
 export default class Friend extends Component {
     constructor(props){
@@ -8,11 +9,16 @@ export default class Friend extends Component {
         this.state = {
             selection: false,
             name: this.props.name,
-            uid: this.props.uid
+            uid: this.props.uid,
+            fontsLoaded: false
         }
     }
 
-    componentDidMount(){
+    async componentDidMount(){
+        await Font.loadAsync({
+            font1: require('../../assets/SourceSansPro-Black.ttf')
+        })
+        this.setState({fontsLoaded: true})
         try{
             console.log(this.props.mama)
         }catch(error){
@@ -21,11 +27,13 @@ export default class Friend extends Component {
     }
 
     render(){
+        if(this.state.fontsLoaded){
         return(
-            <ListItem leftAvatar={{source: {uri: this.props.profilePicture }, title: this.state.name.charAt(0)}} title={this.state.name} subtitle={
+            <ListItem titleStyle={{fontFamily: 'font1'}} leftAvatar={{source: {uri: this.props.profilePicture }, title: this.state.name.charAt(0)}} title={this.state.name} subtitle={
         <View>
-        <Text>#{this.props.discriminator}</Text>
+        <Text style={{fontFamily: 'font1'}}>#{this.props.discriminator}</Text>
             <CheckBox
+            textStyle={{fontFamily: 'font1'}}
              title="Add to new channel"
              checked={this.state.selection}
              onPress={()=> {
@@ -40,7 +48,11 @@ export default class Friend extends Component {
              />
          </View>
             }/>
-        )
+        )}else{
+            return(
+                <ActivityIndicator size={'large'}/>
+            )
+        }
 
     }
 }

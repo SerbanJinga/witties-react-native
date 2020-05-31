@@ -8,7 +8,8 @@ import {createAppContainer } from 'react-navigation'
 import firebaseConfig from './src/firebaseConfig/firebase'
 import firebase from 'firebase'
 import _ from 'lodash'
-import FullScreenStory from './src/screens/FullScreenStory'
+import SearchUsers from './src/screens/friendSystem/SearchUsers'
+import FullScreenStory from './src/screens/stories/FullScreenStory'
 
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
 require('firebase/firestore');
@@ -37,19 +38,24 @@ const navigator = createStackNavigator(
       name: 'Home',
       screen: Home,
       navigationOptions: {
-        gesturesEnabled: false
-      }
+        gesturesEnabled: false,
+        },
     },
+   
     Chat: ChatNavigator,
-    FullScreenStory: FullScreenStory
+    FullScreenStory: {
+      screen: FullScreenStory,
+      name: 'Story'
+    }
   },{
     initialRouteName: 'Auth',
     defaultNavigationOptions:{
-   
-      header: null
-  },
+      // headerShown: false,
+      header: false
+      
+    },
   
-  }
+  },
   );
 
 export default createAppContainer(navigator);

@@ -1,10 +1,17 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions } from 'react-native'
-import { Input, Text, Button, Avatar, Overlay } from 'react-native-elements'
+import { View, StyleSheet, Dimensions, ActivityIndicator } from 'react-native'
+import { Input, Text, Button, Avatar, Overlay, SearchBar, Divider } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker'
 import * as Permissions from 'expo-permissions'
 import firebase from 'firebase'
+import { Entypo } from '@expo/vector-icons'
+import * as Font from 'expo-font'
 import { withNavigation } from 'react-navigation'
+import { ScrollView, FlatList } from 'react-native-gesture-handler'
+import AddFriend from '../screens/friendSystem/AddFriend'
+import Friend from '../components/Friend'
+let arr = []
+let friendsArr = []
 const { width, height } = Dimensions.get('window')
 
  export default class UserProfile extends Component {
@@ -14,7 +21,9 @@ const { width, height } = Dimensions.get('window')
             imageURL: "",
             imageUri: "",
             optionMenu: false,
-            userData: {}
+            userData: {},
+            fontsLoaded: false,
+            friends: []
         }
     }
 
@@ -29,9 +38,16 @@ const { width, height } = Dimensions.get('window')
         console.log(this.state.userData)
     }
 
-    componentDidMount = () => {
+    componentDidMount = async () => {
+        arr = []
+        friendsArr = []
         this._retrieveUserData()
         this._retrieveImage()
+        await this._retrieveAllFriends()
+        await Font.loadAsync({
+            font1: require('../../assets/SourceSansPro-Black.ttf')
+        });
+        this.setState({fontsLoaded: true})
     }
 
     _openOptions = () => {
@@ -90,12 +106,30 @@ _deletePicture = () => {
 }
 
 
-    render(){
-        return(
-            <View style={{width: width, height: height * 0.8, marginTop: 40}}>
+_retrieveAllFriends = async() => {
+    let initialQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+    let documentSnapshots = await initialQuery.get()
+    let documentData = documentSnapshots.data().friends
+    documentData.forEach(doc => this._getFriendDetailsFromUid(doc))
 
+}
+
+_getFriendDetailsFromUid = async(uid) => {
+    let initialQuery = firebase.firestore().collection('users').where("uid", '==', uid)
+    let documentSnapshots = await initialQuery.get()
+    documentSnapshots.docs.map(doc => friendsArr.push(doc.data()))
+    this.setState({friends: friendsArr})
+    // console.log(this.state.friends)
+}
+
+    render(){
+        if(this.state.fontsLoaded){return(
+            <View style={{backgroundColor: '#fff', width: width, height: height, marginTop: 20, flex: 0, flexDirection: 'column'}}>
+                   
+                <View style={{flex: 0, flexDirection: 'column', alignItems: 'center'}}>
+                   
                 <Avatar
-                    containerStyle={{marginTop: 20, marginLeft: 120}}
+                    containerStyle={{marginTop: 20, marginLeft: 0}}
                     size="xlarge"
                     rounded
                     source={{
@@ -103,12 +137,28 @@ _deletePicture = () => {
                     }}
                     onPress={() => this._openOptions()}
                 />
-                <Text style={{marginTop: 20, marginLeft: 140}}>{this.state.userData.displayName}#{this.state.userData.discriminator}</Text>
-                <Text style={{marginTop: 20, marginLeft: 140}}>Profile Picture url: {this.state.userData.profilePicture}</Text>
-                <Text style={{marginTop: 20, marginLeft: 140}}>Care Score: {this.state.userData.careScore}</Text>
-                <Text style={{marginTop: 20, marginLeft: 140}}>Email  {this.state.userData.email}</Text>
-                
-                
+                <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
+                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.userData.displayName}#{this.state.userData.discriminator}</Text>
+                <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
+                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.userData.careScore}</Text>
+                </View>
+                </View>
+                <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
+                <Divider style={{width: width}}/>
+
+                <Text style={{fontFamily: "font1", fontSize: 15, marginTop: 10, marginLeft: 10}}>Your Friends</Text>
+                <FlatList
+                 data = {this.state.friends}
+                 renderItem={({item}) => (
+                    <Friend discriminator={item.discriminator} name={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
+                 )}   
+                keyExtractor={(item, index) => String(index)}
+                ListFooterComponent={this.renderFooter}
+                onEndReached={this.retrieveMore}
+                onEndReachedThreshold={0}
+                refreshing={this.state.refreshing}
+                />
+                </View>
                 <Overlay onBackdropPress={this._openOptions} isVisible={this.state.optionMenu}>
                     <View>
                         <Button
@@ -125,7 +175,11 @@ _deletePicture = () => {
                 </Overlay>
         
             </View>
-        )
+        )}else{
+            return(
+                <ActivityIndicator size="large"/>
+            )
+        }
     }
 }
 

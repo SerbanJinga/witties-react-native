@@ -6,7 +6,7 @@ import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
-import ReceiveFriend from '../ReceiveFriend'
+import ReceiveFriend from './ReceiveFriend'
 const { width, height } = Dimensions.get('window')
 let text = 'vasile'
 let arr = []
@@ -48,6 +48,7 @@ export default class ReceiveFriendRequest extends Component {
     }
 
     componentDidMount = async() =>{
+        arr = []
        await this._retrieveFriendRequests()
     }
    

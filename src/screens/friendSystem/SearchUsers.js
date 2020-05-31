@@ -1,15 +1,29 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, Button } from 'react-native'
-import { Text, SearchBar } from 'react-native-elements'
+import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard } from 'react-native'
+import { Text, SearchBar, Button, Avatar, Overlay, Input, Divider, Tooltip } from 'react-native-elements'
+// import Clipboard from '@react-native-community/clipboard'
 import firebase from 'firebase'
-import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
+import { FlatList } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
-import AddFriend from '../AddFriend'
+import { FontAwesome, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
+import * as Font from 'expo-font'
+
+import AddFriend from './AddFriend'
+import { withNavigation } from 'react-navigation'
+
 const { width, height } = Dimensions.get('window')
-const arr = []
-export default class SearchUsers extends Component {
+const heightS = Dimensions.get('screen').height
+const widthS = Dimensions.get('screen').width
+let arr = []
+
+ export default class SearchUsers extends Component {
+      
+    static navigationOptions = {
+        title: 'Mama',
+        headerMode: 'screen'
+      }
     constructor(props){
         super(props)
         this.state = {
@@ -21,10 +35,38 @@ export default class SearchUsers extends Component {
             refreshing: false,
             filteredData:[],
             friendRequsts: [],
-            currentUser: ""
+            currentUser: "",
+            profilePicture: '',
+            searchOverlay: false,
+            fontsLoaded: false,
+            profileOverlay: false,
+            displayName: '',
+            discriminator: '',
+            email: firebase.auth().currentUser.email
         }
     }
 
+
+    _copyToClipboard = () => {
+        let string = this.state.displayName + "#" + this.state.discriminator
+        console.log(string)
+        Clipboard.setString(string)
+    }
+
+    
+
+    _retrieveProfilePicture = async() => {
+        let initialQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+        let documentSnapshots = await initialQuery.get()
+        let documentData = documentSnapshots.data().profilePicture
+        let displayNameDocumentData = documentSnapshots.data().displayName
+        let discrim = documentSnapshots.data().discriminator
+        this.setState({
+            profilePicture: documentData,
+            displayName: displayNameDocumentData,
+            discriminator: discrim
+        })
+    }
    
 
     getCurrentUser = async() => {
@@ -41,8 +83,15 @@ export default class SearchUsers extends Component {
   
      
     componentDidMount = async() => {
+        arr = []
         await this.getCurrentUser()
         await this.retrieveData()
+        await this._retrieveProfilePicture()
+
+        await Font.loadAsync({
+            font1: require('../../../assets/SourceSansPro-Black.ttf')
+        });
+        this.setState({fontsLoaded: true})
         
     }
 
@@ -57,6 +106,7 @@ export default class SearchUsers extends Component {
         try{
             return(
                 <SearchBar
+                    blurOnSubmit={true}
                     showCancel={true}
                     lightTheme={true}
                     autoCorrect={false}
@@ -161,23 +211,146 @@ export default class SearchUsers extends Component {
       })
 
     }
+
+    _onPressSearch = () => {
+        this.setState({
+            searchOverlay: true
+        })
+    }
+    _onCloseSearch = () => {
+        this.setState({
+            searchOverlay: false
+        })
+    }
+
+    _onPressAvatar = () => {
+        this.setState({
+            profileOverlay: true
+        })
+    }
+
+    _onCloseAvatar = () => {
+        this.setState({
+            profileOverlay: false
+        })
+    }
+
+
     render(){
-        return(
-            <SafeAreaView style={styles.container}>
+            const loaded = this.state.fontsLoaded
+            if(loaded){
+                return(
+            <View style={styles.container}>
+   
+            <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10}}>  
+
+                <TouchableOpacity
+                    onPress={()=> this._onPressSearch()}
+                  style={{
+                    backgroundColor: 'transparent',
+                    margin: 4,
+                    marginRight: 10,
+                 }}>
+              <AntDesign
+                  name="addusergroup"
+                  style={{fontSize: 26, fontWeight: "bold"}}
+              />
+            </TouchableOpacity>    
+            <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5}}>Witties</Text>
+
+            <Avatar onPress={() => this._onPressAvatar()} rounded source={{uri: this.state.profilePicture}}/>
+        
+            </View>
+            <Divider/>
+            {/* <Button title="Da"/> */}
+            {/* search overlay */}
+                <Overlay
+                    animationType={'slide'}
+                    isVisible={this.state.searchOverlay}
+                    overlayStyle={{width: width, height: height}}
+                >
+                <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start'}}>
+                <TouchableOpacity
+                    onPress = {() => this._onCloseSearch()}
+                  style={{
+                    backgroundColor: 'transparent',
+                    marginTop: 20,
+                    marginRight: 10
+                    }}>
+              <AntDesign
+                name="arrowleft"
+                size={20}
+              />
+            </TouchableOpacity>    
+                 <Input
+                     placeholder='Search users'
+                     inputStyle={{fontFamily: 'font1'}}
+                     containerStyle={{marginTop: 10}}
+                     inputContainerStyle={{borderBottomWidth: 0}}
+                     onChangeText={this.search}
+                     value={this.state.searchText}
+                 />
+                </View>
+
+                <Divider/>
                 <FlatList
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
                     <AddFriend discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
-                ListHeaderComponent={this.renderHeader}
                 ListFooterComponent={this.renderFooter}
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
                 />
-            </SafeAreaView>
-        )
+</ScrollView>
+                </Overlay>
+
+                {/* profile overlay */}
+                <Overlay
+                    transparent={true}
+                    animationType={'slide'}
+                    overlayStyle={{width: width, height: height}}
+                    isVisible={this.state.profileOverlay}
+                >
+                    <View style={{flex: 1, flexDirection: 'column'}}>
+                        <View style={{flex: 0, flexDirection: 'row'}}>
+                            <TouchableOpacity
+                            onPress={() => this._onCloseAvatar()}
+                                style={{
+                                    alignSelf: 'flex-end',
+                                    alignItems: 'center',
+                                    backgroundColor: 'transparent',                  
+                                }}>
+                            <MaterialCommunityIcons
+                                name="close"
+                                style={{ color: "#000", fontSize: 30}}
+                                
+                            />
+                            </TouchableOpacity>
+                            <Text style={{fontSize: 18, fontFamily: 'font1', margin: 4}}>Account</Text>
+                        </View>
+                        <View style={{flex: 0, flexDirection: 'row', margin: 15}}>
+                            <Avatar source={{uri: this.state.profilePicture}} rounded/>
+                            <View style={{flex: 0, flexDirection: 'column', marginLeft: 15}}>
+                            <Tooltip popover={<Text>Copied!</Text>}>
+                                <Text onPress={() => this._copyToClipboard()} style={{fontFamily: 'font1'}}>{this.state.displayName}#{this.state.discriminator}</Text>
+                            </Tooltip>
+                                <Text style={{fontFamily: 'font1'}}>{this.state.email}</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                </Overlay>
+            </View>)
+            }else{
+                return (<View style={{flex: 1, width: width, height: height, alignItems: 'center', justifyContent: 'center'}}>
+                    <ActivityIndicator size={'large'}/>
+                </View>)
+            }
+        
     }
     
   
@@ -187,6 +360,9 @@ const styles = StyleSheet.create({
   container: {
     height: height,
     width: width,
+    flex: 1,
+    flexDirection: 'column',
+    backgroundColor: "#fff"
   },
   headerText: {
     fontFamily: 'System',
@@ -210,3 +386,4 @@ const styles = StyleSheet.create({
     color: '#000',
   },
 });
+
