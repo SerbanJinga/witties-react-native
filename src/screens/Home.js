@@ -18,7 +18,6 @@ import MessageComponent from '../screens/MapComponent'
 import MapComponent from '../screens/MapComponent'
 import Constants from 'expo-constants'
 import Notification from '../screens/Notification'
-import MediaDemo from '../screens/MediaDemo'
 import ActivityPopup from '../screens/ActivityPop/ActivityPopup'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import StoriesPublic from '../screens/stories/StoriesPublic'
@@ -114,10 +113,10 @@ export default class Home extends Component {
                       showsPagination={false}
                       index={1}>
                       <View style={{flex: 1}}>
-                        <UserProfile/>
+                        <ChatRoomsList/>
                       </View>
                       <View style={{flex: 1}}>
-                        <SearchUsers/>
+                        <Timeline/>
                       </View>
 
                     <View>

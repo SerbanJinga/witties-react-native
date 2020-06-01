@@ -39,6 +39,11 @@ export default class MessageComponent extends Component {
     }
     //{this.state.translatedDate}
     render() {
-        return (<Button title={this.state.msg + this.state.translatedDate} containerStyle={{ backgroundColor: 'black', borderRadius: 15, marginRight: this.state.marginRight, marginLeft: this.state.marginLeft }} />)
+        return (
+            <TouchableOpacity onLongPress={()=>{console.log('long presssss')}} style={{alignItems:(this.state.sender == firebase.auth().currentUser.uid)?'flex-end':"flex-start"}}>
+                <Text  style={{padding:10,fontSize:20, backgroundColor: 'white', borderRadius: 15, marginRight: this.state.marginRight, marginLeft: this.state.marginLeft}}>{this.state.msg}</Text>   
+            </TouchableOpacity>
+        )
     }
+
 }
