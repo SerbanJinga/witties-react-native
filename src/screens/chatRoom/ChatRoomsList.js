@@ -7,12 +7,12 @@ import { FlatList } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { withNavigation } from 'react-navigation';
 import ActivityPopupChatroomSelect from '../ActivityPop/ActivityPopupChatroomSelect'
+import Room from './Room'
 
 const { width, height } = Dimensions.get('window')
 let groupsIn = []
 let arr = []
 let grupuri = []
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 class ChatRoomsList extends Component {
     constructor(props) {
@@ -29,27 +29,24 @@ class ChatRoomsList extends Component {
         this.tata = this.tata.bind(this)
     }
 
-    componentDidMount = () => {
+    componentDidMount = async () => {
         groupsIn = []
         arr = []
         grupuri = []
-        this._retrieveData()
+        await this._retrieveData()
         // this.waitAndMakeRequest(2000)
-        this._getDataFromId()
         console.log('-----------------------------------------------------------')
         console.log(this.state.type)
         console.log(this.state.type)
         console.log(this.state.type)
         console.log(this.state.type)
         console.log('-----------------------------------------------------------')
+        console.log('mama')
+        console.log('mama')
+
     }
 
-    // async waitAndMakeRequest(update_rate) {
-    //    this._retrieveData()
-    //    await delay(update_rate).then(() => {
-    //        this.waitAndMakeRequest(update_rate)
-    //    })
-    // }
+    //
 
 
     mama = (uid) => {
@@ -70,21 +67,11 @@ class ChatRoomsList extends Component {
 
     _retrieveData = async () => {
 
-        const currentId = firebase.auth().currentUser.uid
-        let inititalQuery = await firebase.firestore().collection("messages")
-        let documentSnapshots = await inititalQuery.get()
-        let documentData = (await documentSnapshots).docs.map(doc => {
-            if (doc.data().usersParticipating) {
-                for (let i = 0; i < doc.data().usersParticipating.length; i++) {
-                    if (currentId === doc.data().usersParticipating[i])
-                        groupsIn.push(doc.data().roomId)
-                }
-            }
-        })
-
-        this.setState({ groupsIn: groupsIn })
-
-        this.state.groupsIn.forEach(group => this._getDataFromId(group))
+        let query = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+        let snapshot = await query.get()
+        let myData = snapshot.data().chatRoomsIn
+        console.log(myData)
+       myData.forEach(document => this._getDataFromId(document))
     }
 
 
@@ -96,6 +83,7 @@ class ChatRoomsList extends Component {
         this.setState({
             documentData: arr
         })
+        console.log(this.state.documentData)
     }
 
 
@@ -108,12 +96,8 @@ class ChatRoomsList extends Component {
                         data={this.state.documentData}
                         renderItem={({ item }) => (
 
-                            <View style={styles.itemContainer}>
-                                <Text>{item.chatRoomName}</Text>
-                                <Text>roomId: {item.roomId}</Text>
-                                <Button title="Go to room" onPress={() => { this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId }) }} />
-
-                            </View>
+                            
+                            <Room roomId={item.roomId} chatRoomName={item.chatRoomName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId }) }/>
                         )}
                         keyExtractor={(item, index) => String(index)}
                         ListHeaderComponent={this.renderHeader}

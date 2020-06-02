@@ -7,18 +7,19 @@ import { FlatList } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
-import { FontAwesome, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
+import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
 import * as Font from 'expo-font'
 
 import AddFriend from './AddFriend'
 import { withNavigation } from 'react-navigation'
+import Toast, { DURATION } from 'react-native-easy-toast'
 
 const { width, height } = Dimensions.get('window')
 const heightS = Dimensions.get('screen').height
 const widthS = Dimensions.get('screen').width
 let arr = []
 
- export default class SearchUsers extends Component {
+  class SearchUsers extends Component {
       
     static navigationOptions = {
         title: 'Mama',
@@ -52,6 +53,7 @@ let arr = []
         let string = this.state.displayName + "#" + this.state.discriminator
         console.log(string)
         Clipboard.setString(string)
+        this.refs.copyToClipboard.show("Copied!")
     }
 
     
@@ -90,7 +92,8 @@ let arr = []
         await this._retrieveProfilePicture()
 console.log(arr)
         await Font.loadAsync({
-            font1: require('../../../assets/SourceSansPro-Black.ttf')
+            font1: require('../../../assets/SourceSansPro-Black.ttf'),
+            font2: require('../../../assets/SourceSansPro-Regular.ttf')
         });
         this.setState({fontsLoaded: true})
         
@@ -233,6 +236,15 @@ console.log(arr)
         })
     }
 
+    refFunction = () => {
+        this.tooltip.toggleTooltip()
+    }
+
+    _signOut = () => {
+        firebase.auth().signOut().then(this.props.navigation.navigate('Loading', {text: 'mama'}))
+      }
+  
+
 
     render(){
             const loaded = this.state.fontsLoaded
@@ -295,7 +307,7 @@ console.log(arr)
                 <FlatList
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
-                    <AddFriend discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
+                    <AddFriend careScore={item.careScore} discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListFooterComponent={this.renderFooter}
@@ -314,7 +326,7 @@ console.log(arr)
                     isVisible={this.state.profileOverlay}
                 >
                     <View style={{flex: 1, flexDirection: 'column'}}>
-                        <View style={{flex: 0, flexDirection: 'row'}}>
+                        <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center'}}>
                             <TouchableOpacity
                             onPress={() => this._onCloseAvatar()}
                                 style={{
@@ -328,19 +340,69 @@ console.log(arr)
                                 
                             />
                             </TouchableOpacity>
-                            <Text style={{fontSize: 18, fontFamily: 'font1', margin: 4}}>Account</Text>
+                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 4}}>Account</Text>
                         </View>
-                        <View style={{flex: 0, flexDirection: 'row', margin: 15}}>
+                        <View style={{flex: 0, flexDirection: 'row', padding: 15}}>
                             <Avatar source={{uri: this.state.profilePicture}} rounded/>
                             <View style={{flex: 0, flexDirection: 'column', marginLeft: 15}}>
-                            <Tooltip popover={<Text>Copied!</Text>}>
-                                <Text onPress={() => this._copyToClipboard()} style={{fontFamily: 'font1'}}>{this.state.displayName}#{this.state.discriminator}</Text>
-                            </Tooltip>
+                                <TouchableOpacity onPress={() => this._copyToClipboard()}>
+                                    <Text style={{fontFamily: 'font1'}}>{this.state.displayName}#{this.state.discriminator}</Text>
+                                </TouchableOpacity>
                                 <Text style={{fontFamily: 'font1'}}>{this.state.email}</Text>
                             </View>
                         </View>
+                        <Divider/>
+                        <TouchableOpacity>
+                            <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
+                                <MaterialIcons
+                                    size={30}
+                                    name="person"
+                                    color="black"
+                                />
+                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Your profile</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
+                                <MaterialIcons
+                                    size={30}
+                                    name="person-add"
+                                    color="black"
+                                />
+                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Add Friends</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
+                                <MaterialIcons
+                                    size={30}
+                                    name="timeline"
+                                    color="black"
+                                />
+                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Your timeline</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => this._signOut()}>
+                            <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
+                                <MaterialIcons
+                                    size={30}
+                                    name="exit-to-app"
+                                    color="black"
+                                />
+                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Sign Out</Text>
+                            </View>
+                        </TouchableOpacity>
+                        
                     </View>
 
+                <Toast
+                    ref="copyToClipboard"
+                    style={{backgroundColor: '#4BB543'}}
+                    textStyle={{color: '#fff'}}
+                    position='bottom'
+                    opacity={0.8}
+                    fadeInDuration={750}
+                />
                 </Overlay>
             </View>)
             }else{
@@ -385,3 +447,4 @@ const styles = StyleSheet.create({
   },
 });
 
+export default withNavigation(SearchUsers)

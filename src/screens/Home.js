@@ -14,10 +14,7 @@ import FriendList from '../screens/friendSystem/FriendList'
 import ChatRoomsList from '../screens/chatRoom/ChatRoomsList' 
 import UserProfile from '../screens/UserProfile'
 import { ScrollView } from 'react-native-gesture-handler'
-import MessageComponent from '../screens/MapComponent'
-import MapComponent from '../screens/MapComponent'
 import Constants from 'expo-constants'
-import Notification from '../screens/Notification'
 import ActivityPopup from '../screens/ActivityPop/ActivityPopup'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import StoriesPublic from '../screens/stories/StoriesPublic'
@@ -113,37 +110,18 @@ export default class Home extends Component {
                       showsPagination={false}
                       index={1}>
                       <View style={{flex: 1}}>
-                        <ChatRoomsList/>
+                        <UserProfile/>
                       </View>
                       <View style={{flex: 1}}>
-                        <Timeline/>
+                        <SearchUsers/>
                       </View>
-
-                    <View>
-                     
-                       <Button
-                        title="Send Notification"
-                        style={{marginTop: 80}}
-                        onPress={() => this.sendPushNotification()}
-                      />
-                       <Button
-                        title="Send Notification"
-                        style={{marginTop: 80}}
-                        onPress={() => this._signOut()}
-                      />
-                    </View>
                     </Swiper>        
                     <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
                         <StoriesPublic/>
-                        <ChannelStatus/>
-                        <ChannelStatus/>
-                        <ChannelStatus/>
+                       
                     </ScrollView>
        </Swiper>
 
-    //   SLIDER CARE MERGE
-          // <Button title="da" onPress={this._signOut()}/>
-          //
           )
 
     }

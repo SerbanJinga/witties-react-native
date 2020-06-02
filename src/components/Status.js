@@ -44,7 +44,6 @@ export default class Status extends Component {
   }
   
     render(){
-      if(this.state.fontsLoaded){
         return(
             <TouchableOpacity activeOpacity={0.8} onPress={() => this.props.press()}>
             <ImageBackground
@@ -70,12 +69,9 @@ export default class Status extends Component {
             </ImageBackground>
             
           </TouchableOpacity>
-        )}else{
-          return(
-            <ActivityIndicator size={'large'}/>
-          )
-        }
-    }
+        )
+    
+}
 }
 
 const styles = StyleSheet.create({

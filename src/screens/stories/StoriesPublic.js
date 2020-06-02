@@ -4,6 +4,7 @@ import firebase from 'firebase'
 import Status from '../../components/Status'
 import * as theme from '../../styles/theme'
 import { withNavigation } from 'react-navigation'
+import ChatRoomsList from '../chatRoom/ChatRoomsList'
 
 let arr = []
 const stories = []
@@ -24,6 +25,7 @@ const { height, width } = Dimensions.get('window')
     componentDidMount = async() => {
       arr = []
       await this.retrieveData()
+      
     }
 
 
@@ -32,7 +34,7 @@ const { height, width } = Dimensions.get('window')
     renderDots = () => {
         const dotPosition = Animated.divide(this.scrollX, width);
         return(
-            <View style={[styles.flex, styles.row, {justifyContent: 'center', alignItems: 'center', marginTop: 10}]}>
+            <View style={[styles.flex, styles.row, {justifyContent: 'center', alignItems: 'center', marginTop: 10, flex: 1}]}>
                 {this.state.documentData.map((item, index) => {
                     const borderWidth = dotPosition.interpolate({
                         inputRange: [index - 1, index, index + 1],
@@ -46,6 +48,7 @@ const { height, width } = Dimensions.get('window')
                         />
                     )
                 })}
+                
             </View>
         )
     }
@@ -59,21 +62,16 @@ const { height, width } = Dimensions.get('window')
         this.setState({
           myFriends: friendsData
         })
-        console.log(this.state.myFriends)
 
-        // this.state.myFriends.forEach
+        this.state.myFriends.forEach(async friend => {
+          let initialQuery = firebase.firestore().collection('status-public').doc(friend)
+          let querySnapshot = await initialQuery.get()
+          let queryDocumentData = querySnapshot.data().statuses
+          queryDocumentData.forEach(doc => arr.push(doc))
+          this.setState({documentData: arr})
+        
+        })
 
-        for(let i = 0; i < this.state.myFriends.length; i++)
-        {
-
-            await firebase.firestore().collection('status-public').where('creatorId', '==', this.state.myFriends[i]).get().then(res => {
-              console.log('Prietenul ' + i)
-              const query = res.docs.map(doc => doc.data().statuses)
-              query.forEach(doc => doc.forEach(altDoc => {arr.push(altDoc)}))
-            })
-        }
-        this.setState({documentData: arr})
-       
     }
 
 
@@ -107,6 +105,7 @@ const { height, width } = Dimensions.get('window')
                  data = {this.state.documentData}
                  renderItem={({item}) => (
                      <Status postedFor={item.hoursPosted} activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
+                     
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
@@ -119,7 +118,9 @@ const { height, width } = Dimensions.get('window')
             <Button title="Retrieve"
               color="#fff"
              onPress={() => this.retrieveData()}/>
-
+              <View>
+                <ChatRoomsList/>
+              </View>
             </View>
             )
     }
