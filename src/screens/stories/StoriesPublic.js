@@ -1,13 +1,19 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, Button, FlatList, Animated, SafeAreaView, Text } from 'react-native'
+import { View, StyleSheet, Dimensions, Button, FlatList, Animated, SafeAreaView, Text, ActivityIndicator } from 'react-native'
 import firebase from 'firebase'
 import Status from '../../components/Status'
 import * as theme from '../../styles/theme'
 import { withNavigation } from 'react-navigation'
 import ChatRoomsList from '../chatRoom/ChatRoomsList'
-
+import * as Font from 'expo-font'
+import Modal from 'react-native-modal'
 let arr = []
+let allStatuses = []
+import FullScreenStory from './FullScreenStory'
+import { Overlay } from 'react-native-elements'
 const stories = []
+let newArr = []
+let otherArr = []
 const { height, width } = Dimensions.get('window')
  class StoriesPublic extends Component{
     scrollX = new Animated.Value(0)
@@ -17,15 +23,28 @@ const { height, width } = Dimensions.get('window')
             documentData: [],
             whoSee: [],
             myFriends: [],
-            allStories: []
+            allStories: [],
+            fontsLoaded: false,
+            loading: false,
+            refreshing: false,
+            storiesModal: false,
+            allStatuses: []
         }
     }
 
 
     componentDidMount = async() => {
       arr = []
+      allStatuses = []
+      newArr = []
+      otherArr = []
       await this.retrieveData()
-      
+      await Font.loadAsync({
+        font1: require('../../../assets/SourceSansPro-Black.ttf')
+      })
+      this.setState({
+        fontsLoaded: true
+      })
     }
 
 
@@ -67,12 +86,14 @@ const { height, width } = Dimensions.get('window')
           let initialQuery = firebase.firestore().collection('status-public').doc(friend)
           let querySnapshot = await initialQuery.get()
           let queryDocumentData = querySnapshot.data().statuses
-          queryDocumentData.forEach(doc => arr.push(doc))
-          this.setState({documentData: arr})
+          arr.push(queryDocumentData[queryDocumentData.length - 1])
+          queryDocumentData.forEach(doc => allStatuses.push(doc))
+          this.setState({documentData: arr, allStatuses: allStatuses})
         
         })
 
     }
+    
 
 
   
@@ -81,15 +102,32 @@ const { height, width } = Dimensions.get('window')
         let documentSnapshots = await initialQuery.get()
         let allStories = (await documentSnapshots).docs.map(doc => doc.data().statuses)
         allStories.forEach(story => this.setState({allStories: story}))
-        console.log(this.state.allStories)
+         newArr = [...this.state.allStories, ...this.state.allStatuses]
+         otherArr = newArr.reduce((acc, current) => {
+          const x = acc.find(item => item.timestamp === current.timestamp)
+          if(!x){
+            return acc.concat([current])
+          }else{
+            return acc;
+          }
+        }, [])
+        console.log('---------------------------')
+        console.log(otherArr)
+        // allStatuses.filter(value => this.state.allStories.includes(value))
+        this.setState({
+          allStatuses: otherArr
+        })
       }
 
     onPress = async (item) => {
       await this.getAllStoriesFromId(item.creatorId)
-      this.props.navigation.navigate('FullScreenStory', { status: item, allStories: this.state.allStories})
+      
+      this.props.navigation.navigate('FullScreenStory',    { status: item, allStories: this.state.allStatuses})
+      
     }
 
     render(){
+      if(this.state.fontsLoaded){
         return(
             <View style={[ styles.column, styles.destinations ], { marginTop: 40}}>
                 <SafeAreaView style={styles.container} >
@@ -115,14 +153,13 @@ const { height, width } = Dimensions.get('window')
                 refreshing={this.state.refreshing}
                 />
             </SafeAreaView>
-            <Button title="Retrieve"
-              color="#fff"
-             onPress={() => this.retrieveData()}/>
-              <View>
+            
+                <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Messages</Text>
                 <ChatRoomsList/>
-              </View>
             </View>
-            )
+            )}else{
+              return (<ActivityIndicator size="large"/>)
+            }
     }
 }
 

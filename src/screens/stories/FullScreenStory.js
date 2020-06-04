@@ -34,6 +34,7 @@ import { divide } from "react-native-reanimated";
 import { withNavigation } from "react-navigation";
 import ViewPager from '@react-native-community/viewpager'
 import FullScreenSignleStory from "./FullScreenSingleStory";
+import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures'
 
 
 class FullScreenStorty extends React.Component {
@@ -151,6 +152,7 @@ class FullScreenStorty extends React.Component {
             )
           })}
         </ViewPager>
+
         </View>
         )
 

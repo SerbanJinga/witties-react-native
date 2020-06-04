@@ -7,6 +7,7 @@ import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 import ReceiveFriend from './ReceiveFriend'
+import * as Font from 'expo-font'
 const { width, height } = Dimensions.get('window')
 let text = 'vasile'
 let arr = []
@@ -50,6 +51,7 @@ export default class ReceiveFriendRequest extends Component {
     componentDidMount = async() =>{
         arr = []
        await this._retrieveFriendRequests()
+        
     }
    
     _acceptFriend = async(uid) => {
@@ -79,12 +81,11 @@ export default class ReceiveFriendRequest extends Component {
     render(){
         return(
             <View>
-                <Text style={{fontSize: 40, textAlign: 'center', marginTop: 20}}>ai primit cereri de la </Text>
                 <SafeAreaView style={styles.container}>
                 <FlatList
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <ReceiveFriend displayName={item.displayName} discriminator={item.discriminator} profilePicture={item.profilePicture} press={() => this._acceptFriend(item.uid)}/>
+                     <ReceiveFriend careScore={item.careScore} displayName={item.displayName} discriminator={item.discriminator} profilePicture={item.profilePicture} press={() => this._acceptFriend(item.uid)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}

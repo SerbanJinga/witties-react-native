@@ -10,6 +10,8 @@ import { withNavigation } from 'react-navigation'
 import { ScrollView, FlatList } from 'react-native-gesture-handler'
 import AddFriend from '../screens/friendSystem/AddFriend'
 import Friend from '../components/Friend'
+import ReceiveFriend from '../screens/friendSystem/ReceiveFriend'
+import ReceiveFriendRequest from './friendSystem/ReceiveFriendRequest'
 let arr = []
 let friendsArr = []
 const { width, height } = Dimensions.get('window')
@@ -146,8 +148,9 @@ _getFriendDetailsFromUid = async(uid) => {
                 <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
                 <Divider style={{width: width}}/>
 
-                <Text style={{fontFamily: "font1", fontSize: 15, marginTop: 10, marginLeft: 10}}>Your Friends</Text>
-                <FlatList
+                <Text style={{fontFamily: "font1", fontSize: 15, marginTop: 10, marginLeft: 10}}>News</Text>
+                <ReceiveFriendRequest/>
+                {/* <FlatList
                  data = {this.state.friends}
                  renderItem={({item}) => (
                     <Friend discriminator={item.discriminator} name={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
@@ -157,7 +160,7 @@ _getFriendDetailsFromUid = async(uid) => {
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
-                />
+                /> */}
                 </View>
                 <Overlay onBackdropPress={this._openOptions} isVisible={this.state.optionMenu}>
                     <View>

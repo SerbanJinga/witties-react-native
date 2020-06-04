@@ -23,6 +23,7 @@ import ChannelStatus from '../components/ChannelStatus'
 import Timeline from '../screens/Timeline'
 import PlacesInput from 'react-native-places-input';
 import CameraScreen from '../screens/camera/Camera'
+import { SafeAreaView } from 'react-native-safe-area-context'
 const { width, height } = Dimensions.get('window')
 
 export default class Home extends Component {
@@ -54,6 +55,7 @@ export default class Home extends Component {
       // }).then(res => {
       //   console.log('MERGE MERGE MERGE MERGE') 
       //   console.log(res.data)})
+   
   }
 
 
@@ -61,9 +63,7 @@ export default class Home extends Component {
       let initialQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
       let documents = await initialQuery.get()
       let documentData = documents.data().profilePicture
-      console.log('---------------------------')
-      console.log(documentData)
-      console.log('---------------------------')
+      
       this.setState({
         profilePicture: documentData
       })
@@ -96,7 +96,7 @@ export default class Home extends Component {
     render(){
         return(
 
-         
+         <SafeAreaView style={{flex: 1}}>
           <Swiper
                   loop={false}
                   showsPagination={false}
@@ -121,8 +121,9 @@ export default class Home extends Component {
                        
                     </ScrollView>
        </Swiper>
-
+</SafeAreaView>
           )
 
     }
 }
+

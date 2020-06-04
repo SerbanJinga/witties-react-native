@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import { Text, Input, Button, Icon } from 'react-native-elements'
-import { Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
+import { Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { timing } from 'react-native-reanimated'
 import firebase from 'firebase'
+import * as Font from 'expo-font'
+import { TouchableHighlight } from 'react-native-gesture-handler'
 
 export default class MessageComponent extends Component {
     constructor(props) {
@@ -14,10 +16,30 @@ export default class MessageComponent extends Component {
             translatedDate: '',
             marginLeft: 0,
             marginRight: 0,
+            fontsLoaded: false
 
         }
     }
-    componentDidMount() {
+
+    
+  _renderTimestamps = (timestamp) => {
+    let date = new Date(timestamp * 1000)
+    let hours = date.getHours()
+    let minutes = "0" + date.getMinutes()
+    let seconds = "0" + date.getSeconds()
+
+    let formattedTime = hours + ":" + minutes.substr(-2)
+    return formattedTime
+  } 
+
+    componentDidMount = async() => {
+        await Font.loadAsync({
+            font1: require('../../../assets/SourceSansPro-Black.ttf'),
+            font2: require('../../../assets/SourceSansPro-Regular.ttf')
+        })
+        this.setState({
+            fontsLoaded: true
+        })
         console.log(this.state.sender)
         console.log("-----------------------------------------")
         console.log(this.state.date)
@@ -39,11 +61,38 @@ export default class MessageComponent extends Component {
     }
     //{this.state.translatedDate}
     render() {
+        if(this.state.fontsLoaded)
+{
         return (
-            <TouchableOpacity onLongPress={()=>{console.log('long presssss')}} style={{alignItems:(this.state.sender == firebase.auth().currentUser.uid)?'flex-end':"flex-start"}}>
-                <Text  style={{padding:10,fontSize:20, backgroundColor: 'white', borderRadius: 15, marginRight: this.state.marginRight, marginLeft: this.state.marginLeft}}>{this.state.msg}</Text>   
-            </TouchableOpacity>
+            <View style={[styles.submit, {marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]}>
+                <Text style={{fontFamily: 'font1'}}>{this.state.msg}</Text>
+                <Text style={{fontFamily: 'font2', marginLeft: 20}}>{this._renderTimestamps(this.state.date)}</Text>
+        </View>
         )
+        }else{
+            return(
+                <ActivityIndicator size="large"/>
+            )
+        }
     }
 
 }
+
+const styles = StyleSheet.create({
+    submit:{
+        paddingTop:10,
+        paddingBottom:10,
+        backgroundColor:'#daf5c4',
+        borderRadius:10,
+        borderWidth: 1,
+        borderColor: 'transparent',
+        marginBottom: 2,
+        paddingLeft: 10,
+        paddingRight: 10,
+        // alignSelf: 'flex-start'
+    },
+      submitText:{
+          color:'#fff',
+          textAlign:'center',
+      }
+})

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Button, Text, CheckBox } from 'react-native-elements'
-import { View, Dimensions, StyleSheet } from 'react-native'
+import { View, Dimensions, StyleSheet, ActivityIndicator } from 'react-native'
 import firebase from 'firebase'
 import { render } from 'react-dom'
 import { FlatList } from 'react-native-gesture-handler'
@@ -24,6 +24,9 @@ class ChatRoomsList extends Component {
             type: props.type,
             gruperino: [],
             story: false,
+            loading: false,
+            limit: 6,
+            lastVisible: null
         }
         this.mama = this.mama.bind(this)
         this.tata = this.tata.bind(this)
@@ -34,15 +37,7 @@ class ChatRoomsList extends Component {
         arr = []
         grupuri = []
         await this._retrieveData()
-        // this.waitAndMakeRequest(2000)
-        console.log('-----------------------------------------------------------')
-        console.log(this.state.type)
-        console.log(this.state.type)
-        console.log(this.state.type)
-        console.log(this.state.type)
-        console.log('-----------------------------------------------------------')
-        console.log('mama')
-        console.log('mama')
+       
 
     }
 
@@ -66,24 +61,80 @@ class ChatRoomsList extends Component {
     }
 
     _retrieveData = async () => {
-
+        try{
+            this.setState({
+                loading: true
+            })
         let query = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
         let snapshot = await query.get()
         let myData = snapshot.data().chatRoomsIn
         console.log(myData)
        myData.forEach(document => this._getDataFromId(document))
+        }catch(error){
+            console.log(error)
+        }
+    }
+    
+    _retriveMore = async () => {
+        try{
+            this.setState({
+                refreshing: true
+            })
+            let additionalQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+            let additionalSnapshots = await additionalQuery.get()
+            let additionalData = additionalSnapshots.data().chatRoomsIn
+            additionalData.forEach(document => this._getMoreDataFromId(document))
+        }catch(err){
+            console.log(err)
+        }
+    }
+    _getMoreDataFromId = async (group) => {
+        let inititalQuery = await firebase.firestore().collection("messages").where('roomId', '==', group).startAfter(this.state.lastVisible).limit(this.state.limit)
+        let documentSnapshots = await inititalQuery.get()
+        let documentData = documentSnapshots.docs.map(doc => doc.data())
+        let lastVisible = documentData[documentData.length - 1]
+        this.setState({
+            documentData: [...this.state.documentData, ...documentData],
+            lastVisible: lastVisible,
+            refreshing: false
+
+        })
+
+        console.log('DaiFJIAFJKAFJAKFJAFJAFKJFAKAFJKFAJ')
+        
+        console.log(this.state.lastVisible)
+    }
+
+    renderHeader = () => {
+        try{
+            if(this.state.loading || this.state.refreshing){
+                return(
+                    <View>
+                        <ActivityIndicator size="large"/>
+                    </View>
+                )
+            }else{
+                return null
+            }
+        }catch(err){
+            console.log(err)
+        }
     }
 
 
     _getDataFromId = async (group) => {
-        let inititalQuery = await firebase.firestore().collection("messages").where('roomId', '==', group)
+        let inititalQuery = await firebase.firestore().collection("messages").where('roomId', '==', group).limit(this.state.limit)
         let documentSnapshots = await inititalQuery.get()
         let documentData = documentSnapshots.docs.map(doc => doc.data())
         documentData.forEach(doc => arr.push(doc))
+        let lastVisible = documentData[documentData.length - 1]
         this.setState({
-            documentData: arr
+            documentData: arr,
+            lastVisible: lastVisible,
+            loading: false
+
         })
-        console.log(this.state.documentData)
+
     }
 
 
@@ -94,10 +145,10 @@ class ChatRoomsList extends Component {
                 <SafeAreaView>
                     <FlatList
                         data={this.state.documentData}
-                        renderItem={({ item }) => (
+                        renderItem={({ item, index }) => (
 
                             
-                            <Room roomId={item.roomId} chatRoomName={item.chatRoomName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId }) }/>
+                            <Room profilePicture={item.profilePicture} lastMessage={item.messages[index].msg} roomId={item.roomId} chatRoomName={item.chatRoomName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId, profilePicture: item.profilePicture }) }/>
                         )}
                         keyExtractor={(item, index) => String(index)}
                         ListHeaderComponent={this.renderHeader}

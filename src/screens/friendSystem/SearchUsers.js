@@ -137,6 +137,7 @@ console.log(arr)
     }
 
     retrieveData = async() => {
+        console.log('merge JKFALFKLAGKLA FKALGLA G')
         let documentT;
         const func = firebase.functions().httpsCallable('friendSystem')
         try{
@@ -160,12 +161,12 @@ console.log(arr)
             console.log(error)
         }
     }   
+   
     _getUserFromUid = async (uid) => {
         let initialQuery = await firebase.firestore().collection('users').doc(uid)
         let documentSnapshots = await initialQuery.get()
         let documentData = await documentSnapshots.data()
         arr.push(documentData)
-        console.log(arr)
     }
     
     sendNotification = async(token, uid) => {
@@ -246,6 +247,7 @@ console.log(arr)
   
 
 
+
     render(){
             const loaded = this.state.fontsLoaded
             if(loaded){
@@ -280,7 +282,7 @@ console.log(arr)
                     overlayStyle={{width: width, height: height}}
                 >
                 <ScrollView style={{flex: 1, flexDirection: 'column'}}>
-                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start'}}>
+                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start'}}>
                 <TouchableOpacity
                     onPress = {() => this._onCloseSearch()}
                   style={{
@@ -314,6 +316,7 @@ console.log(arr)
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
+                onRefresh={this.handleRefresh}
                 />
 </ScrollView>
                 </Overlay>

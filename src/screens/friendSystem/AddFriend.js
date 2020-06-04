@@ -56,19 +56,20 @@ export default class AddFriend extends Component {
     render(){
         return(
             <TouchableOpacity onPress={() => this._pressTouchableOpacity()}>
-            <ListItem titleStyle={{fontFamily: 'font1'}} title={this.props.displayName} leftAvatar={{source:{ uri: this.props.profilePicture }, title: this.props.displayName.charAt(0)}} subtitle={
-                <View style={{flex: 1, flexDirection: 'column'}}>
-                <Text style={{fontFamily: "font1"}}>#{this.props.discriminator}</Text>
-                    <Button
-                        titleStyle={{fontFamily: "font1"}}
-                        onPress={() => this.props.press()}
-                        type="clear"
-                        style={{width: 110}}
-                        title="Add Friend"
-                    />
+        
+            <View style={{flex: 1, padding: 10}}>
+                <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
+                    <Avatar size={40} rounded source={{uri: this.props.profilePicture}}/>
+                    <View style={{flex: 1, flexDirection: 'column',}}>
+                    <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.props.displayName}</Text>
+                    <Text style={{fontFamily: 'font1', marginLeft: 4}}>#{this.props.discriminator}</Text>
+                    </View>
+                <Button title="Add Friend" type="clear" titleStyle={{fontFamily: 'font1'}} onPress={() => this.props.press()}/>
                 </View>
-            }/>
-            <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width - 40, height: height / 3, borderRadius: '10'}}>
+                <Divider style={{marginTop: 20}}/>
+
+            </View>
+            <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                         <Avatar size={40} source={{uri: this.props.profilePicture}} rounded/>
@@ -95,14 +96,20 @@ export default class AddFriend extends Component {
                     </TouchableOpacity>
                     <Divider style={{marginTop: 0}}/>
 
-                    <TouchableOpacity style={{padding: 10}}>
-                        <Text style={{fontFamily: 'font1', fontSize: 18}}>More</Text>
-                    </TouchableOpacity>
-                    <Divider style={{marginTop: 0}}/>
-
                     <TouchableOpacity style={{padding: 10, paddingBottom: 20}}>
                         <Text style={{fontFamily: 'font1', fontSize: 18}}>Copy Username</Text>
                     </TouchableOpacity>
+                    <Divider style={{marginTop: 0}}/>
+                    <TouchableOpacity style={{padding: 10}}>
+                        <Text style={{fontFamily: 'font1', fontSize: 18, color: 'red'}}>Block User</Text>
+                    </TouchableOpacity>
+                    <Divider style={{marginTop: 0}}/>
+                    
+                    <TouchableOpacity style={{padding: 10}}>
+                        <Text style={{fontFamily: 'font1', fontSize: 18, color: '#b2b8c2', alignSelf: 'center'}}>Done</Text>
+                    </TouchableOpacity>
+                    
+                   
                 </View>
         </Overlay>
 

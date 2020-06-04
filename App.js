@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { createStackNavigator } from 'react-navigation-stack'
+import { createStackNavigator, TransitionPresets } from 'react-navigation-stack'
 import AuthNavigator from './src/screens/login/AuthNavigator'
 import ChatRoom from './src/screens/chatRoom/ChatRoom'
 import Home from './src/screens/Home'
@@ -45,7 +45,12 @@ const navigator = createStackNavigator(
     Chat: ChatNavigator,
     FullScreenStory: {
       screen: FullScreenStory,
-      name: 'Story'
+      name: 'Story',
+      navigationOptions: {
+        ...TransitionPresets.ModalSlideFromBottomIOS,
+        gestureDirection: 'horizontal',
+        
+      }
     }
   },{
     initialRouteName: 'Auth',
