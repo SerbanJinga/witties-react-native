@@ -142,7 +142,7 @@ const { height, width } = Dimensions.get('window')
                 style={[styles.shadow, { overflow: 'visible' }]}
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <Status postedFor={item.hoursPosted} activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
+                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
                      
                  )}   
                 keyExtractor={(item, index) => String(index)}

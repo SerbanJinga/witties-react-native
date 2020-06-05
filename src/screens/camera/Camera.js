@@ -10,6 +10,7 @@ import firebase from 'firebase'
 import * as Font from 'expo-font'
 import * as ImagePicker from 'expo-image-picker'
 import { Avatar, Button } from 'react-native-elements'
+import ActivityPopup from '../ActivityPop/ActivityPopup'
 const { width, height } = Dimensions.get('window')
 export default class CameraScreen extends Component {
     constructor(props){
@@ -22,9 +23,28 @@ export default class CameraScreen extends Component {
             flashIcon: 'flash-off',
             withFlash: Camera.Constants.FlashMode.off,
             profilePicture: '',
-            fontsLoaded: false
+            fontsLoaded: false,
+            showAct: false
         }
     }
+
+    
+    closeSwipablePanel = (foo) =>{
+      this.setState({showAct:false})
+      // let fasdas = this.state.documentData
+      // if(typeof foo === 'undefined')
+      // return;
+
+      // fasdas.push(foo)
+      // this.setState({documentData:fasdas})
+      // console.log(' aklgjhakgakgjakgja kg,ajkglkaklgkalgklagkl')
+  }
+
+  openSwipeablePanel = () => {
+    this.setState({
+      showAct: true
+    })
+  }
 
 
     _getProfilePicture = async() => {
@@ -115,7 +135,7 @@ pickImage = async() => {
 renderCamera = () => {
   return(
     <View style={{flex: 1}}>
-        <Camera style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}} flashMode={this.state.withFlash}>
+        <Camera ratio={'16: 9'} style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}} flashMode={this.state.withFlash}>
 
     <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>   
     <TouchableOpacity
@@ -255,8 +275,8 @@ renderGallery = () => {
               <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Your Story</Text>
              </View>
              <View style={{flex: 0, flexDirection: 'column', alignItems: 'center', margin: 10}}>              
-             <Avatar containerStyle={{borderWidth: 2, borderColor: 'white', borderStyle: 'solid'}} rounded source={{uri: 'https://image.flaticon.com/icons/png/512/32/32441.png'}}/>
-              <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Channels</Text>
+             <Avatar onPress={() => this.openSwipeablePanel()} containerStyle={{borderWidth: 2, borderColor: 'white', borderStyle: 'solid'}} rounded source={{uri: 'https://image.flaticon.com/icons/png/512/32/32441.png'}}/>
+              <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Edit</Text>
              </View>
              <TouchableOpacity>
              <View style={{flex: 0, justifyContent: 'center',alignContent: 'center', alignItems: 'center',marginTop: 20, marginLeft: 80, flexDirection: 'row'}}>
@@ -275,6 +295,9 @@ renderGallery = () => {
                 </ImageBackground>
           
             </View>
+            <Overlay overlayStyle={{width: width, height: height - 200, position: 'absolute', bottom: 0}} onBackdropPress={() => this.closeSwipablePanel()} animationType='fade' isVisible={this.state.showAct}>
+              <ActivityPopup/>
+            </Overlay>
       </Overlay>
     )
 }

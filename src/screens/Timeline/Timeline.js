@@ -1,5 +1,5 @@
 import React from "react"
-import { Text, Button, Input, SearchBar, Divider } from 'react-native-elements'
+import { Text, Button, Input, SearchBar, Divider, Overlay } from 'react-native-elements'
 import {
     StyleSheet,
     View,
@@ -16,18 +16,19 @@ import {
 
 
 } from 'react-native';
-import ActivityPopup from './ActivityPop/ActivityPopup'
+import ActivityPopup from '../ActivityPop/ActivityPopup'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import * as theme from '../styles/theme'
+import * as theme from '../../styles/theme'
 import SwipeablePanel from 'rn-swipeable-panel';
-import Status from "../components/Status"
+import Status from "../../components/Status"
 const { width, height } = Dimensions.get('window')
 
 import firebase from 'firebase';
 import { divide } from "react-native-reanimated";
 const screenHeight = Dimensions.get('screen').height;
+import TimelinePost from './TimelinePost'
 
 
 
@@ -38,37 +39,38 @@ export default class Timeline extends React.Component {
             documentDataFriends: [],
             plusSize: 30,
             showAct: false,
-            documentData: [{
-                activity: "Laba grav in grup",
-                mood: "Trist bro",
-                text: "Va salut pe toti!",
-                date: "24/3/2020"
+            // documentData: [{
+            //     activity: "Laba grav in grup",
+            //     mood: "Trist bro",
+            //     text: "Va salut pe toti!",
+            //     date: "24/3/2020"
 
-            }, {
-                activity: "Laba grav grav",
-                mood: "Trist rau bro",
-                text: "Va salut  toti!",
-                date: "25/3/2020"
+            // }, {
+            //     activity: "Laba grav grav",
+            //     mood: "Trist rau bro",
+            //     text: "Va salut  toti!",
+            //     date: "25/3/2020"
 
-            }, {
-                activity: "Laba grav grav",
-                mood: "Trist rau bro",
-                text: "Va salut  toti!",
-                date: "25/3/2020"
+            // }, {
+            //     activity: "Laba grav grav",
+            //     mood: "Trist rau bro",
+            //     text: "Va salut  toti!",
+            //     date: "25/3/2020"
 
-            }, {
-                activity: "Laba grav grav",
-                mood: "Trist rau bro",
-                text: "Va salut  toti!",
-                date: "27/3/2020"
+            // }, {
+            //     activity: "Laba grav grav",
+            //     mood: "Trist rau bro",
+            //     text: "Va salut  toti!",
+            //     date: "27/3/2020"
 
-            }, {
-                activity: "Laba grassv grav",
-                mood: "Trist rassau bro",
-                text: "Va sasdasdalut  toti!",
-                date: "29/3/2020"
+            // }, {
+            //     activity: "Laba grassv grav",
+            //     mood: "Trist rassau bro",
+            //     text: "Va sasdasdalut  toti!",
+            //     date: "29/3/2020"
 
-            }],
+            // }],
+            documentData:[],
             lastVisible: null,
             loading: false,
             refreshing: false,
@@ -87,8 +89,8 @@ export default class Timeline extends React.Component {
         console.log(screenHeight, "   vs  ", height)
         console.log(this.state.documentDataFriends)
         //Dau reverse la array
-        let reverted = this.state.documentData.reverse()
-        this.setState({ documentData: reverted })
+        // let reverted = this.state.documentData.reverse()
+        // this.setState({ documentData: reverted })
     }
     renderHeader() {
         return (<View>
@@ -103,68 +105,102 @@ export default class Timeline extends React.Component {
         })
         this.setState({ filteredData: filteredData })
     }
-    closeSwipablePanel = () =>{
+
+    closeSwipablePanel = (foo) =>{
         this.setState({showAct:false})
+        let fasdas = this.state.documentData
+        if(typeof foo === 'undefined')
+        return;
+
+        fasdas.push(foo)
+        this.setState({documentData:fasdas})
         // console.log(' aklgjhakgakgjakgja kg,ajkglkaklgkalgklagkl')
     }
     async retrieveData() {
-        // let initialQuery = await firebase.firestore().collection("users").where("uid", "==", firebase.auth().currentUser.uid)
-        // let documentSnapshots = await initialQuery.get()
-        // let documentData = documentSnapshots.docs.map(doc => doc.data())
-        // let bagPl = documentData[0].customActivities
-        // this.setState({ documentData: bagPl })
+        let initialQuery = await firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid)
+        let documentSnapshots = await initialQuery.get()
         console.log('-------------------------------------------------')
-        console.log(this.state.documentData)
+        console.log(documentSnapshots)
         console.log('-------------------------------------------------')
+        let documentData = documentSnapshots.data().statuses
+        console.log('---------------------------aqwqeqe----------------------')
+        console.log(documentData)
+        console.log('-------------------------------------------------')
+        documentData.reverse()
+        documentData.slice().sort((a, b) => a.timestamp - b.timestamp)
+
+        this.setState({ documentData: documentData })
+        // console.log('-------------------------------------------------')
+        // console.log(this.state.documentData)
+        // console.log('-------------------------------------------------')
 
     }
     render() {
-        return (<View style={{ height: screenHeight }}>
-            <SwipeablePanel isActive={this.state.showAct}
-                openLarge={true}
+        return (<View style={{ height: screenHeight, flex: 1 }}>
+            <Overlay isVisible={this.state.showAct}
+                
 
-                onClose={() => { this.setState({ showAct: false }) }}
-                showCloseButton
-
+                onBackdropPress={() => { this.setState({ showAct: false }) }}
+                // showCloseButton
+                overlayStyle={{position:"absolute",bottom:0,width:width,top:40}}
+                animationType='fade'
+                transparent
 
             >
                 <ActivityPopup papa={this.closeSwipablePanel}/>
-            </SwipeablePanel>
+            </Overlay>
             {/* //(this.state.documentData[index].date === item.date) */}
             {/* <Text h4 style={{paddingTop:30}}>spatiu sus bro</Text> */}
+            
             <View style={{ alignItems: 'center' }}>
                 <FlatList
-                    decelerationRate={0}
+                    // decelerationRate={0}
 
 
                     data={this.state.documentData}
                     renderItem={({ item, index }) => (
-                        <View><Text>da</Text></View>
+                        
+                        <TimelinePost 
+                        postedFor={item.hoursPosted} 
+                        activity={item.activity} 
+                        mood={item.mood} 
+                        text={item.text} 
+                        creatorId={item.creatorId} 
+                        timestamp={item.timestamp} 
+                        image={item.image} 
+                        // press={() => this.onPress(item)}
+                        
+                        />
 
                     )}
                     keyExtractor={(item, index) => String(index)}
-                    ListHeaderComponent={this.renderHeader}
-                    ListFooterComponent={<View style={{ height: 150 }}></View>}
+                    ListHeaderComponent={<View style={{ height: 150 }}></View>}
+                    // ListFooterComponent={}
                     // ItemSeparatorComponent={(item) => (<Text>{item.date}</Text>)}
                     onEndReached={this.retrieveMore}
-                    onEndReachedThreshold={0}
+                    onEndReachedThreshold={1}
+                    columnWrapperStyle={{flexDirection:"row-reverse"}}
                     refreshing={this.state.refreshing}
                     inverted
+                    numColumns={3}
+                    
+                    
 
                 />
 
 
             </View>
             <TouchableOpacity style={{
-                flex: 1,
                 position: 'absolute',
                 alignItems: "center",
                 right: 30,
                 bottom: 30,
                 opacity: (this.state.showAct) ? 0 : 1,
-
+                // borderRadius: 1000, 
+                borderWidth: 0,
+                borderColor: 'transparent', 
             }} onPress={() => { this.setState({ showAct: true }) }}>
-                <Ionicons size={60} name={"ios-add"} style={[{ color: theme.colors.white, backgroundColor: theme.colors.blue, paddingHorizontal: 15, borderRadius: 60 }]} />
+                <Ionicons size={60} name={"ios-add"} style={[{ color: theme.colors.white, paddingHorizontal: 15, borderRadius: 1000, backgroundColor: theme.colors.blue }]} />
             </TouchableOpacity>
         </View>)
     }

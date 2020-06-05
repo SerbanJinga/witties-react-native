@@ -20,7 +20,7 @@ import Toast, { DURATION } from 'react-native-easy-toast'
 import StoriesPublic from '../screens/stories/StoriesPublic'
 import { Col, Row, Grid } from "react-native-easy-grid";
 import ChannelStatus from '../components/ChannelStatus'
-import Timeline from '../screens/Timeline'
+import Timeline from '../screens/Timeline/Timeline'
 import PlacesInput from 'react-native-places-input';
 import CameraScreen from '../screens/camera/Camera'
 import { SafeAreaView } from 'react-native-safe-area-context'

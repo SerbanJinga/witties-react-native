@@ -13,6 +13,7 @@ import * as Font from 'expo-font'
 import AddFriend from './AddFriend'
 import { withNavigation } from 'react-navigation'
 import Toast, { DURATION } from 'react-native-easy-toast'
+import Timeline from '../../screens/Timeline/Timeline'
 
 const { width, height } = Dimensions.get('window')
 const heightS = Dimensions.get('screen').height
@@ -407,6 +408,7 @@ console.log(arr)
                     fadeInDuration={750}
                 />
                 </Overlay>
+                <Timeline/>
             </View>)
             }else{
                 return (<View style={{flex: 1, width: width, height: height, alignItems: 'center', justifyContent: 'center'}}>
