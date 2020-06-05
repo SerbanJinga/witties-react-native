@@ -408,7 +408,7 @@ console.log(arr)
                     fadeInDuration={750}
                 />
                 </Overlay>
-                <Timeline/>
+                {/* <Timeline/> */}
             </View>)
             }else{
                 return (<View style={{flex: 1, width: width, height: height, alignItems: 'center', justifyContent: 'center'}}>

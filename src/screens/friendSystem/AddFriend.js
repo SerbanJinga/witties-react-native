@@ -149,4 +149,3 @@ export default class AddFriend extends Component {
 }
 
 
-

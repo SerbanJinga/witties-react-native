@@ -96,7 +96,7 @@ export default class Home extends Component {
     render(){
         return(
 
-         <SafeAreaView style={{flex: 1}}>
+         <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
           <Swiper
                   loop={false}
                   showsPagination={false}

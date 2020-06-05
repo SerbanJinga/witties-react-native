@@ -38,7 +38,7 @@ export default class Room extends Component {
                     <Avatar onPress={() => this._changeChatPicture()} size={40} rounded source={{uri: this.props.profilePicture}}/>
                     <View style={{flex: 1, flexDirection: 'column',}}>
                     <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.props.chatRoomName}</Text>
-                    <Text style={{fontFamily: 'font2', marginLeft: 4}}>{this.props.lastMessage}</Text>
+                    {/* <Text style={{fontFamily: 'font2', marginLeft: 4}}>{this.props.lastMessage}</Text> */}
                     </View>
                     <Badge  status="primary" containerStyle={{marginLeft: "auto"}} badgeStyle={{width: 20, height: 20, borderRadius:20}} value={2}/>
 

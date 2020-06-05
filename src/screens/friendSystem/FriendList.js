@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, Button } from 'react-native'
-import { Text, Divider, CheckBox, Input } from 'react-native-elements'
+import { Text, Divider, CheckBox, Input, Overlay, Avatar } from 'react-native-elements'
 import firebase from 'firebase'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
@@ -10,8 +10,12 @@ import ChatRoom from '../../screens/chatRoom/ChatRoom'
 import Friend from '../../components/Friend'
 const { width, height } = Dimensions.get('window')
 import { withNavigation } from 'react-navigation';
+import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
+import * as ImagePicker from 'expo-image-picker'
+
 
 let arr = []
+let twoUserArr = []
 
  class FriendList extends Component {
     constructor(props){
@@ -20,12 +24,17 @@ let arr = []
             documentData: [],
             friendRequestsReceived: [],
             chatRoomIds: [],
-            groupName : ""
+            groupName : "",
+            nextOverlay: false,
+            imageUri: "",
+            roomId: ""
         }
 
         this.addUserToChatRoom = this.addUserToChatRoom.bind(this)
         this.removeUserFromChatRoom = this.removeUserFromChatRoom.bind(this)
     }
+
+
 
     addUserToChatRoom = (uid) => {
         const chatRoomIdsFinal = this.state.chatRoomIds
@@ -66,44 +75,137 @@ let arr = []
 
     }
 
-    createChatRoom = () => {
-        const uid = firebase.firestore().collection("messages").doc().id
+    create = () => {
+    const uid = firebase.firestore().collection("messages").doc().id
+    
         firebase.firestore().collection("messages").doc(uid).set({
             usersParticipating: this.state.chatRoomIds,
             messages: [],
             roomId: uid,
             chatRoomName: this.state.groupName
-        }).then(this.props.navigation.navigate('ChatRoom', {iqdif:this.state.groupName, roomId: uid})).catch(err => console.log(err))
+        }).then(this.uploadToStorage(uid))
+        this.state.chatRoomIds.forEach(id => {
+            firebase.firestore().collection("users").doc(id).update({
+                chatRoomsIn: firebase.firestore.FieldValue.arrayUnion(uid)
+            })
+        })
+    }
+
+    createChatRoom = () => {
+        
+        this.setState({
+            nextOverlay: true
+        })
+    }
+
+    closeOverlay = () => {
+        this.setState({
+            nextOverlay: false
+        })
+    }
+
+    onAvatarPress = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3]
+        })
+
+        if(!result.cancelled){
+            this.setState({
+                imageUri: result.uri
+            })
+        }
+    }
+
+    uploadToStorage = async (uid) => {
+        const path = `messages/profile-picture/${uid}`
+        const response = await fetch(this.state.imageUri)
+        const file = await response.blob()
+    
+        let upload = firebase.storage().ref(path).put(file)
+        upload.on("state_changed", snapshot => {}, err => {
+            console.log(err)
+        },
+        async () => {
+            const url = await upload.snapshot.ref.getDownloadURL()
+            console.log(url)
+            this.setState({imageUri: url})
+            this._uploadToFirestore(url, uid)
+        })
+    }
+    _uploadToFirestore = (url, uid) => {
+        firebase.firestore().collection("messages").doc(uid).update({
+            profilePicture: url
+        })
     }
 
 
     componentDidMount = async() => {
+        twoUserArr = []
+        arr = []
         this.state.chatRoomIds.push(firebase.auth().currentUser.uid)
 
         await this._retrieveFriends()
     }
 
+    press = async(uid, profilePicture, name) => {
+        twoUserArr.push(firebase.auth().currentUser.uid)
+        twoUserArr.push(uid)
+        const roomId = firebase.auth().currentUser.uid + "_" + uid
+        let initialQuery = await firebase.firestore().collection("messages").doc(roomId)
+        let initalSnapshots = await initialQuery.get()
+        if(!initalSnapshots.exists){
+        firebase.firestore().collection("messages").doc(roomId).set({
+            chatRoomName: name,
+            messages: [],
+            profilePicture: profilePicture,
+            roomId: roomId,
+            usersParticipating: twoUserArr
+        })
+        firebase.firestore().collection("users").doc(uid).update({
+            chatRoomsIn: firebase.firestore.FieldValue.arrayUnion(roomId)
+        })
+        
+        firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
+            chatRoomsIn: firebase.firestore.FieldValue.arrayUnion(roomId)
+        })
+        this.props.close()
+        this.props.navigation.navigate("ChatRoom", { iqdif: name, roomId: roomId, profilePicture: profilePicture})
+        }else{
+            this.props.close()
+            this.props.navigation.navigate("ChatRoom", { iqdif: name, roomId: roomId, profilePicture: profilePicture})
+                
+        }
+    }
     render(){
         return(
-            <View>
-                <Text style={{fontSize: 40, textAlign: 'center', marginTop: 20}}>prieteni</Text>
-                <Input
-                    placeholder="Group Name"
-                    returnKeyType="next"
-                    textContentType="name"
-                    inputContainerStyle={styles.input}
-                    value={this.state.groupName}
-                    onChangeText={groupName => this.setState({ groupName })}
-                />
-            <Button
-                title="Create Chat"
-                onPress={this.createChatRoom}
-            />
+            <View style={{flex: 1, flexDirection: 'column'}}>
+                <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                <TouchableOpacity
+                        onPress={()=> this.props.close()}
+                                style={{
+                                    alignSelf: 'flex-end',
+                                    alignItems: 'center',
+                                    backgroundColor: 'transparent',                  
+                                }}>
+                            <MaterialCommunityIcons
+                                name="close"
+                                style={{ color: "#000", fontSize: 30}}
+                                
+                            />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={this.createChatRoom}>
+                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 4}}>Next</Text>
+                            </TouchableOpacity>
+                </View>
+                
+            
                 <SafeAreaView style={styles.container}>
                 <FlatList
                  data = {this.state.documentData}
                     renderItem={({item}) => (
-                        <Friend discriminator={item.discriminator} mama={this.addUserToChatRoom} tata={this.removeUserFromChatRoom} profilePicture={item.profilePicture} name={item.displayName} uid={item.uid} />
+                        <Friend press={() => this.press(item.uid, item.profilePicture, item.displayName)} discriminator={item.discriminator} mama={this.addUserToChatRoom} tata={this.removeUserFromChatRoom} profilePicture={item.profilePicture} displayName={item.displayName} uid={item.uid} />
                     )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
@@ -113,6 +215,47 @@ let arr = []
                 refreshing={this.state.refreshing}
                 />
             </SafeAreaView>
+            <Overlay overlayStyle={{width: width, height: height}} animationType="fade" isVisible={this.state.nextOverlay}>
+                    <View style={{flex: 1, flexDirection: 'column'}}>
+                    <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                <TouchableOpacity
+                        onPress={()=> this.closeOverlay()}
+                                style={{
+                                    alignSelf: 'flex-end',
+                                    alignItems: 'center',
+                                    backgroundColor: 'transparent',                  
+                                }}>
+                            <MaterialCommunityIcons
+                                name="arrow-left"
+                                style={{ color: "#000", fontSize: 30}}
+                                
+                            />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={this.create}>
+                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 4}}>Create </Text>
+                            </TouchableOpacity>
+                </View>
+                        <View style={{flex: 1, flexDirection: 'row', padding: 20}}>
+                        <Avatar source={{uri: this.state.imageUri}} size={50} rounded onPress={()=>this.onAvatarPress()}/>
+                        <View style={{flex: 1, flexDirection: 'column'}}>
+                        <Divider/>
+                        <Input
+                            
+                            placeholder="Group Name"
+                            returnKeyType="next"
+                            textContentType="name"
+                            containerStyle={{borderWidth: 0, borderColor: '#fff'}}
+                            style={{borderWidth: 0, borderColor: '#fff'}}
+                            inputStyle={{borderWidth: 0, borderColor: '#fff'}}
+                            inputContainerStyle={{borderWidth: 0, borderColor: '#fff'}}
+                            value={this.state.groupName}
+                            onChangeText={groupName => this.setState({ groupName })}
+                        />
+                        <Divider/>
+                        </View>
+                        </View>
+                    </View>
+            </Overlay>
             </View>
         )
     }

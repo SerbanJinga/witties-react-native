@@ -148,7 +148,7 @@ class ChatRoomsList extends Component {
                         renderItem={({ item, index }) => (
 
                             
-                            <Room profilePicture={item.profilePicture} lastMessage={item.messages[index].msg} roomId={item.roomId} chatRoomName={item.chatRoomName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId, profilePicture: item.profilePicture }) }/>
+                            <Room profilePicture={item.profilePicture} roomId={item.roomId} chatRoomName={item.chatRoomName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId, profilePicture: item.profilePicture }) }/>
                         )}
                         keyExtractor={(item, index) => String(index)}
                         ListHeaderComponent={this.renderHeader}

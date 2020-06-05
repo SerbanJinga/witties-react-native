@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, Button, FlatList, Animated, SafeAreaView, Text, ActivityIndicator } from 'react-native'
+import { View, StyleSheet, Dimensions, FlatList, Animated, SafeAreaView, Text, ActivityIndicator } from 'react-native'
 import firebase from 'firebase'
 import Status from '../../components/Status'
 import * as theme from '../../styles/theme'
@@ -10,7 +10,8 @@ import Modal from 'react-native-modal'
 let arr = []
 let allStatuses = []
 import FullScreenStory from './FullScreenStory'
-import { Overlay } from 'react-native-elements'
+import { Overlay, Button } from 'react-native-elements'
+import FriendList from '../friendSystem/FriendList'
 const stories = []
 let newArr = []
 let otherArr = []
@@ -28,7 +29,8 @@ const { height, width } = Dimensions.get('window')
             loading: false,
             refreshing: false,
             storiesModal: false,
-            allStatuses: []
+            allStatuses: [],
+            chat: false
         }
     }
 
@@ -126,6 +128,18 @@ const { height, width } = Dimensions.get('window')
       
     }
 
+    openNewChatOverlay = () => {
+      this.setState({
+        chat: true
+      })
+    }
+
+    closeNewChatOverlay = () => {
+      this.setState({
+        chat: false
+      })
+    }
+
     render(){
       if(this.state.fontsLoaded){
         return(
@@ -154,8 +168,16 @@ const { height, width } = Dimensions.get('window')
                 />
             </SafeAreaView>
             
-                <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Messages</Text>
+                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Messages</Text>
+                  <Button onPress={()=> this.openNewChatOverlay()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 10}} type="clear" title="New"/>
+                </View>
                 <ChatRoomsList/>
+                <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} animationType="fade">
+                  <View style={{flex: 1}}>
+                    <FriendList close={()=>this.closeNewChatOverlay()}/>
+                  </View>
+                </Overlay>
             </View>
             )}else{
               return (<ActivityIndicator size="large"/>)

@@ -41,7 +41,7 @@ export default class ActivityPopup extends React.Component {
         this.state = {
             displayName: props.laba,
             nameOfUser: props.name,
-
+            
             selectedActivity: '',
 
             gap: 0,
@@ -85,9 +85,15 @@ export default class ActivityPopup extends React.Component {
 
 
     componentDidMount() {
+            if(this.props.imageFromCamera !== undefined){
+                this.setState({
+                    imageUri: this.props.imageFromCamera
+                })
+                this.uploadPhoto()
+            }
+                
 
-
-
+        console.log(this.props.imageFromCamera)
 
 
     }

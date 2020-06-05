@@ -184,7 +184,7 @@ renderCamera = () => {
       }}>
       <Ionicons
           name="ios-photos"
-          style={{ color: "#fff", fontSize: 40}}
+          style={{ color: "#fff", fontSize: 30}}
       />
     </TouchableOpacity>
     <TouchableOpacity
@@ -196,7 +196,7 @@ renderCamera = () => {
       }}>
       <FontAwesome
           name="camera"
-          style={{ color: "#fff", fontSize: 40}}
+          style={{ color: "#fff", fontSize: 30}}
       />
     </TouchableOpacity>
     <TouchableOpacity
@@ -210,7 +210,7 @@ renderCamera = () => {
       >
       <MaterialCommunityIcons
           name="camera-switch"
-          style={{ color: "#fff", fontSize: 40}}
+          style={{ color: "#fff", fontSize: 30}}
       />
     </TouchableOpacity>
   </View>
@@ -269,7 +269,7 @@ renderGallery = () => {
             </TouchableOpacity>  
                 
              </View>
-             <View style={{flex: 0, flexDirection: 'row', margin: 20, marginTop: height / 1.4, alignContent: 'center'}}>
+             <View style={{flex: 0, flexDirection: 'row', margin: 20, position: 'absolute', bottom: 20, alignContent: 'center', justifyContent: 'space-between'}}>
              <View style={{flex: 0, flexDirection: 'column', alignItems: 'center', margin: 10}}>              
               <Avatar containerStyle={{borderWidth: 2, borderColor: 'white',  borderStyle: 'solid'}} rounded source={{uri: this.state.profilePicture}}/>
               <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Your Story</Text>
@@ -279,7 +279,8 @@ renderGallery = () => {
               <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Edit</Text>
              </View>
              <TouchableOpacity>
-             <View style={{flex: 0, justifyContent: 'center',alignContent: 'center', alignItems: 'center',marginTop: 20, marginLeft: 80, flexDirection: 'row'}}>
+            <TouchableOpacity style={{backgroundColor: '#0984e3', borderRadius: '40'}}>
+            <View style={{flex: 0, justifyContent: 'center',alignContent: 'center', alignItems: 'center',marginTop: 20, marginLeft: 80, flexDirection: 'row'}}>
 
              <Text style={{color: '#fff', marginRight:15, fontFamily: 'font1', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>Send to</Text>
               <MaterialCommunityIcons
@@ -287,7 +288,9 @@ renderGallery = () => {
                 style={{fontSize: 20}}
                 color="#fff"
               />
-                           </View>
+              </View>
+
+              </TouchableOpacity>
 
               </TouchableOpacity>
              </View>
@@ -296,7 +299,7 @@ renderGallery = () => {
           
             </View>
             <Overlay overlayStyle={{width: width, height: height - 200, position: 'absolute', bottom: 0}} onBackdropPress={() => this.closeSwipablePanel()} animationType='fade' isVisible={this.state.showAct}>
-              <ActivityPopup/>
+              <ActivityPopup imageFromCamera={this.state.pictureTaken}/>
             </Overlay>
       </Overlay>
     )
