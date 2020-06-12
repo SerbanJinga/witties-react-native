@@ -27,7 +27,8 @@ let twoUserArr = []
             groupName : "",
             nextOverlay: false,
             imageUri: "",
-            roomId: ""
+            roomId: "",
+            display: 'none'
         }
 
         this.addUserToChatRoom = this.addUserToChatRoom.bind(this)
@@ -148,6 +149,17 @@ let twoUserArr = []
 
         await this._retrieveFriends()
     }
+    renderDisplay = () => {
+        if(this.state.chatRoomIds.length !== 0){
+            this.setState({
+                display: 'flex'
+            })
+        }
+    }
+
+    // componentDidUpdate = () => {
+    //     this.renderDisplay()
+    // }
 
     press = async(uid, profilePicture, name) => {
         twoUserArr.push(firebase.auth().currentUser.uid)

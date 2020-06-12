@@ -44,9 +44,9 @@ class Friend extends Component {
                     <Text style={{fontFamily: 'font1', marginLeft: 4}}>#{this.props.discriminator}</Text>
                     </View>
                     <CheckBox
+                        checkedIcon="dot-circle-o"
+                        containerStyle={{backgroundColor: 'transparent',borderWidth: 0}}
                         uncheckedIcon="circle-o"
-                        textStyle={{fontFamily: 'font1'}}
-                        title="Add"
                         checked={this.state.selection}
                         onPress={()=> {
                             if(this.state.selection === false){

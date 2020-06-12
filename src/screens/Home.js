@@ -26,6 +26,7 @@ import CameraScreen from '../screens/camera/Camera'
 import { SafeAreaView } from 'react-native-safe-area-context'
 const { width, height } = Dimensions.get('window')
 
+
 export default class Home extends Component {
 
 
@@ -49,13 +50,8 @@ export default class Home extends Component {
       await this._getProfilePicture()
       console.log(firebase.auth().currentUser.uid)
       console.log('se executa........')
-      // const func = await firebase.functions().httpsCallable('friendSystem');
-      // func({
-      //   param: ''
-      // }).then(res => {
-      //   console.log('MERGE MERGE MERGE MERGE') 
-      //   console.log(res.data)})
-   
+    //  const func = await firebase.functions().httpsCallable('deletePost')
+    //  func({timestamp: "1591718068140"}).then(console.log('a mers'))
   }
 
 

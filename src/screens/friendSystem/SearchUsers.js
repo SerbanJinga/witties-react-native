@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard } from 'react-native'
+import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard, Alert } from 'react-native'
 import { Text, SearchBar, Button, Avatar, Overlay, Input, Divider, Tooltip } from 'react-native-elements'
 // import Clipboard from '@react-native-community/clipboard'
 import firebase from 'firebase'
@@ -45,7 +45,8 @@ let arr = []
             displayName: '',
             discriminator: '',
             email: firebase.auth().currentUser.email,
-            allUsersUid: []
+            allUsersUid: [],
+            settings: false
         }
     }
 
@@ -149,6 +150,9 @@ console.log(arr)
          
         func().then(async res => {
              documentT = await res.data.documentData
+             console.log('-------------------------')
+             console.log(documentT)
+             console.log('-------------------------  ')
             documentT.forEach(element => {
                 this._getUserFromUid(element)
             })
@@ -243,10 +247,38 @@ console.log(arr)
     }
 
     _signOut = () => {
+        Alert.alert(
+            'Are you sure you want to sign out?',
+            'Please do not.',
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log('nimic'),
+                    style: 'cancel'
+                },{
+                    text: 'Sign Out',
+                    onPress: () => this._signOutUser(),
+                    style: 'destructive'
+                }
+            ],
+            {cancelable: 'false'}
+        )
+    }
+    _signOutUser = () => {
         firebase.auth().signOut().then(this.props.navigation.navigate('Loading', {text: 'mama'}))
       }
   
+      _openSettings = () => {
+        this.setState({
+            settings: true
+        })
+    }
 
+    _closeSettings = () => {
+        this.setState({
+            settings: false
+        })
+    }
 
 
     render(){
@@ -284,29 +316,27 @@ console.log(arr)
                 >
                 <ScrollView style={{flex: 1, flexDirection: 'column'}}>
                 <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start'}}>
-                <TouchableOpacity
-                    onPress = {() => this._onCloseSearch()}
-                  style={{
-                    backgroundColor: 'transparent',
-                    marginTop: 20,
-                    marginRight: 10
-                    }}>
-              <AntDesign
-                name="arrowleft"
-                size={20}
-              />
-            </TouchableOpacity>    
-                 <Input
-                     placeholder='Search users'
-                     inputStyle={{fontFamily: 'font1'}}
-                     containerStyle={{marginTop: 10}}
-                     inputContainerStyle={{borderBottomWidth: 0}}
-                     onChangeText={this.search}
-                     value={this.state.searchText}
-                 />
-                </View>
+                <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>  
+                <TouchableOpacity onPress={() => this._onCloseSearch()}>
+                <AntDesign name="close" size={20}/>
+            </TouchableOpacity>
+              <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
+    backgroundColor:"#fff",
+    borderBottomColor: '#ecedef',
+    borderTopColor: '#ecedef',
+    borderLeftColor: '#ecedef',
+    borderRightColor: '#ecedef',
+    borderWidth: 1,
+    borderRadius: 10,
+    margin: 10,
+    width: width / 1.3
+}}  inputContainerStyle={{backgroundColor: '#fff', height: 30}} value={this.state.searchText} onChangeText={this.search} />
+            <TouchableOpacity onPress={() => this.openFilter()}>
+                <AntDesign name="filter" size={20}/>
+            </TouchableOpacity>
 
-                <Divider/>
+           </View>
+           </View>
                 <FlatList
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
@@ -330,7 +360,7 @@ console.log(arr)
                     isVisible={this.state.profileOverlay}
                 >
                     <View style={{flex: 1, flexDirection: 'column'}}>
-                        <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center'}}>
+                        <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', marginTop: 10}}>
                             <TouchableOpacity
                             onPress={() => this._onCloseAvatar()}
                                 style={{
@@ -338,13 +368,9 @@ console.log(arr)
                                     alignItems: 'center',
                                     backgroundColor: 'transparent',                  
                                 }}>
-                            <MaterialCommunityIcons
-                                name="close"
-                                style={{ color: "#000", fontSize: 30}}
-                                
-                            />
+                            <AntDesign name="close" size={20}/>
                             </TouchableOpacity>
-                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 4}}>Account</Text>
+                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 8}}>Account</Text>
                         </View>
                         <View style={{flex: 0, flexDirection: 'row', padding: 15}}>
                             <Avatar source={{uri: this.state.profilePicture}} rounded/>
@@ -363,29 +389,45 @@ console.log(arr)
                                     name="person"
                                     color="black"
                                 />
-                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Your profile</Text>
+                                <Text style={{fontFamily: 'font1', marginLeft: 4, fontSize: 14}}>Your profile</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <Divider/>
+                        <TouchableOpacity onPress={() => {this._onCloseAvatar()
+                            this._onPressSearch()}}>
                             <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
                                 <MaterialIcons
                                     size={30}
                                     name="person-add"
                                     color="black"
                                 />
-                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Add Friends</Text>
+                                <Text style={{fontFamily: 'font1', marginLeft: 4, fontSize: 14}}>Add Friends</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <Divider/>
+                        <TouchableOpacity onPress={() => this._onCloseAvatar()}>
                             <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
                                 <MaterialIcons
                                     size={30}
                                     name="timeline"
                                     color="black"
                                 />
-                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Your timeline</Text>
+                                <Text style={{fontFamily: 'font1', marginLeft: 4, fontSize: 14}}>Your timeline</Text>
                             </View>
                         </TouchableOpacity>
+                        <Divider/>
+                        
+                        <TouchableOpacity onPress={() => this._openSettings()}>
+                            <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
+                                <MaterialIcons
+                                    size={30}
+                                    name="settings"
+                                    color="black"
+                                />
+                                <Text style={{fontFamily: 'font1', marginLeft: 4, fontSize: 14}}>Settings</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <Divider/>
                         <TouchableOpacity onPress={() => this._signOut()}>
                             <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
                                 <MaterialIcons
@@ -393,7 +435,7 @@ console.log(arr)
                                     name="exit-to-app"
                                     color="black"
                                 />
-                                <Text style={{fontFamily: 'font2', marginLeft: 4, fontSize: 14}}>Sign Out</Text>
+                                <Text style={{fontFamily: 'font1', marginLeft: 4, fontSize: 14, color: 'red'}}>Sign Out</Text>
                             </View>
                         </TouchableOpacity>
                         
@@ -407,8 +449,35 @@ console.log(arr)
                     opacity={0.8}
                     fadeInDuration={750}
                 />
+                  <Overlay animationType="slide" isVisible={this.state.settings} fullScreen overlayStyle={{width: width}}>
+                    <View style={{flex: 1, flexDirection: 'column'}}>
+                        <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <TouchableOpacity onPress={() => this._closeSettings()}>
+                    <AntDesign
+                        size={26}
+                        name="down"
+                        color="#b2b8c2"
+                    />
+                    </TouchableOpacity>
+                    <Text style={{fontFamily: 'font1', fontSize: 20}}>Settings</Text>
+                    <TouchableOpacity onPress={() => this._closeSettings()}>
+                    <AntDesign
+                        size={26}
+                        name="bars"
+                        color="#b2b8c2"
+                    />
+                    </TouchableOpacity>
+                        </View>
+                        <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
+                        <Text style={{fontFamily: 'font1', fontSize: 20, margin: 10}}>Profile Settings</Text>
+                        <Divider/>
+                        
+                        </View>
+                    </View>
                 </Overlay>
-                {/* <Timeline/> */}
+                </Overlay>
+              
+                <Timeline/>
             </View>)
             }else{
                 return (<View style={{flex: 1, width: width, height: height, alignItems: 'center', justifyContent: 'center'}}>

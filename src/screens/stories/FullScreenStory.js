@@ -35,6 +35,7 @@ import { withNavigation } from "react-navigation";
 import ViewPager from '@react-native-community/viewpager'
 import FullScreenSignleStory from "./FullScreenSingleStory";
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures'
+import Swiper from "react-native-swiper";
 
 
 class FullScreenStorty extends React.Component {
@@ -85,12 +86,6 @@ class FullScreenStorty extends React.Component {
         return formattedTime
       } 
     
-    componentDidUpdate(prevProps,prevState){
-        // if (this.state.paused !== prevState.pause) {
-        //     console.log("I have changed")
-        //   }
-          // console.log(this.state.item.hoursPosted)
-    }
 
     
   getData = async(uid) => {
@@ -115,43 +110,22 @@ class FullScreenStorty extends React.Component {
         )
     })
   }
-  changeIndexPlus = () => {
-    if (this.state.currentIndex > this.state.allStories.length){
-      this.state.currentIndex = 0
-    }
-    let newIndex = this.state.currentIndex + 1
-    this.setState({
-      currentIndex: newIndex
-    })
-    this.viewPager.setPage(this.state.currentIndex)
-  }
-
-  changeIndexMinus = () => {
-
-    if (this.state.currentIndex > this.state.allStories.length){
-      this.state.currentIndex = this.state.currentIndex
-    }
-    let newIndex = this.state.currentIndex - 1
-    this.setState({
-      currentIndex: newIndex
-    })
-    this.viewPager.setPage(this.state.currentIndex)
-  }
+  
 
     render() {
       
         return (
           <View style={{flex: 1}}>
-          <ViewPager ref={(viewPager) => this.viewPager = viewPager} pageMargin="10" transitionStyle='scroll' orientation='vertical ' style={{flex: 1}} initialPage={this.state.currentIndex}>
+          <Swiper horizontal>
           {this.state.allStories.map((item, index) => {
             return(
               <View key={index}>
-                <FullScreenSignleStory displayName={this.state.displayName} profilePicture={this.state.profilePicture} image={item.image} mood={item.mood} activity={item.activity} apasainapoi={() => this.changeIndexMinus()} apasa={() => this.changeIndexPlus()}/>
+                <FullScreenSignleStory displayName={this.state.displayName} profilePicture={this.state.profilePicture} image={item.image} mood={item.mood} activity={item.activity} />
 
               </View>
             )
           })}
-        </ViewPager>
+          </Swiper>
 
         </View>
         )

@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator } from 'react-native'
-import { Input, Text, Button, Avatar, Overlay, SearchBar, Divider } from 'react-native-elements'
+import { View, StyleSheet, Dimensions, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { Text, Button, Avatar, Overlay, SearchBar, Divider } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker'
 import * as Permissions from 'expo-permissions'
 import firebase from 'firebase'
-import { Entypo } from '@expo/vector-icons'
+import { Entypo, AntDesign } from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { withNavigation } from 'react-navigation'
 import { ScrollView, FlatList } from 'react-native-gesture-handler'
@@ -12,6 +12,8 @@ import AddFriend from '../screens/friendSystem/AddFriend'
 import Friend from '../components/Friend'
 import ReceiveFriend from '../screens/friendSystem/ReceiveFriend'
 import ReceiveFriendRequest from './friendSystem/ReceiveFriendRequest'
+import FriendList from './friendSystem/FriendList'
+import AllFriends from './friendSystem/AllFriends'
 let arr = []
 let friendsArr = []
 const { width, height } = Dimensions.get('window')
@@ -25,9 +27,14 @@ const { width, height } = Dimensions.get('window')
             optionMenu: false,
             userData: {},
             fontsLoaded: false,
-            friends: []
+            friends: [],
+            friendsNumber: 0,
+            friendsOverlay: false,
+            settings: false
         }
     }
+
+   
 
     _retrieveUserData = async() => {
         const currentId = firebase.auth().currentUser.uid
@@ -50,7 +57,9 @@ const { width, height } = Dimensions.get('window')
             font1: require('../../assets/SourceSansPro-Black.ttf')
         });
         this.setState({fontsLoaded: true})
+        this.retrieveHowManyFriends()
     }
+
 
     _openOptions = () => {
         this.setState({
@@ -124,10 +133,26 @@ _getFriendDetailsFromUid = async(uid) => {
     // console.log(this.state.friends)
 }
 
+retrieveHowManyFriends = () =>{
+   
+}
+
+
+openFriends = () => {
+    this.setState({
+        friendsOverlay: true
+    })
+}
+
+closeFriends = () => {
+    this.setState({
+        friendsOverlay: false
+    })
+}
     render(){
         if(this.state.fontsLoaded){return(
-            <View style={{backgroundColor: '#fff', width: width, height: height, marginTop: 20, flex: 0, flexDirection: 'column'}}>
-                   
+            <View style={{backgroundColor: '#fff', width: width, height: height, marginTop: 20, flex: 1, flexDirection: 'column'}}>
+                 
                 <View style={{flex: 0, flexDirection: 'column', alignItems: 'center'}}>
                    
                 <Avatar
@@ -144,39 +169,43 @@ _getFriendDetailsFromUid = async(uid) => {
                 <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
                 <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.userData.careScore}</Text>
                 </View>
+                <TouchableOpacity onPress={() => this.openFriends()}>
+                    <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.friends.length} Friends</Text>
+                </TouchableOpacity>
                 </View>
                 <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
                 <Divider style={{width: width}}/>
 
                 <Text style={{fontFamily: "font1", fontSize: 15, marginTop: 10, marginLeft: 10}}>News</Text>
-                <ReceiveFriendRequest/>
-                {/* <FlatList
-                 data = {this.state.friends}
-                 renderItem={({item}) => (
-                    <Friend discriminator={item.discriminator} name={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
-                 )}   
-                keyExtractor={(item, index) => String(index)}
-                ListFooterComponent={this.renderFooter}
-                onEndReached={this.retrieveMore}
-                onEndReachedThreshold={0}
-                refreshing={this.state.refreshing}
-                /> */}
+                <AllFriends/>
+                
                 </View>
-                <Overlay onBackdropPress={this._openOptions} isVisible={this.state.optionMenu}>
+
+                <Overlay animationType="slide" onBackdropPress={() => this.closeFriends()} fullScreen isVisible={this.state.friendsOverlay}>
+                <View style={{flex: 1}}>
+                    <FriendList close={() => this.closeFriends()}/>
+                </View>
+                </Overlay>
+                <Overlay onBackdropPress={this._openOptions} isVisible={this.state.optionMenu} overlayStyle={{position: 'absolute', bottom: 0, width: width}}>
                     <View>
-                        <Button
-                            onPress = {this._deletePicture}
-                            type="clear"
-                            title="Delete picture"
-                        />
+                        
                         <Button
                             onPress={this._pickImage}
                             type="clear"
                             title="Select picture"
+                            titleStyle={{color: '#000', fontFamily: "font1"}}
+
+                        />
+                        <Divider/>
+                        <Button
+                            titleStyle={{color: 'red', fontFamily: "font1"}}
+                            onPress = {this._deletePicture}
+                            type="clear"
+                            title="Delete picture"
                         />
                     </View>
                 </Overlay>
-        
+                
             </View>
         )}else{
             return(

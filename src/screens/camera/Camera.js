@@ -236,7 +236,7 @@ renderGallery = () => {
                 alignItems: 'center',
                 backgroundColor: 'transparent',
               }}>
-              <MaterialCommunityIcons
+              <AntDesign
                   name="close"
                   style={{ color: "#fff", fontSize: 30}}
               />

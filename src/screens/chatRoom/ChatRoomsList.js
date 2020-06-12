@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
-import { Button, Text, CheckBox } from 'react-native-elements'
-import { View, Dimensions, StyleSheet, ActivityIndicator } from 'react-native'
+import { Button, Text, CheckBox, SearchBar, Overlay, ButtonGroup, Divider } from 'react-native-elements'
+import { View, Dimensions, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native'
 import firebase from 'firebase'
 import { render } from 'react-dom'
-import { FlatList } from 'react-native-gesture-handler'
+import { FlatList,  } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { withNavigation } from 'react-navigation';
 import ActivityPopupChatroomSelect from '../ActivityPop/ActivityPopupChatroomSelect'
 import Room from './Room'
+import { AntDesign } from '@expo/vector-icons'
 
 const { width, height } = Dimensions.get('window')
 let groupsIn = []
@@ -26,12 +27,26 @@ class ChatRoomsList extends Component {
             story: false,
             loading: false,
             limit: 6,
-            lastVisible: null
+            lastVisible: null,
+            searchChats: "",
+            filteredData: [],
+            filter: false,
+            index: null,
+            filterBy: ""
         }
         this.mama = this.mama.bind(this)
         this.tata = this.tata.bind(this)
+        this.updateIndex = this.updateIndex.bind(this)
     }
 
+
+    searchChats = (searchChats) => {
+        this.setState({searchChats: searchChats})
+        let filteredData = this.state.documentData.filter(function(item){
+            return item.chatRoomName.includes(searchChats)
+        })
+        this.setState({filteredData: filteredData})
+      }
     componentDidMount = async () => {
         groupsIn = []
         arr = []
@@ -41,7 +56,7 @@ class ChatRoomsList extends Component {
 
     }
 
-    //
+    
 
 
     mama = (uid) => {
@@ -137,14 +152,53 @@ class ChatRoomsList extends Component {
 
     }
 
+    openFilter = () => {
+        this.setState({
+            filter: true
+        })
+    }
+
+    closeFilter = () => {
+        this.setState({
+            filter: false
+        })
+    }
+    updateIndex(selectedIndex){
+        this.setState({
+            index: selectedIndex
+        })
+    }
+    date = () => {
+        this.setState({
+            filterBy: "date"
+        })
+
+
+    }
+
 
     render() {
+//={{type: 'antdesign', name: 'filter'}}
 
         if (this.state.type !== 0) {
             return (
                 <SafeAreaView>
+                <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
+    backgroundColor:"#fff",
+    borderBottomColor: '#ecedef',
+    borderTopColor: '#ecedef',
+    borderLeftColor: '#ecedef',
+    borderRightColor: '#ecedef',
+    borderWidth: 1,
+    borderRadius: 10,
+    margin: 10,
+}}  inputContainerStyle={{backgroundColor: '#fff', height: 30}} 
+    value={this.state.searchChats}
+    onChangeText={this.searchChats}
+/>
+
                     <FlatList
-                        data={this.state.documentData}
+                    data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                         renderItem={({ item, index }) => (
 
                             

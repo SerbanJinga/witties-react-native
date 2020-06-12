@@ -83,9 +83,16 @@ export default class ActivityPopup extends React.Component {
         this.importSendUserList = this.importSendUserList.bind(this)
     }
 
+    dummy = () => {
+        let colorArr = ['black', 'red', 'pink', 'green']
+        let color = colorArr[Math.floor(Math.random() * colorArr.length)]
+        console.log(color)
+    }
+
 
     componentDidMount() {
-            if(this.props.imageFromCamera !== undefined){
+        this.dummy()
+        if(this.props.imageFromCamera !== undefined){
                 this.setState({
                     imageUri: this.props.imageFromCamera
                 })

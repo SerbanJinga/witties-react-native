@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, FlatList, Animated, SafeAreaView, Text, ActivityIndicator } from 'react-native'
+import { View, StyleSheet, Dimensions, FlatList, Animated, SafeAreaView, Text, ActivityIndicator, TextInput } from 'react-native'
 import firebase from 'firebase'
 import Status from '../../components/Status'
 import * as theme from '../../styles/theme'
@@ -10,7 +10,7 @@ import Modal from 'react-native-modal'
 let arr = []
 let allStatuses = []
 import FullScreenStory from './FullScreenStory'
-import { Overlay, Button } from 'react-native-elements'
+import { Overlay, Button, SearchBar, Input } from 'react-native-elements'
 import FriendList from '../friendSystem/FriendList'
 const stories = []
 let newArr = []
@@ -30,9 +30,12 @@ const { height, width } = Dimensions.get('window')
             refreshing: false,
             storiesModal: false,
             allStatuses: [],
-            chat: false
+            chat: false,
+            searchChats: ""
         }
     }
+
+   
 
 
     componentDidMount = async() => {
@@ -124,7 +127,7 @@ const { height, width } = Dimensions.get('window')
     onPress = async (item) => {
       await this.getAllStoriesFromId(item.creatorId)
       
-      this.props.navigation.navigate('FullScreenStory',    { status: item, allStories: this.state.allStatuses})
+      this.props.navigation.navigate('FullScreenStory',    { status: item, allStories: this.state.allStatuses, transition: 'collapseExpand'})
       
     }
 
@@ -143,7 +146,9 @@ const { height, width } = Dimensions.get('window')
     render(){
       if(this.state.fontsLoaded){
         return(
-            <View style={[ styles.column, styles.destinations ], { marginTop: 40}}>
+            <View style={[ styles.column, styles.destinations ]}>
+                  <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>News</Text>
+                
                 <SafeAreaView style={styles.container} >
                 <FlatList
                 // decelerationRate={0}
@@ -168,12 +173,14 @@ const { height, width } = Dimensions.get('window')
                 />
             </SafeAreaView>
             
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                   <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Messages</Text>
                   <Button onPress={()=> this.openNewChatOverlay()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 10}} type="clear" title="New"/>
                 </View>
+               
+
                 <ChatRoomsList/>
-                <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} animationType="fade">
+                <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} fullScreen animationType="slide">
                   <View style={{flex: 1}}>
                     <FriendList close={()=>this.closeNewChatOverlay()}/>
                   </View>

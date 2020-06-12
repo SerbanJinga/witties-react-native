@@ -17,6 +17,7 @@ import {
     Text
 
 } from 'react-native';
+import { AntDesign } from '@expo/vector-icons'
 import * as theme from '../../styles/theme'
 
 
@@ -57,13 +58,14 @@ constructor(props){
   }
 render(){
     return(
-        <TouchableOpacity activeOpacity={0.8} onPress={() => this.props.apasa()}>
+        <TouchableOpacity activeOpacity={0.8}>
+          
 <ImageBackground
   style={[styles.flex, styles.destination]}
   source={{uri: this.props.image}}
 >
 
-    <Progress.Bar style={{marginLeft: 10, marginRight: 10}} progress={this.state.progress} indeterminate={this.state.indeterminate} width={width} height={2}/>
+    {/* <Progress.Bar style={{marginLeft: 10, marginRight: 10}} progress={this.state.progress} indeterminate={this.state.indeterminate} width={width} height={2}/> */}
     
 
   <View style={[styles.row, { justifyContent: 'space-between' }]}>
@@ -80,6 +82,9 @@ render(){
           color={theme.colors.white}
         />
         <Text> {this.props.mood}</Text>
+        <TouchableOpacity onPress={() => this.props.close()}>
+            <AntDesign name="arrowleft" size={20} color="white"/>
+          </TouchableOpacity>
       </Text>
     </View>
 
