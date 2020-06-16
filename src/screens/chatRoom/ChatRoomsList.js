@@ -142,13 +142,15 @@ class ChatRoomsList extends Component {
         let documentSnapshots = await inititalQuery.get()
         let documentData = documentSnapshots.docs.map(doc => doc.data())
         documentData.forEach(doc => arr.push(doc))
-        let lastVisible = documentData[documentData.length - 1]
+        let lastVisible = arr[arr.length - 1]
         this.setState({
             documentData: arr,
             lastVisible: lastVisible,
             loading: false
 
         })
+
+        console.log("LSASLOAG AGKAGAG", this.state.lastVisible)
 
     }
 

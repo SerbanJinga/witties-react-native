@@ -201,10 +201,10 @@ let twoUserArr = []
                                     alignItems: 'center',
                                     backgroundColor: 'transparent',                  
                                 }}>
-                            <MaterialCommunityIcons
+                            <AntDesign
                                 name="close"
-                                style={{ color: "#000", fontSize: 30}}
-                                
+                                size={20}
+
                             />
                             </TouchableOpacity>
                             <TouchableOpacity onPress={this.createChatRoom}>

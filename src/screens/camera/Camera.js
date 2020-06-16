@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import { Overlay, Icon } from 'react-native-elements'
-import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView } from 'react-native'
 import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
 import { FontAwesome, MaterialCommunityIcons, Ionicons, Feather, AntDesign } from '@expo/vector-icons'
@@ -9,9 +9,16 @@ import Gallery from './Gallery'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
 import * as ImagePicker from 'expo-image-picker'
-import { Avatar, Button } from 'react-native-elements'
+import { Avatar, SearchBar } from 'react-native-elements'
 import ActivityPopup from '../ActivityPop/ActivityPopup'
+import { Video } from 'expo-av'
+import SendToList from './SendToList'
+import { Send } from 'react-native-gifted-chat'
+import DoubleTap from './DoubleTap'
+
 const { width, height } = Dimensions.get('window')
+
+let lastTap = null
 export default class CameraScreen extends Component {
     constructor(props){
         super(props)
@@ -24,8 +31,15 @@ export default class CameraScreen extends Component {
             withFlash: Camera.Constants.FlashMode.off,
             profilePicture: '',
             fontsLoaded: false,
-            showAct: false
-        }
+            showAct: false,
+            onPressCamera: false,
+            currentDate: Date.now(),
+            cameraDoes: "photo",
+            video: "",
+            showVideo: false,
+            openSend: false,
+            settings: false
+          }
     }
 
     
@@ -92,6 +106,22 @@ takePicture = () => {
   }
 }
 
+takeVideo =() => {
+  this.camera.stopRecording()
+  this.setState({
+    showVideo: true
+  })
+  console.log('s-a oprit')
+  console.log(this.state.showVideo)
+}
+
+stopRecording = () => {
+
+}
+
+
+
+
 onPictureSaved = photo => {
   this.setState({
     pictureTaken: photo.uri,
@@ -106,15 +136,25 @@ changeFlashIcon = () => {
   let newFlash;
   let stateFlash = ''
   if(this.state.flashIcon === 'flash'){
+    this.setState({
+      withFlash: Camera.Constants.FlashMode.auto 
+    })
     newFlash = 'flash-auto'
   }else if(this.state.flashIcon === 'flash-auto'){
+    this.setState({
+      withFlash: Camera.Constants.FlashMode.off
+    })
     newFlash = 'flash-off'
   }else if(this.state.flashIcon === 'flash-off'){
+    this.setState({
+      withFlash: Camera.Constants.FlashMode.on
+    })
     newFlash = 'flash'
   }
   this.setState({
     flashIcon: newFlash,
   })
+
 }
 
 pickImage = async() => {
@@ -123,22 +163,76 @@ pickImage = async() => {
     allowsEditing: true,
     aspect: [4, 3]
   })
-
   if(!result.cancelled){
-    // this.setState({
-    //   pictureTaken: result.uri
-    // })
-    console.log(result.uri)
+    this.setState({
+      pictureTaken: result.uri,
+      showPhoto: true
+    })
   }
 
+ 
+
 }
+startTimer = () => {
+  this.setState({
+    onPressCamera: true
+  })
+  setTimeout(this.checkTimer, 400)
+}
+
+checkTimer = async() => {
+  if(this.state.onPressCamera === true){
+    this.setState({
+      cameraDoes: "video"
+    })
+    let video = await this.camera.recordAsync()
+    console.log(video)
+    this.setState({
+      video: video.uri
+    })
+    console.log(this.state.video != '')
+
+  }else{
+    this.setState({
+      cameraDoes: "photo"
+    })
+  }
+}
+
+stopTimer = () => {
+  this.setState({
+    onPressCamera: false
+  })
+
+  if(this.state.cameraDoes === 'photo'){
+    this.takePicture()
+  }else{
+    this.takeVideo()
+
+  }
+}
+
+openSettings = () => {
+  this.setState({
+    settings: true
+  })
+}
+
+closeSettings = () => {
+  this.setState({
+    settings: false
+  })
+}
+
 renderCamera = () => {
   return(
     <View style={{flex: 1}}>
+    <DoubleTap onDoubleTap={() => this.handleCameraType()}>
         <Camera ratio={'16: 9'} style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}} flashMode={this.state.withFlash}>
 
     <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>   
     <TouchableOpacity
+      onPress={() => this.openSettings()}
       activeOpacity={0.8}
       style={{
         alignSelf: 'flex-end',
@@ -188,7 +282,10 @@ renderCamera = () => {
       />
     </TouchableOpacity>
     <TouchableOpacity
-      onPress={this.takePicture}
+      onPressIn={this.startTimer}
+      // onLongPress={() => console.log('apas lung')}
+      onPressOut={this.stopTimer}
+      // onPress={this.takePicture}
       style={{
         alignSelf: 'flex-end',
         alignItems: 'center',
@@ -214,12 +311,47 @@ renderCamera = () => {
       />
     </TouchableOpacity>
   </View>
+  <Overlay isVisible={this.state.settings} animationType="slide" fullScreen>
+  <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+
+  <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>  
+            <TouchableOpacity onPress={() => this.closeSettings()}>
+            <AntDesign name="close" size={20}/>
+        </TouchableOpacity>
+    
+
+       </View>
+       </View>
+       </ScrollView>
+  </Overlay>
   </Camera>
+  </DoubleTap>
   </View>)
+}
+
+openSendTo = () => {
+  this.setState({
+    openSend: true
+  })
+}
+
+closeSendTo = () => {
+  this.setState({
+    openSend: false
+  })
+}
+
+_postOnStory = () => {
+  firebase.firestore().collection()
 }
 
 _pressOverlay = () => {
   this.setState({ showPhoto: false, pictureTaken: '' })
+}
+
+sendPost = () => {
+
 }
 
 renderGallery = () => {
@@ -271,7 +403,7 @@ renderGallery = () => {
              </View>
              <View style={{flex: 0, flexDirection: 'row', margin: 20, position: 'absolute', bottom: 20, alignContent: 'center', justifyContent: 'space-between'}}>
              <View style={{flex: 0, flexDirection: 'column', alignItems: 'center', margin: 10}}>              
-              <Avatar containerStyle={{borderWidth: 2, borderColor: 'white',  borderStyle: 'solid'}} rounded source={{uri: this.state.profilePicture}}/>
+              <Avatar onPress={() => this._postOnStory()} containerStyle={{borderWidth: 2, borderColor: 'white',  borderStyle: 'solid'}} rounded source={{uri: this.state.profilePicture}}/>
               <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Your Story</Text>
              </View>
              <View style={{flex: 0, flexDirection: 'column', alignItems: 'center', margin: 10}}>              
@@ -279,7 +411,7 @@ renderGallery = () => {
               <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Edit</Text>
              </View>
              <TouchableOpacity>
-            <TouchableOpacity style={{backgroundColor: '#0984e3', borderRadius: '40'}}>
+            <TouchableOpacity style={{backgroundColor: '#0984e3', borderRadius: '40'}} onPress={()=> this.openSendTo()}>
             <View style={{flex: 0, justifyContent: 'center',alignContent: 'center', alignItems: 'center',marginTop: 20, marginLeft: 80, flexDirection: 'row'}}>
 
              <Text style={{color: '#fff', marginRight:15, fontFamily: 'font1', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>Send to</Text>
@@ -301,16 +433,36 @@ renderGallery = () => {
             <Overlay overlayStyle={{width: width, height: height - 200, position: 'absolute', bottom: 0}} onBackdropPress={() => this.closeSwipablePanel()} animationType='fade' isVisible={this.state.showAct}>
               <ActivityPopup imageFromCamera={this.state.pictureTaken}/>
             </Overlay>
+
+            <Overlay fullScreen animationType="slide" isVisible={this.state.openSend}>
+              <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()}/>
+            </Overlay>
       </Overlay>
     )
 }
 
+renderVideo = () => {
+  // console.log('se randeaza')
+  return(
+  <Overlay isVisible={this.state.showVideo} overlayStyle={{flex: 1}}>
+  <View style={{flex: 1}}>
+    <Video source={{uri: this.state.video}} style={{width: width, height: height}} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+    </View>
+  </Overlay>
+  )
+}
+
     render(){
       if(this.state.fontsLoaded){
-      if(this.state.pictureTaken === ''){
+      if(this.state.pictureTaken === '' && this.state.video === ''){
+        console.log('n am poza nici video')
         return this.renderCamera()
-      }else{
+      }else if(this.state.pictureTaken !== ''){
+        console.log('am poza')
         return this.renderGallery()
+      }else if(this.state.video !== ''){
+        console.log('am video', this.state.video)
+        return this.renderVideo()
       }
         
     }else{

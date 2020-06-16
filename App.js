@@ -87,6 +87,9 @@ const navigator = createStackNavigator(
     Home: {
       name: 'Home',
       screen: Home,
+      navigationOptions:{
+        gestureEnabled: false
+      }
      },
    
     Chat: ChatNavigator,

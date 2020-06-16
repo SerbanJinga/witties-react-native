@@ -34,14 +34,14 @@ const friendsArr = [];
 import SwipeablePanel from 'rn-swipeable-panel'
 import PlacesInput from 'react-native-places-input';
 import ChatroomList from '../chatRoom/ChatRoomsList'
-
+let replacer;
 export default class ActivityPopup extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
             displayName: props.laba,
             nameOfUser: props.name,
-            
+
             selectedActivity: '',
 
             gap: 0,
@@ -83,6 +83,7 @@ export default class ActivityPopup extends React.Component {
         this.importSendUserList = this.importSendUserList.bind(this)
     }
 
+
     dummy = () => {
         let colorArr = ['black', 'red', 'pink', 'green']
         let color = colorArr[Math.floor(Math.random() * colorArr.length)]
@@ -120,7 +121,7 @@ export default class ActivityPopup extends React.Component {
     }
 
     pressButton = () => {
-        if(this.state.imageUri === ''){
+        if(this.state.imageUri === ''){+
             this.sendActivity('')
         }else{
             this.uploadPhoto()
@@ -148,8 +149,8 @@ export default class ActivityPopup extends React.Component {
             async () => {
                 const url = await upload.snapshot.ref.getDownloadURL()
                 console.log(url)
-                this.setState({ imageURL: url })
-                this.sendActivity(this.state.imageURL).then(() => this.props.papa())
+                this.setState({ imageURL: url })//EROARE AICi
+                this.sendActivity(this.state.imageURL).then(() => this.props.papa(replacer))
             })
     }
     importSendUserList(cv, story) {
@@ -225,7 +226,8 @@ export default class ActivityPopup extends React.Component {
             timestamp: Date.now(),
             hoursPosted: this.state.selectedValueHours,
             location: this.state.location,
-            creatorId: firebase.auth().currentUser.uid
+            creatorId: firebase.auth().currentUser.uid,
+            albums:[],
 
             
         }
@@ -233,16 +235,31 @@ export default class ActivityPopup extends React.Component {
         console.log('-------------------------------------')
         console.log(this.state.usersSentTo)
         console.log('-------------------------------------')
+        replacer = foo;
         if (this.state.public)
             firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).update({
                 statuses: firebase.firestore.FieldValue.arrayUnion(foo)
             })
 
-        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).update({
-            statuses: firebase.firestore.FieldValue.arrayUnion(foo)
+         firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').add({
+            mood: foo.mood,
+            text: foo.text,
+            taggedUsers: foo.taggedUsers,
+            activity: foo.activity,
+            image: foo.image,
+            timestamp: foo.timestamp,
+            hoursPosted: foo.hoursPosted,
+            location: foo.location,
+            creatorId: firebase.auth().currentUser.uid,
+            albums:foo.albums,
+         })
+         
+         
+         //({
+        //     statuses: firebase.firestore.FieldValue.arrayUnion(foo)
 
 
-        })
+        // })
 
         firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
             status: foo,

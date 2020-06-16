@@ -5,8 +5,10 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Octicons from 'react-native-vector-icons/Octicons'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
+import TimelineOverlay from './TimelineOverlay'
 const { height, width } = Dimensions.get('window')
-import ImageLoader from './ImageLoader'
+const screenHeight = Dimensions.get('screen').height
+const screenWidth = Dimensions.get('screen').width
 export default class TimelinePost extends Component {
 
     constructor(props) {
@@ -17,6 +19,7 @@ export default class TimelinePost extends Component {
             fontsLoaded: false,
             marginLeft: 0,
             marginRight: 0,
+            showOptions: false,
         }
     }
 
@@ -53,12 +56,10 @@ export default class TimelinePost extends Component {
 
         //let year = date.getUTCFullYear()
 
-
-
         return (<View style={{
             position: 'absolute', top: 5, left: 5, width: 30, height: 30,
             backgroundColor: 'white', justifyContent: "center", alignItems: "center",
-            borderRadius:5,
+            borderRadius: 5,
         }}>
             <Text style={{ fontSize: 8 }}>{day}</Text>
             <Text style={{ fontSize: 8 }}>{month}</Text>
@@ -80,56 +81,51 @@ export default class TimelinePost extends Component {
         // console.log(this.state.date)
         // console.log("-----------------------------------------")
         // await this.getData(this.props.creatorId)
-        Font.loadAsync({
-            font1: require('../../../assets/SourceSansPro-Black.ttf')
-        }).then(this.setState({
-            fontsLoaded: true
-        }))
+
 
     }
-
+/*  */
     render() {
-        if(this.state.fontsLoaded){
+
         return (
             <TouchableOpacity
                 activeOpacity={0.8}
                 style={{}}
+                onLongPress={() => {
+                    console.log("Saluttt")
+                    this.props.showOverlay(this.props.id)
+                }}
+                onPressIn={() => { console.log("Press In") }}
             // onPress={() => this.props.press()}
             >
-
+               
                 <ImageBackground
                     style={[styles.flex, styles.destination]}
                     imageStyle={{ borderColor: 'black', borderWidth: 1 }}
-                    // source={{ uri: this.props.image }}
+                    source={{ uri: this.props.image }}
                 >
-                    <ImageLoader source={{uri: this.props.image}} style={{width: width / 3, height: width * 0.5,  borderWidth: 1, borderColor: 'black'}}/>
-
                     {this._renderTimestamps(this.props.timestamp)}
                     <View style={[styles.column, { justifyContent: 'center' }]}>
-                    
                         <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
 
-                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4, fontFamily: 'font1'}}>{this.state.displayName}</Text>
-                        <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4, fontFamily: 'font1' }}>
+                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
+                        <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
                             <Octicons
                                 name="smiley"
                                 size={theme.sizes.font * 0.8}
                                 color={theme.colors.white}
                             />
-                            <Text>{this.props.mood}</Text>
-                            <Text style={{fontFamily: 'font1'}}> {this.props.text}</Text>
+                            <Text> {this.props.text}</Text>
                         </Text>
 
 
                     </View>
                 </ImageBackground>
 
-            </TouchableOpacity>
+            </TouchableOpacity >
 
 
-        )}else{
-            return ( <ActivityIndicator size="large"/>)
-        }
+        )
 
 
     }

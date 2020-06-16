@@ -50,8 +50,8 @@ export default class Home extends Component {
       await this._getProfilePicture()
       console.log(firebase.auth().currentUser.uid)
       console.log('se executa........')
-    //  const func = await firebase.functions().httpsCallable('deletePost')
-    //  func({timestamp: "1591718068140"}).then(console.log('a mers'))
+     const func = await firebase.functions().httpsCallable('deletePost')
+     func({timestamp: String(1591369937622)}).then(console.log('a mers'))
   }
 
 

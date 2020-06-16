@@ -31,7 +31,8 @@ const { height, width } = Dimensions.get('window')
             storiesModal: false,
             allStatuses: [],
             chat: false,
-            searchChats: ""
+            searchChats: "",
+            lastVisible: {}
         }
     }
 
@@ -94,9 +95,14 @@ const { height, width } = Dimensions.get('window')
           arr.push(queryDocumentData[queryDocumentData.length - 1])
           queryDocumentData.forEach(doc => allStatuses.push(doc))
           this.setState({documentData: arr, allStatuses: allStatuses})
-        
+          
+        })
+        let lastVisible = arr[arr.length - 1]
+        this.setState({
+          lastVisible: lastVisible
         })
 
+        console.log('LAST VISIBLE', lastVisible)
     }
     
 
@@ -141,6 +147,19 @@ const { height, width } = Dimensions.get('window')
       this.setState({
         chat: false
       })
+    }
+    renderFooter = () => {
+      try{
+        if(this.state.loading || this.state.refreshing){
+          return(
+            <ActivityIndicator size="large"/>
+          )
+        }else{
+          return null
+        }
+      }catch(err){
+        console.log(err)
+      }
     }
 
     render(){

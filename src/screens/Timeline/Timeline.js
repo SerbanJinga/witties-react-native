@@ -16,8 +16,6 @@ import {
 
 
 } from 'react-native';
-import ImageLoader from './ImageLoader'
-import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
 import ActivityPopup from '../ActivityPop/ActivityPopup'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
@@ -25,12 +23,15 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import * as theme from '../../styles/theme'
 import SwipeablePanel from 'rn-swipeable-panel';
 import Status from "../../components/Status"
+import { AntDesign } from '@expo/vector-icons'
 const { width, height } = Dimensions.get('window')
-import * as Font from 'expo-font'
+
 import firebase from 'firebase';
 import { divide } from "react-native-reanimated";
 const screenHeight = Dimensions.get('screen').height;
 import TimelinePost from './TimelinePost'
+import TimelineOverlay from "./TimelineOverlay";
+import { indexOf } from "lodash";
 
 
 
@@ -41,26 +42,21 @@ export default class Timeline extends React.Component {
             documentDataFriends: [],
             plusSize: 30,
             showAct: false,
-            
-            documentData:[],
+            documentData: [],
             lastVisible: null,
             loading: false,
             refreshing: false,
             filteredData: [],
-
+            showOverlay: false,
+            id:'',
             limit: 20,
-            fontsLoaded: false,
             openFilter: false
 
         }
         this.closeSwipablePanel = this.closeSwipablePanel.bind(this)
+        this.renderOverlay = this.renderOverlay.bind(this)
     }
     componentDidMount() {
-        Font.loadAsync({
-            font1: require('../../../assets/SourceSansPro-Black.ttf')
-        }).then(this.setState({
-            fontsLoaded: true
-        }))
         console.log("De aici vine", this.state.displayName)
 
         this.retrieveData()
@@ -79,42 +75,11 @@ export default class Timeline extends React.Component {
     }
     search = (searchText) => {
         this.setState({ searchText: searchText })
-        let filteredData = this.state.documentData.filter(function (item) {
-            return item.text.toLowerCase().includes(searchText)
+        let filteredData = this.state.documentDataFriends.filter(function (item) {
+            return item.displayName.toLowerCase().includes(searchText)
         })
         this.setState({ filteredData: filteredData })
     }
-
-    closeSwipablePanel = (foo) =>{
-        this.setState({showAct:false})
-        let fasdas = this.state.documentData
-        if(typeof foo === 'undefined')
-        return;
-
-        fasdas.push(foo)
-        this.setState({documentData:fasdas})
-        // console.log(' aklgjhakgakgjakgja kg,ajkglkaklgkalgklagkl')
-    }
-    async retrieveData() {
-        let initialQuery = await firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid)
-        let documentSnapshots = await initialQuery.get()
-        console.log('-------------------------------------------------')
-        console.log(documentSnapshots)
-        console.log('-------------------------------------------------')
-        let documentData = documentSnapshots.data().statuses
-        console.log('---------------------------aqwqeqe----------------------')
-        console.log(documentData)
-        console.log('-------------------------------------------------')
-        documentData.reverse()
-        documentData.slice().sort((a, b) => a.timestamp - b.timestamp)
-
-        this.setState({ documentData: documentData })
-        // console.log('-------------------------------------------------')
-        // console.log(this.state.documentData)
-        // console.log('-------------------------------------------------')
-
-    }
-
     openFilter = () => {
         this.setState({
             openFilter: true
@@ -191,9 +156,38 @@ export default class Timeline extends React.Component {
             documentData: documentData,
         })
     }
+    renderOverlay(id) {
+        console.log('------------------------------------------------')
+        console.log(id)
+        console.log('------------------------------------------------')
+        this.setState({ id:id, showOverlay: true})
+    }
+
+    closeSwipablePanel = (foo) => {
+        this.setState({ showAct: false })
+        let fasdas = this.state.documentData
+        if (typeof foo === 'undefined')
+            return;
+
+        fasdas.push(foo)
+        this.setState({ documentData: fasdas })
+        // console.log(' aklgjhakgakgjakgja kg,ajkglkaklgkalgklagkl')
+    }
+    async retrieveData() {
+        let initialQuery = await firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid).collection('statuses')
+        let documentSnapshots = await initialQuery.get()
+        let documentData = documentSnapshots.docs.map(document => document.data())
+        let idMap = documentSnapshots.docs.map(document => document.id)
+        for (let i = 0; i < idMap.length; i++) {
+            documentData[i].id = idMap[i]
+        }
+        documentData.reverse()
+        documentData.slice().sort((a, b) => a.timestamp - b.timestamp)
+        this.setState({ documentData: documentData })
+    }
     render() {
         return (<View style={{ height: screenHeight, flex: 1 }}>
-        <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>  
+         <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>  
               <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
     backgroundColor:"#fff",
     borderBottomColor: '#ecedef',
@@ -211,42 +205,55 @@ export default class Timeline extends React.Component {
 
            </View>
             <Overlay isVisible={this.state.showAct}
-                
-                fullScreen
+
+
                 onBackdropPress={() => { this.setState({ showAct: false }) }}
                 // showCloseButton
-                overlayStyle={{position:"absolute",bottom:0,width:width}}
-                animationType='slide'
+                overlayStyle={{ position: "absolute", bottom: 0, width: width, top: 40 }}
+                animationType='fade'
                 transparent
 
             >
-            
-            <TouchableOpacity style={{marginTop: 10}} onPress={() => {this.setState({showAct: false})}}>
-                <AntDesign name="close" size={20}/>
-            </TouchableOpacity>
-                <ActivityPopup papa={this.closeSwipablePanel}/>
+                <ActivityPopup papa={this.closeSwipablePanel} />
+            </Overlay>
+
+            <Overlay isVisible={this.state.showOverlay}
+
+
+                onBackdropPress={() => { this.setState({ showOverlay: false }) }}
+
+                overlayStyle={{ position: "absolute", left: 15, right: 15, borderRadius: 30, }}
+                animationType='fade'
+                transparent
+
+            >
+
+                <TimelineOverlay id={this.state.id} /> 
             </Overlay>
             {/* //(this.state.documentData[index].date === item.date) */}
             {/* <Text h4 style={{paddingTop:30}}>spatiu sus bro</Text> */}
-            
+
             <View style={{ alignItems: 'center' }}>
-            
                 <FlatList
                     // decelerationRate={0}
 
-                    data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
 
+                    data={this.state.documentData}
                     renderItem={({ item, index }) => (
-                        <TimelinePost 
-                        postedFor={item.hoursPosted} 
-                        activity={item.activity} 
-                        mood={item.mood} 
-                        text={item.text} 
-                        creatorId={item.creatorId} 
-                        timestamp={item.timestamp} 
-                        image={item.image} 
+
+                        <TimelinePost
+                            postedFor={item.hoursPosted}
+                            activity={item.activity}
+                            mood={item.mood}
+                            text={item.text}
+                            creatorId={item.creatorId}
+                            timestamp={item.timestamp}
+                            image={item.image}
+                            showOverlay={this.renderOverlay}
+                            id={item.id}
+
                         // press={() => this.onPress(item)}
-                        
+
                         />
 
                     )}
@@ -256,32 +263,27 @@ export default class Timeline extends React.Component {
                     // ItemSeparatorComponent={(item) => (<Text>{item.date}</Text>)}
                     onEndReached={this.retrieveMore}
                     onEndReachedThreshold={1}
-                    columnWrapperStyle={{flexDirection:"row-reverse"}}
+                    columnWrapperStyle={{ flexDirection: "row-reverse" }}
                     refreshing={this.state.refreshing}
                     inverted
                     numColumns={3}
-                    
-                    
+
+
 
                 />
 
 
             </View>
             <TouchableOpacity style={{
+                flex: 1,
                 position: 'absolute',
                 alignItems: "center",
                 right: 30,
                 bottom: 30,
                 opacity: (this.state.showAct) ? 0 : 1,
-                // borderRadius: 1000, 
-                borderWidth: 0,
-                borderColor: 'transparent', 
+
             }} onPress={() => { this.setState({ showAct: true }) }}>
-                    <AntDesign 
-                        name="pluscircle"
-                        size={48}
-                        style={{color: theme.colors.blue}}
-                    />
+                <Ionicons size={60} name={"ios-add"} style={[{ color: theme.colors.white, backgroundColor: theme.colors.blue, paddingHorizontal: 15, borderRadius: 60 }]} />
             </TouchableOpacity>
             <Overlay isVisible={this.state.openFilter} fullScreen animationType="slide">
                 <View style={{flex: 1, flexDirection: 'column'}}>
@@ -293,7 +295,7 @@ export default class Timeline extends React.Component {
                                     alignItems: 'center',
                                     backgroundColor: 'transparent',                  
                                 }}>
-                            <MaterialCommunityIcons
+                            <AntDesign
                                 name="close"
                                 style={{ color: "#000", fontSize: 30}}
                                 
