@@ -25,8 +25,9 @@ import PlacesInput from 'react-native-places-input';
 import CameraScreen from '../screens/camera/Camera'
 import { SafeAreaView } from 'react-native-safe-area-context'
 const { width, height } = Dimensions.get('window')
-
-
+let arr = []
+let finalArr = []
+let arrTest = []
 export default class Home extends Component {
 
 
@@ -46,13 +47,26 @@ export default class Home extends Component {
     
 
     componentDidMount = async() => {
+      arr = []
+      finalArr = []
       await this._getToken()
       await this._getProfilePicture()
       console.log(firebase.auth().currentUser.uid)
       console.log('se executa........')
-     const func = await firebase.functions().httpsCallable('deletePost')
-     func({timestamp: String(1591369937622)}).then(console.log('a mers'))
-  }
+    //  const func = await firebase.functions().httpsCallable('deletePost')
+    //  func({timestamp: String(1591369937622)}).then(console.log('a mers'))
+    //  const func = await firebase.functions().httpsCallable('recommendedFriends')
+    //  func().then(res => console.log('SE POATE', res.data)).catch(err => console.log('nu merge'))
+     
+    }
+
+
+    addToArr = (data) => {
+      arr.push(data)
+      console.log(arr)
+    }
+  
+
 
 
     _getProfilePicture = async() => {

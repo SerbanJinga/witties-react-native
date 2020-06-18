@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard, Alert } from 'react-native'
+import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard, Alert, SectionList } from 'react-native'
 import { Text, SearchBar, Button, Avatar, Overlay, Input, Divider, Tooltip } from 'react-native-elements'
 // import Clipboard from '@react-native-community/clipboard'
 import firebase from 'firebase'
@@ -14,11 +14,13 @@ import AddFriend from './AddFriend'
 import { withNavigation } from 'react-navigation'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import Timeline from '../../screens/Timeline/Timeline'
+import AddedMe from './AddedMe'
 
 const { width, height } = Dimensions.get('window')
 const heightS = Dimensions.get('screen').height
 const widthS = Dimensions.get('screen').width
 let arr = []
+let addedMe = []
 
   class SearchUsers extends Component {
       
@@ -46,7 +48,8 @@ let arr = []
             discriminator: '',
             email: firebase.auth().currentUser.email,
             allUsersUid: [],
-            settings: false
+            settings: false,
+            addedMe: []
         }
     }
 
@@ -89,16 +92,18 @@ let arr = []
      
     componentDidMount = async() => {
         arr = []
-        await this.getCurrentUser()
-        await this.retrieveData().then(this.setState({documentData: arr}))
-        await this._retrieveProfilePicture()
+        addedMe = []
+        
 console.log(arr)
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf'),
             font2: require('../../../assets/SourceSansPro-Regular.ttf')
         });
         this.setState({fontsLoaded: true})
-        
+        await this.getCurrentUser()
+        await this.retrieveData().then(this.setState({documentData: arr}))
+        await this.addedMe()
+        await this._retrieveProfilePicture()
     }
 
     search = (searchText) => {
@@ -173,6 +178,23 @@ console.log(arr)
         let documentData = await documentSnapshots.data()
         arr.push(documentData)
     }
+
+    addedMe = async () => {
+        let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+        let addData = await initialQuery.data().receivedRequests
+        addData.forEach(element => this.getAddedMeUser(element))
+    }
+
+    getAddedMeUser = async(uid) => {
+        let initialQuery = await firebase.firestore().collection('users').doc(uid).get()
+        let data = await initialQuery.data()
+        addedMe.push(data)
+        console.log('adlafjakfjkalfjalkdal')
+        console.log(addedMe)
+        this.setState({
+            addedMe: addedMe
+        })
+    }
     
     sendNotification = async(token, uid) => {
         const message = {
@@ -205,17 +227,15 @@ console.log(arr)
         console.log('se trimite')
         this.state.friendRequsts.push(uid)
         await this.getToken(uid)
-      firebase.firestore().collection("friends").doc(firebase.auth().currentUser.uid).collection("sent").doc(uid).set({
-        accepted: false,
-        request: "pending",
-        receiver: uid
-      })
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            sentRequests: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
 
-      firebase.firestore().collection("friends").doc(uid).collection("received").doc(firebase.auth().currentUser.uid).set({
-          accepted: false,
-          request: "pending",
-          sender: firebase.auth().currentUser.uid
-      })
+        firebase.firestore().collection('users').doc(uid).update({
+            receivedRequests: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
+
+  
 
     }
 
@@ -280,6 +300,22 @@ console.log(arr)
         })
     }
 
+    _acceptFriend = (uid) => {
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(uid)
+        })    
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            receivedRequests: firebase.firestore.FieldValue.arrayRemove(uid)
+        })
+
+        firebase.firestore().collection('users').doc(uid).update({
+            sentRequests: firebase.firestore.FieldValue.arrayRemove(firebase.auth().currentUser.uid)
+        })
+        firebase.firestore().collection('users').doc(uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
+    }
+
 
     render(){
             const loaded = this.state.fontsLoaded
@@ -337,6 +373,17 @@ console.log(arr)
 
            </View>
            </View>
+           <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Added Me</Text>
+            <FlatList
+                        data={this.state.addedMe}
+                        renderItem={({item}) => (
+                        <AddedMe careScore={item.careScore} discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._acceptFriend(item.uid)}/>
+                    )}  
+                    keyExtractor={(item, index) => String(index)}
+
+                />
+            <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Discover More</Text>
+
                 <FlatList
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
@@ -349,6 +396,7 @@ console.log(arr)
                 refreshing={this.state.refreshing}
                 onRefresh={this.handleRefresh}
                 />
+             
 </ScrollView>
                 </Overlay>
 

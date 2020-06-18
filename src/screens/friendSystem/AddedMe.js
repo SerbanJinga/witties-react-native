@@ -6,14 +6,14 @@ import * as Font from 'expo-font'
 import { AntDesign, Entypo } from '@expo/vector-icons'
 const { width, height } = Dimensions.get('window')
 
-export default class AddFriend extends Component {
+export default class AddedMe extends Component {
     constructor(props){
         super(props)
         this.state = {
             fontsLoaded: false,
             overlayOpened: false,
             showFullProfile: false,
-            buttonTitle: "Add Friend"
+            buttonTitle: "Accept"
         }
     }
 
@@ -67,7 +67,7 @@ export default class AddFriend extends Component {
                     </View>
                 <Button title={this.state.buttonTitle} type="clear" titleStyle={{fontFamily: 'font1'}} onPress={() => {this.props.press()
                 this.setState({
-                    buttonTitle: "Added"
+                    buttonTitle: "Friends"
                 })}}/>
                 </View>
                 <Divider style={{marginTop: 20}}/>

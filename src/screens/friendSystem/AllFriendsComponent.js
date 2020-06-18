@@ -6,7 +6,10 @@ import { AntDesign, Entypo } from '@expo/vector-icons'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import firebase from 'firebase'
 import { withNavigation } from 'react-navigation'
+import { FlatList } from 'react-native-gesture-handler'
 let twoUserArr = []
+let arr = []
+let finalArr = []
 
 const { width, height } = Dimensions.get('window')
  class AllFriendsComponent extends Component {
@@ -18,9 +21,18 @@ const { width, height } = Dimensions.get('window')
             showFullProfile: false,
             options: false,
             blockAlert: false,
-            removeAlert: false
+            removeAlert: false,
+            suggestedFriends: []
         }
     }
+
+    _retrieveSuggestedFriends = async () => {
+        const func = firebase.functions().httpsCallable('recommendedFriends')
+        func({uid: this.props.uid}).then(res => this.setState({
+            suggestedFriends: res.data.documentData
+        }))
+    }
+
 
     showBlockAlert = (name, uid) => {
         Alert.alert(
@@ -35,6 +47,7 @@ const { width, height } = Dimensions.get('window')
                 {
                     text: "Block",
                     onPress: () => this.blockUser(uid),
+                    style: 'destructive'
                 }
             ],
             {cancelable: 'false'}
@@ -66,6 +79,7 @@ const { width, height } = Dimensions.get('window')
                 {
                     text: "Remove",
                     onPress: () => this.removeUser(uid),
+                    style: 'destructive'
                 }
             ],
             {cancelable: 'false'}
@@ -90,6 +104,7 @@ const { width, height } = Dimensions.get('window')
         }).then(this.setState({
             fontsLoaded: true
         }))
+        await this._retrieveSuggestedFriends()
     }
     _pressTouchableOpacity = () => {
         this.setState({
@@ -254,6 +269,13 @@ const { width, height } = Dimensions.get('window')
 
                 </View>
                 <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
+                <FlatList
+                    data={this.state.suggestedFriends}
+                    renderItem={({item}) => (
+                        <Text>{item}</Text>
+                    )}   
+                keyExtractor={(item, index) => String(index)}
+                />
             </View>
             <Overlay animationType='fade' onBackdropPress={() => this._closeOptions()} isVisible={this.state.options} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
