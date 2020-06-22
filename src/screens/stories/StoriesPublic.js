@@ -8,13 +8,15 @@ import ChatRoomsList from '../chatRoom/ChatRoomsList'
 import * as Font from 'expo-font'
 import Modal from 'react-native-modal'
 let arr = []
-let allStatuses = []
+let allStoriesFromAllUsers = []
 import FullScreenStory from './FullScreenStory'
 import { Overlay, Button, SearchBar, Input } from 'react-native-elements'
 import FriendList from '../friendSystem/FriendList'
-const stories = []
-let newArr = []
-let otherArr = []
+import StreakVideo from '../chatRoom/StreakVideo'
+let stories = []
+
+
+let finalArray = []
 const { height, width } = Dimensions.get('window')
  class StoriesPublic extends Component{
     scrollX = new Animated.Value(0)
@@ -29,10 +31,11 @@ const { height, width } = Dimensions.get('window')
             loading: false,
             refreshing: false,
             storiesModal: false,
-            allStatuses: [],
+            allStoriesFromAllUsers: [],
             chat: false,
             searchChats: "",
-            lastVisible: {}
+            lastVisible: {},
+            allStoriesFromId: []
         }
     }
 
@@ -41,9 +44,11 @@ const { height, width } = Dimensions.get('window')
 
     componentDidMount = async() => {
       arr = []
-      allStatuses = []
+      allStoriesFromAllUsers = []
       newArr = []
       otherArr = []
+      finalArray = []
+      stories = []
       await this.retrieveData()
       await Font.loadAsync({
         font1: require('../../../assets/SourceSansPro-Black.ttf')
@@ -55,28 +60,7 @@ const { height, width } = Dimensions.get('window')
 
 
 
-   
-    renderDots = () => {
-        const dotPosition = Animated.divide(this.scrollX, width);
-        return(
-            <View style={[styles.flex, styles.row, {justifyContent: 'center', alignItems: 'center', marginTop: 10, flex: 1}]}>
-                {this.state.documentData.map((item, index) => {
-                    const borderWidth = dotPosition.interpolate({
-                        inputRange: [index - 1, index, index + 1],
-                        outputRange: [0, 2.5, 0],
-                        extrapolate: 'clamp'
-                    })
-                    return(
-                        <Animated.View
-                            key={`step-${item.id}`}
-                            style={[styles.dots, styles.activeDot, {borderWidth: borderWidth}]}
-                        />
-                    )
-                })}
-                
-            </View>
-        )
-    }
+
 
     retrieveData = async() => {
         const currentId = firebase.auth().currentUser.uid
@@ -93,47 +77,62 @@ const { height, width } = Dimensions.get('window')
           let querySnapshot = await initialQuery.get()
           let queryDocumentData = querySnapshot.data().statuses
           arr.push(queryDocumentData[queryDocumentData.length - 1])
-          queryDocumentData.forEach(doc => allStatuses.push(doc))
-          this.setState({documentData: arr, allStatuses: allStatuses})
-          
+          queryDocumentData.forEach(doc => allStoriesFromAllUsers.push(doc))
+          this.setState({documentData: arr, allStoriesFromAllUsers: allStoriesFromAllUsers})
+          console.log('mamamieieairia', this.state.allStoriesFromAllUsers)
         })
-        let lastVisible = arr[arr.length - 1]
-        this.setState({
-          lastVisible: lastVisible
-        })
+      }
 
-        console.log('LAST VISIBLE', lastVisible)
-    }
-    
+
 
 
   
+      // getAllStoriesFromId = async(uid) => {
+      //   let initialQuery = await firebase.firestore().collection("status-public").where('creatorId', '==', uid)
+      //   let documentSnapshots = await initialQuery.get()
+      //   let allStories = (await documentSnapshots).docs.map(doc => doc.data().statuses)
+      //   this.setState({
+      //     allStories: allStories
+      //   })
+      //   // allStories.forEach(story => this.setState({allStories: story}))
+      //    newArr = [...this.state.allStories, ...this.state.allStatuses]
+      //    otherArr = newArr.reduce((acc, current) => {
+      //     const x = acc.find(item => item.timestamp === current.timestamp)
+      //     if(!x){
+      //       return acc.concat([current])
+      //     }else{
+      //       return acc;
+      //     }
+      //   }, [])
+      //   console.log('---------------------------')
+      //   console.log(otherArr)
+      //   // allStatuses.filter(value => this.state.allStories.includes(value))
+      //   this.setState({
+      //     allStatuses: otherArr
+      //   })
+      // }
+
       getAllStoriesFromId = async(uid) => {
         let initialQuery = await firebase.firestore().collection("status-public").where('creatorId', '==', uid)
         let documentSnapshots = await initialQuery.get()
-        let allStories = (await documentSnapshots).docs.map(doc => doc.data().statuses)
-        allStories.forEach(story => this.setState({allStories: story}))
-         newArr = [...this.state.allStories, ...this.state.allStatuses]
-         otherArr = newArr.reduce((acc, current) => {
-          const x = acc.find(item => item.timestamp === current.timestamp)
-          if(!x){
-            return acc.concat([current])
-          }else{
-            return acc;
-          }
-        }, [])
-        console.log('---------------------------')
-        console.log(otherArr)
-        // allStatuses.filter(value => this.state.allStories.includes(value))
+        let allStoriesFromId = await documentSnapshots.docs.map(doc => doc.data().statuses)
+        allStoriesFromId.forEach(story => {
+          finalArray.push(story)
+        })
+        stories = this.state.allStoriesFromAllUsers.filter(element => !finalArray.includes(element))
+        console.log(finalArray)
+
+
+
         this.setState({
-          allStatuses: otherArr
+          allStoriesFromId: stories
         })
       }
 
     onPress = async (item) => {
       await this.getAllStoriesFromId(item.creatorId)
       
-      this.props.navigation.navigate('FullScreenStory',    { status: item, allStories: this.state.allStatuses, transition: 'collapseExpand'})
+      this.props.navigation.navigate('FullScreenStory',    { status: item, allStories: this.state.allStoriesFromId, transition: 'collapseExpand'})
       
     }
 
@@ -198,7 +197,8 @@ const { height, width } = Dimensions.get('window')
                 </View>
                
 
-                <ChatRoomsList/>
+                {/* <ChatRoomsList/> */}
+                  <StreakVideo/>
                 <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} fullScreen animationType="slide">
                   <View style={{flex: 1}}>
                     <FriendList close={()=>this.closeNewChatOverlay()}/>

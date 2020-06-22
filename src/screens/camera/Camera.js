@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import { Overlay, Icon } from 'react-native-elements'
-import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView, Animated, StyleSheet } from 'react-native'
 import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
 import { FontAwesome, MaterialCommunityIcons, Ionicons, Feather, AntDesign } from '@expo/vector-icons'
@@ -9,12 +9,14 @@ import Gallery from './Gallery'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
 import * as ImagePicker from 'expo-image-picker'
-import { Avatar, SearchBar } from 'react-native-elements'
+import { Avatar, SearchBar, Button } from 'react-native-elements'
 import ActivityPopup from '../ActivityPop/ActivityPopup'
 import { Video } from 'expo-av'
 import SendToList from './SendToList'
 import { Send } from 'react-native-gifted-chat'
 import DoubleTap from './DoubleTap'
+import VideoPlayer from 'expo-video-player'
+
 
 const { width, height } = Dimensions.get('window')
 
@@ -38,7 +40,8 @@ export default class CameraScreen extends Component {
             video: "",
             showVideo: false,
             openSend: false,
-            settings: false
+            settings: false,
+            showListVideo: false
           }
     }
 
@@ -441,14 +444,37 @@ renderGallery = () => {
     )
 }
 
+pressVideo = () => {
+  this.setState({
+    showListVideo: true
+  })
+}
+
+
+closeVideo = () => {
+  this.setState({
+    showListVideo: false
+  })
+}
+
 renderVideo = () => {
+  // const opacity = React.useMemo(() => new Animated.Value(0), []);
   // console.log('se randeaza')
   return(
-  <Overlay isVisible={this.state.showVideo} overlayStyle={{flex: 1}}>
-  <View style={{flex: 1}}>
-    <Video source={{uri: this.state.video}} style={{width: width, height: height}} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
-    </View>
-  </Overlay>
+  <Overlay isVisible={this.state.showVideo} overlayStyle={{flex: 1, width: width, height: height}}>
+<View style={styles.container}>
+ 
+      <Video source={{uri: this.state.video}} resizeMode="cover" style={styles.video} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+      <TouchableOpacity style={styles.button} onPress={() => this.pressVideo()}>
+        <Text style={{fontSize: 40}}>Send to</Text>
+      </TouchableOpacity>
+</View>  
+
+<Overlay isVisible={this.state.showListVideo}>
+  <SendToList video={this.state.video}/>
+</Overlay>
+</Overlay>
+
   )
 }
 
@@ -472,3 +498,27 @@ renderVideo = () => {
     }
   }
 }
+const styles = StyleSheet.create({
+  container: {
+  //  position: 'relative',
+   width: width,
+   height: height,
+  //  flex: 1
+  },
+  video: {
+   position: 'absolute',
+  //  top: 0,
+  //  right: 0,
+  //  left: 0,
+  //  bottom: 0,
+   zIndex: 1,
+   height: height,
+   width: width + 20,
+    left: -10,
+    // right: 0
+  },
+  button: {
+    position: 'absolute',
+    zIndex: 2,
+  }
+});

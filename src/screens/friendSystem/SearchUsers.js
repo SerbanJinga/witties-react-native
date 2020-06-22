@@ -373,7 +373,9 @@ console.log(arr)
 
            </View>
            </View>
+           {this.state.addedMe.length === 0 ?
            <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Added Me</Text>
+           : null}
             <FlatList
                         data={this.state.addedMe}
                         renderItem={({item}) => (

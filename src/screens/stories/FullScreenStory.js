@@ -60,6 +60,10 @@ class FullScreenStorty extends React.Component {
 
     }
 
+    componentDidMount(){
+      console.log()
+    }
+
 
     animate(){
       let progress = 0
@@ -99,7 +103,9 @@ class FullScreenStorty extends React.Component {
 
   componentDidMount = async() => {
     await this.getData(this.state.item.creatorId)
+    console.log('mama e cam tarfa')
    await console.log(this.state.allStories)
+
   }
   
 

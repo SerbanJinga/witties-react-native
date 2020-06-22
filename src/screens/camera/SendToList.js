@@ -12,7 +12,8 @@ export default class SendToList extends Component{
         super(props)
         this.state = {
             documentData: [],
-            sendTo: []
+            sendTo: [],
+            imageUri: ""
         }
     }
 
@@ -63,9 +64,31 @@ export default class SendToList extends Component{
         console.log(this.state.sendTo)
     }
 
+    uploadVideo = async() => {
+        const timestamp = firebase.auth().currentUser.uid + "/" + Date.now()
+        const path = `videos/${timestamp}`
+        const response = await fetch(this.props.video)
+        const file = await response.blob()
+
+        let upload = firebase.storage().ref(path).put(file)
+        upload.on("state_changed", snapshot => {}, err => {
+            console.log(arr)
+        },
+        async () => {
+            const url = await upload.snapshot.ref.getDownloadURL()
+            this.setState({imageUri: url})
+            
+            this.sendPost()
+
+        })
+
+    }
+
+
+
     sendPost = () => {
         let foo = {
-            msg: 'e bine',
+            video: this.state.imageUri,
             sender: firebase.auth().currentUser.uid,
             timestamp: Date.now()
         }
@@ -74,8 +97,8 @@ export default class SendToList extends Component{
                 messages: firebase.firestore.FieldValue.arrayUnion(foo)
             })
         })
-        this.props.close()
-        this.props.closeEvery()
+        // this.props.close()
+        // this.props.closeEvery()
     }
 
 
@@ -99,7 +122,7 @@ export default class SendToList extends Component{
                     margin: 10,
                     width: width / 1.3
                 }}  inputContainerStyle={{backgroundColor: '#fff', height: 30}} value={this.state.searchText} onChangeText={this.search} />
-        <TouchableOpacity onPress={() => this.sendPost()}>
+        <TouchableOpacity onPress={() => this.uploadVideo()}>
             <AntDesign name="arrowright" size={20}/>
         </TouchableOpacity>
 

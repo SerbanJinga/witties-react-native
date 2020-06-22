@@ -18,6 +18,7 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const { width, height } = Dimensions.get('window')
 const { width2, height2 } = Dimensions.get("screen")
 import SwipeablePanel from "rn-swipeable-panel";
+import VideoComponent from './VideoComponent'
 
 class ChatRoom extends Component {
     constructor(props) {
@@ -348,6 +349,7 @@ class ChatRoom extends Component {
                     renderItem={({ item }) => (
                         <View>
                             {(typeof (item.location) === 'undefined') ? <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> :
+                              (typeof item.video === 'undefined') ?
                                                 <ChatRoomPost
                                                     postedFor={item.hoursPosted}
                                                     activity={item.activity}
@@ -355,7 +357,10 @@ class ChatRoom extends Component {
                                                     text={item.text}
                                                     creatorId={item.creatorId}
                                                     timestamp={item.timestamp}
-                                                    image={item.image} />}
+                                                    image={item.image} 
+                                                    /> : 
+                                <VideoComponent video={item.video} creatorId={item.sender}/>}
+
                             {/* <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> */}
                         </View>
                     )}
