@@ -122,7 +122,7 @@ class FullScreenStorty extends React.Component {
       
         return (
           <View style={{flex: 1}}>
-          <Swiper horizontal>
+          <Swiper loop={false} horizontal>
           {this.state.allStories.map((item, index) => {
             return(
               <View key={index}>

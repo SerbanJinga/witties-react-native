@@ -12,6 +12,8 @@ import SearchUsers from './src/screens/friendSystem/SearchUsers'
 import FullScreenStory from './src/screens/stories/FullScreenStory'
 
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
+import Camera from './src/screens/camera/Camera';
+import StreakVideoCamera from './src/screens/chatRoom/StreakVideoCamera';
 require('firebase/firestore');
 
 console.disableYellowBox=true;
@@ -96,7 +98,9 @@ const navigator = createStackNavigator(
     FullScreenStory: {
       screen: FullScreenStory,
       name: 'Story',
-    }
+    },
+    CameraScreen: Camera,
+    StreakVideoCamera: StreakVideoCamera
   },{
     initialRouteName: 'Auth',
     headerMode: null,

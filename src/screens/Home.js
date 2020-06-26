@@ -120,10 +120,10 @@ export default class Home extends Component {
                       showsPagination={false}
                       index={1}>
                       <View style={{flex: 1}}>
-                        {/* <UserProfile/> */}
+                        <UserProfile/>
                       </View>
                       <View style={{flex: 1}}>
-                        {/* <SearchUsers/> */}
+                        <SearchUsers/>
                       </View>
                     </Swiper>        
                     <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>

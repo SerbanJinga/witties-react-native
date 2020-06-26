@@ -179,7 +179,7 @@ const { height, width } = Dimensions.get('window')
                 style={[styles.shadow, { overflow: 'visible' }]}
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
+                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item.creatorId)}/>
                      
                  )}   
                 keyExtractor={(item, index) => String(index)}
@@ -197,8 +197,8 @@ const { height, width } = Dimensions.get('window')
                 </View>
                
 
-                {/* <ChatRoomsList/> */}
-                  <StreakVideo/>
+                <ChatRoomsList/>
+                  {/* <StreakVideo/> */}
                 <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} fullScreen animationType="slide">
                   <View style={{flex: 1}}>
                     <FriendList close={()=>this.closeNewChatOverlay()}/>

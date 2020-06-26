@@ -16,12 +16,12 @@ import SendToList from './SendToList'
 import { Send } from 'react-native-gifted-chat'
 import DoubleTap from './DoubleTap'
 import VideoPlayer from 'expo-video-player'
-
+import { withNavigation } from 'react-navigation'
 
 const { width, height } = Dimensions.get('window')
 
 let lastTap = null
-export default class CameraScreen extends Component {
+ class CameraScreen extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -522,3 +522,5 @@ const styles = StyleSheet.create({
     zIndex: 2,
   }
 });
+
+export default withNavigation(CameraScreen)

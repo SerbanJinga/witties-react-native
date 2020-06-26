@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions, Alert } from 'react-native'
+import { View, Clipboard, TouchableOpacity, ActivityIndicator, Dimensions, Alert } from 'react-native'
 import { ListItem, Button, Text, Avatar, Divider, Overlay } from 'react-native-elements'
 import * as Font from 'expo-font'
 import { AntDesign, Entypo } from '@expo/vector-icons'
@@ -7,6 +7,9 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import firebase from 'firebase'
 import { withNavigation } from 'react-navigation'
 import { FlatList } from 'react-native-gesture-handler'
+import Toast, { DURATION } from 'react-native-easy-toast'
+import RecommendedFriend from './RecommendedFriend'
+
 let twoUserArr = []
 let arr = []
 let finalArr = []
@@ -22,15 +25,37 @@ const { width, height } = Dimensions.get('window')
             options: false,
             blockAlert: false,
             removeAlert: false,
-            suggestedFriends: []
+            suggestedFriends: [],
+            suggestedFriendsData: [],
+            friendRequests: [],
+            currentUser: ""
         }
     }
 
+    getCurrentUser = async() => {
+        const uid = firebase.auth().currentUser.uid
+        let initialQuery = await firebase.firestore().collection('users').where('uid', '==', uid)
+        let documentSnapshots = await initialQuery.get()
+        let documentData = documentSnapshots.docs.map(doc => doc.data().displayName)
+        this.setState({
+            currentUser: documentData[0]
+        })
+
+        console.log(this.state.currentUser)
+    }
+
     _retrieveSuggestedFriends = async () => {
+        console.log(this.props.uid)
         const func = firebase.functions().httpsCallable('recommendedFriends')
-        func({uid: this.props.uid}).then(res => this.setState({
+        await func({uid: this.props.uid}).then(res => this.setState({
             suggestedFriends: res.data.documentData
-        }))
+        })).then(console.log('a mers'))
+        // console.log(this.state.suggestedFriends)
+        this.state.suggestedFriends.forEach(suggestedFriend => this.getFriendById(suggestedFriend))
+    }
+
+    getFriendById = async (uid) => {
+        console.log(uid)
     }
 
 
@@ -99,12 +124,14 @@ const { width, height } = Dimensions.get('window')
     }
 
     componentDidMount = async () => {
+        arr = []
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf')
         }).then(this.setState({
             fontsLoaded: true
         }))
         await this._retrieveSuggestedFriends()
+        await this.getCurrentUser()
     }
     _pressTouchableOpacity = () => {
         this.setState({
@@ -172,6 +199,55 @@ const { width, height } = Dimensions.get('window')
                 
         }
     }
+
+
+    _copyToClipboard = () => {
+        let string = this.props.displayName + "#" + this.props.discriminator
+        Clipboard.setString(string)
+        this.refs.copyToClipboard.show("Copied")
+    }
+
+    sendNotification = async(token, uid) => {
+        const message = {
+            to: token,
+            sound: 'default',
+            title: uid,
+            body: 'Ai primit cerere de la ' + this.state.currentUser,
+            data: {data: 'goes here'},
+            _displayInForeground: true
+        }
+        
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      });
+    }
+   
+
+    getToken = async(uid) => {
+        let initialQuery = await firebase.firestore().collection("users").where('uid', '==', uid)
+        let documentSnapshots = initialQuery.get()
+        let documentData = (await documentSnapshots).docs.map(doc => doc.data().tokens)
+        this.sendNotification(documentData[0], uid)
+    }
+
+    _sendRequest = async(uid) =>{
+        this.state.friendRequests.push(uid)
+        await this.getToken(uid)
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            sentRequests: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+
+        firebase.firestore().collection('users').doc(uid).update({
+            receivedRequests: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
+    }
+
     render(){
         if(this.state.fontsLoaded){
         return(
@@ -209,6 +285,14 @@ const { width, height } = Dimensions.get('window')
                                     </View>
 
                             </TouchableOpacity>
+                            <Toast
+                    ref="copyToClipboard"
+                    style={{backgroundColor: '#4BB543'}}
+                    textStyle={{color: '#fff'}}
+                    position='bottom'
+                    opacity={0.8}
+                    fadeInDuration={750}
+                />
                     </View>
                    
                     <Divider style={{marginTop: 10}}/>
@@ -217,7 +301,7 @@ const { width, height } = Dimensions.get('window')
                         <Text style={{fontFamily: 'font1', fontSize: 18}}>Send Message</Text>
                     </TouchableOpacity>
                     <Divider/>
-                    <TouchableOpacity style={{padding: 10}}>
+                    <TouchableOpacity style={{padding: 10}} onPress={() => this._copyToClipboard()}>
                         <Text style={{fontFamily: 'font1', fontSize: 18}}>Copy Username</Text>
                     </TouchableOpacity>
                     <Divider style={{marginTop: 0}}/>
@@ -235,7 +319,7 @@ const { width, height } = Dimensions.get('window')
                     <TouchableOpacity style={{padding: 10}}>
                         <Text style={{fontFamily: 'font1', fontSize: 18, color: '#b2b8c2', alignSelf: 'center'}}>Done</Text>
                     </TouchableOpacity>
-
+                 
                     
                    
                 </View>
@@ -265,14 +349,14 @@ const { width, height } = Dimensions.get('window')
                 <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
                 <Text style={{fontFamily: "font1", fontSize: 15}}>{this.props.careScore}</Text>
                 </View>
-                <Button style={{marginTop: 40}} titleStyle={{fontFamily: 'font1'}} title="Add Friend" type="clear"/>
+                <Button style={{marginTop: 40}} titleStyle={{fontFamily: 'font1'}} title="See Friendship" type="clear"/>
 
                 </View>
                 <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
                 <FlatList
-                    data={this.state.suggestedFriends}
+                    data={this.state.suggestedFriendsData}
                     renderItem={({item}) => (
-                        <Text>{item}</Text>
+                        <RecommendedFriend profilePicture={item.profilePicture} displayName={item.displayName} uid={item.uid} discriminator={item.discriminator} press={() => this._sendRequest(item.uid)}/>
                     )}   
                 keyExtractor={(item, index) => String(index)}
                 />
@@ -323,6 +407,8 @@ const { width, height } = Dimensions.get('window')
         </Overlay>
         
         </Overlay>
+
+        
            
                 </TouchableOpacity>
         )}else{

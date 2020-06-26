@@ -54,7 +54,8 @@ const { width, height } = Dimensions.get('window')
         this._retrieveImage()
         await this._retrieveAllFriends()
         await Font.loadAsync({
-            font1: require('../../assets/SourceSansPro-Black.ttf')
+            font1: require('../../assets/SourceSansPro-Black.ttf'),
+            font2: require('../../assets/SourceSansPro-Regular.ttf')
         });
         this.setState({fontsLoaded: true})
         this.retrieveHowManyFriends()

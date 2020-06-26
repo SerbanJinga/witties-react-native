@@ -27,16 +27,23 @@ export default class ActivitySelect extends Component {
                         backgroundColor: '#f5f6fa',
                         borderRadius: 30,
                         marginBottom: 10,
-                        width:width*0.6,
+                        width: width * 0.6,
 
                     }}
                     type='clear'
                     title={this.state.name}
                     checked={this.state.selection}
                     onPress={() => {
+                        if(typeof this.props.otherData === 'undefined'){
+                            this.props.mama(this.state.name);
+                            console.log('s a transmis asta:',this.state.name)
+                            return;
+                        }
+                        this.props.mama(this.props.otherData)
+                        console.log('s a transmis asta:',this.props.otherData)
+                        
 
-                        this.props.mama(this.state.name);
-                        console.log("ceva")
+                        
                     }}
                 />
 

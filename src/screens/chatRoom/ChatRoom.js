@@ -19,6 +19,7 @@ const { width, height } = Dimensions.get('window')
 const { width2, height2 } = Dimensions.get("screen")
 import SwipeablePanel from "rn-swipeable-panel";
 import VideoComponent from './VideoComponent'
+import StreakVideo from './StreakVideo'
 
 class ChatRoom extends Component {
     constructor(props) {
@@ -184,6 +185,12 @@ class ChatRoom extends Component {
                 />                
         )
     }
+
+    renderStreakVideo = () => {
+        return(
+            <StreakVideo chatRoomName={this.state.roomId}/>
+        )
+    }
     _retrieveImage = async() => {
         const path = `messages/profile-picture/${this.state.roomId}`
         const url = await firebase.storage().ref(path).getDownloadURL()
@@ -243,7 +250,7 @@ class ChatRoom extends Component {
             <View style={styles.container}>
            
             <Overlay overlayStyle={{width: width, height: height}} isVisible={this.state.changeChatOverlay} animationType="slide">
-            <View style={{flex: 1}}>
+            <ScrollView style={{flex: 1}}>
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                     <TouchableOpacity onPress={() => this._closeChatDetails()}>
                     <AntDesign
@@ -268,7 +275,10 @@ class ChatRoom extends Component {
                 </View>
                 <Text style={{fontFamily: 'font1', fontSize: 20, padding: 10}}>Participants</Text>
                     {this.renderParticipants()}
-                </View>
+                <Text style={{fontFamily: 'font1', fontSize: 20, padding: 10}}>Daily Streak</Text>
+                    
+                    {this.renderStreakVideo()}
+                </ScrollView>
                 <Overlay animationType='fade' onBackdropPress={() => this._closeChatSettings()} isVisible={this.state.chatSettings} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>

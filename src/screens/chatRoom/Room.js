@@ -7,8 +7,9 @@ import firebase from 'firebase'
 import { Camera } from 'expo-camera'
 import CameraScreen from '../camera/Camera'
 import DoubleTap from '../camera/DoubleTap'
-const { width, height } = Dimensions.get('window')
-export default class Room extends Component {
+import { withNavigation } from 'react-navigation'
+const { width, height } = Dimensions.get('screen')
+class Room extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -35,11 +36,12 @@ export default class Room extends Component {
         })
     }
 
-    openCamera = () => {
-        this.setState({
-            cameraOverlay: true
+    openCamera = (id) => {
+      this.props.navigation.navigate('StreakVideoCamera', { roomId: id })
+    //     this.setState({
+    //         cameraOverlay: true
         
-        })
+    //     })
     }
 
 
@@ -158,6 +160,7 @@ export default class Room extends Component {
         if(this.state.fontsLoaded){
 
         return(
+          <View>
             <TouchableOpacity style={{padding: this.state.padding}} onPress={() => this.props.press()}>
                         <View style={{flex: 1, padding: 10}}>
                 <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
@@ -167,7 +170,7 @@ export default class Room extends Component {
                     {/* <Text style={{fontFamily: 'font2', marginLeft: 4}}>{this.props.lastMessage}</Text> */}
                     </View>
                     {/* <Badge  status="primary" containerStyle={{marginLeft: "auto"}} badgeStyle={{width: 20, height: 20, borderRadius:20}} value={2}/> */}
-                    <TouchableOpacity onPress={() => this.openCamera()}>
+                    <TouchableOpacity onPress={() => this.openCamera(this.props.roomId)}>
                     <AntDesign
                         color="#D4AF37"
                         name="camera"
@@ -178,15 +181,17 @@ export default class Room extends Component {
                 <Divider style={{marginTop: 20}}/>
 
             </View>
-            <Overlay isVisible={this.state.cameraOverlay} overlayStyle={{width: width, height: height, flex: 1}} animationType="slide">
-                <CameraScreen golden={'golden'}/>
-            </Overlay>
-            
+           
             </TouchableOpacity>
-            
+            <Overlay isVisible={this.state.cameraOverlay} overlayStyle={{width: width, height: height}} animationType="slide">
+                
+            </Overlay>
+            </View>
         )}else{
             return ( <ActivityIndicator size="large"/>)
         }
             
     }
 }
+
+export default withNavigation(Room)

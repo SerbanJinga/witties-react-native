@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
-import { Text, View } from 'react-native'
+import { Text, View, Dimensions } from 'react-native'
 import firebase from 'firebase'
 import { FlatList } from 'react-native-gesture-handler'
 import { Video } from 'expo-av'
+import { ThemeConsumer } from 'react-native-elements'
 let arr = []
+const { width, height } = Dimensions.get('window')
 
 export default class StreakVideoComponent extends Component {
     constructor(props){
@@ -16,7 +18,7 @@ export default class StreakVideoComponent extends Component {
     }
 
     componentDidMount(){
-        console.log(this.props.video)
+        console.log(this.props.video, 'EU SUNT')
         
     }
 
@@ -34,10 +36,9 @@ export default class StreakVideoComponent extends Component {
 
     render(){
         return(
-            <View style={{flex: 1}}>
-                <Video onPlaybackStatusUpdate={(playbackStatus) => this._onPlaybackStatusUpdate(playbackStatus)} source={{uri: this.props.video[this.state.index].video}} resizeMode="cover" style={{ width: 100, height: 100 }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
-
-            </View>
-        )
+                <View style={{flex: 1}}>
+   <Video source={{uri: this.props.video}} resizeMode="cover" style={{ width: width - 20, height: 200, borderRadius: 20 }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+                                </View>          
+            )
     }
 }

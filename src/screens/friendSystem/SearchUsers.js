@@ -153,7 +153,7 @@ console.log(arr)
                 refreshing: true
             })
          
-        func().then(async res => {
+        await func().then(async res => {
              documentT = await res.data.documentData
              console.log('-------------------------')
              console.log(documentT)
@@ -161,12 +161,11 @@ console.log(arr)
             documentT.forEach(element => {
                 this._getUserFromUid(element)
             })
-        })
-
+        }).then(
         this.setState({
             loading: false,
             refreshing: false
-        })
+        }))
     }catch(error){
             console.log(error)
         }
@@ -231,10 +230,9 @@ console.log(arr)
             sentRequests: firebase.firestore.FieldValue.arrayUnion(uid)
         })
 
-        firebase.firestore().collection('users').doc(uid).update({
+        await firebase.firestore().collection('users').doc(uid).update({
             receivedRequests: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
         })
-
   
 
     }
@@ -316,6 +314,12 @@ console.log(arr)
         })
     }
 
+    handleRefresh = () => {
+        return(
+            <Text>da</Text>
+        )
+    }
+
 
     render(){
             const loaded = this.state.fontsLoaded
@@ -373,7 +377,7 @@ console.log(arr)
 
            </View>
            </View>
-           {this.state.addedMe.length === 0 ?
+           {this.state.addedMe.length !== 0 ?
            <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Added Me</Text>
            : null}
             <FlatList

@@ -60,6 +60,7 @@
     "react-native-swipe-gestures": "^1.0.5",
     "react-native-swiper": "^1.6.0",
     "react-native-video": "^4.4.5",
+    "react-native-video-editor": "^0.2.0",
     "react-native-web": "~0.11.7",
     "react-navigation": "^4.3.8",
     "react-navigation-stack": "^2.3.13",
