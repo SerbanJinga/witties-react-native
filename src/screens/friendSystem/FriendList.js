@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker'
 
 let arr = []
 let twoUserArr = []
+let roomArrId = []
 
  class FriendList extends Component {
     constructor(props){
@@ -162,9 +163,18 @@ let twoUserArr = []
     // }
 
     press = async(uid, profilePicture, name) => {
+        roomArrId = []
         twoUserArr.push(firebase.auth().currentUser.uid)
         twoUserArr.push(uid)
-        const roomId = firebase.auth().currentUser.uid + "_" + uid
+
+        roomArrId.push(firebase.auth().currentUser.uid)
+        roomArrId.push(uid)
+        roomArrId.sort()
+        let roomId = "";
+        roomArrId.forEach(room => {
+            roomId += room
+        })
+        // const roomId = firebase.auth().currentUser.uid + "_" + uid
         let initialQuery = await firebase.firestore().collection("messages").doc(roomId)
         let initalSnapshots = await initialQuery.get()
         if(!initalSnapshots.exists){

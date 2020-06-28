@@ -78,7 +78,7 @@ export default class AllFriends extends Component{
         return(
             <View style={{flex: 1}}>
             <FlatList
-                data={this.state.documentData}
+                data={this.state.documentData.slice(0, 4)}
                 renderItem={({item}) => (
                     
                     <AllFriendsComponent close={() => this.closeSearch()} uid={item.uid} careScore={item.careScore} displayName={item.displayName} discriminator={item.discriminator} profilePicture={item.profilePicture} press={() => this._acceptFriend(item.uid)}/>

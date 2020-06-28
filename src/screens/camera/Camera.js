@@ -4,7 +4,8 @@ import { Overlay, Icon } from 'react-native-elements'
 import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView, Animated, StyleSheet } from 'react-native'
 import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
-import { FontAwesome, MaterialCommunityIcons, Ionicons, Feather, AntDesign } from '@expo/vector-icons'
+import { FontAwesome, MaterialCommunityIcons, Ionicons, Feather, AntDesign, MaterialIcons } from '@expo/vector-icons'
+import * as Location from 'expo-location'
 import Gallery from './Gallery'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
@@ -30,6 +31,7 @@ let lastTap = null
             pictureTaken: '',
             showPhoto: false,
             flashIcon: 'flash-off',
+            locationIcon: 'location-off',
             withFlash: Camera.Constants.FlashMode.off,
             profilePicture: '',
             fontsLoaded: false,
@@ -43,6 +45,24 @@ let lastTap = null
             settings: false,
             showListVideo: false
           }
+    }
+
+    async changeLocationIcon() {
+      let { status } = await Permissions.askAsync(Permissions.LOCATION)
+      
+      if (status !== 'granted') {
+        console.log("nu ai permisiune bai coi")
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({})
+      let lat,long
+      lat = location.coords.latitude
+      long = location.coords.longitude
+      console.log(lat,long)
+      if (this.state.locationIcon === 'location-off')
+        this.setState({ locationIcon: "location-on" })
+        else
+        this.setState({ locationIcon: "location-off" })
     }
 
     
@@ -259,6 +279,20 @@ renderCamera = () => {
           style={{ color: "#fff", fontSize: 30}}
       />
     </TouchableOpacity>
+
+    <TouchableOpacity
+                style={{
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent',
+                }}>
+                <MaterialIcons
+                  onPress={() => this.changeLocationIcon()}
+                  name={this.state.locationIcon}
+                  style={{ color: "#fff", fontSize: 30 }}
+                />
+              </TouchableOpacity>
+              
     <TouchableOpacity
       style={{
         alignSelf: 'flex-end',

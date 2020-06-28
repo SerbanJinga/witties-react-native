@@ -29,7 +29,10 @@ const { width, height } = Dimensions.get('screen')
 import firebase from 'firebase'
 import * as Progress from 'react-native-progress'
 import { Overlay, Input, Button } from 'react-native-elements';
-export default class FullScreenSignleStory extends Component{
+
+import { Video } from 'expo-av';
+
+export default class FullScreenSignleStoryVideo extends Component{
 
 constructor(props){
   super(props)
@@ -69,6 +72,8 @@ getDisplayName = async() => {
       }, 500)
     }, 1500)
   }
+
+ 
 
   componentDidMount = async() => {
     arr = []
@@ -111,21 +116,19 @@ getDisplayName = async() => {
   }
 render(){
     return(
+ <View style={[styles.row, { justifyContent: 'space-between' }]}>
+      
         <TouchableOpacity onPress={() => this.openOverlay()}>
-          
-<ImageBackground
-  style={[styles.flex, styles.destination]}
-  source={{uri: this.props.image}}
->
+ <Video source={{uri: this.props.video}} resizeMode="cover" style={{ width: width, height: height }} shouldPlay isMuted={true} rate={1.0} volume={1.0} isLooping={false}/>
+ 
 
-    {/* <Progress.Bar style={{marginLeft: 10, marginRight: 10}} progress={this.state.progress} indeterminate={this.state.indeterminate} width={width} height={2}/> */}
-    
-
-  <View style={[styles.row, { justifyContent: 'space-between' }]}>
-    <View style={{ flex: 0 }}>
+ 
+    <View style={[styles.row, { flex: 1, position: 'absolute', top: 0 }]}>
+    <View style={{flex: 0}}>
       <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
     </View>
 
+    
     <View style={[styles.column, { flex: 2, paddingHorizontal: theme.sizes.padding / 2, marginTop: 10 }]}>
       <Text style={{ color: theme.colors.white, fontWeight: 'bold' }}>{this.state.displayName}</Text>
       <Text style={{ color: theme.colors.white }}>
@@ -140,11 +143,10 @@ render(){
           </TouchableOpacity>
       </Text>
     </View>
+    </View>
 
-  </View>
-
-</ImageBackground>   
-
+            
+    
 <Overlay isVisible={this.state.reply} overlayStyle={{position: 'absolute', bottom: 0, width: width, height: 200}} onBackdropPress={() => this.closeOverlay()}>
             
 
@@ -170,6 +172,7 @@ render(){
     </KeyboardAvoidingView>
                 </Overlay> 
 </TouchableOpacity>
+    </View>
 
     )
 }

@@ -214,7 +214,6 @@ export default class ActivityPopup extends React.Component {
         })
 
     }
-
     sendActivity = async (url) => {
         let foo = {
             mood: this.state.mood,
@@ -237,9 +236,18 @@ export default class ActivityPopup extends React.Component {
         console.log('-------------------------------------')
         replacer = foo;
         if (this.state.public)
-            firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).update({
-                statuses: firebase.firestore.FieldValue.arrayUnion(foo)
-            })
+            firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).collection('statuses').add({
+                mood: foo.mood,
+                text: foo.text,
+                taggedUsers: foo.taggedUsers,
+                activity: foo.activity,
+                image: foo.image,
+                timestamp: foo.timestamp,
+                hoursPosted: foo.hoursPosted,
+                location: foo.location,
+                creatorId: firebase.auth().currentUser.uid,
+                albums:foo.albums,
+             })
 
          firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').add({
             mood: foo.mood,

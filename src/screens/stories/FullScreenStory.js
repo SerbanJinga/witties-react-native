@@ -34,6 +34,7 @@ import { divide } from "react-native-reanimated";
 import { withNavigation } from "react-navigation";
 import ViewPager from '@react-native-community/viewpager'
 import FullScreenSignleStory from "./FullScreenSingleStory";
+import FullScreenSignleStoryVideo from './FullScreenSingleStoryVideo'
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures'
 import Swiper from "react-native-swiper";
 
@@ -52,60 +53,46 @@ class FullScreenStorty extends React.Component {
             indeterminate: true,
             allStories: props.navigation.state.params.allStories,
             currentStory: 0,
-            currentIndex: 0
+            currentIndex: 0,
+            dynamicIndex: 0
             
         
 
         }
+        this.arr = []
 
+          this.changeIndex = this.changeIndex.bind(this)
     }
 
-    componentDidMount(){
-      console.log()
-    }
 
 
-    animate(){
-      let progress = 0
-      this.setState({progress})
-      setTimeout(()=>{
-        this.setState({indeterminate: false})
-        setInterval(() => {
-          progress += 0.1
-          if(progress > 1){
-            progress = 1
-          }
-          this.setState({progress})
-        }, 500)
-      }, 1500)
-    }
+    
    
-    _renderTimestamps = (timestamp) => {
-        let date = new Date(timestamp * 1000)
-        let hours = date.getHours()
-        let minutes = "0" + date.getMinutes()
-        let seconds = "0" + date.getSeconds()
+    // _renderTimestamps = (timestamp) => {
+    //     let date = new Date(timestamp * 1000)
+    //     let hours = date.getHours()
+    //     let minutes = "0" + date.getMinutes()
+    //     let seconds = "0" + date.getSeconds()
     
-        let formattedTime = hours + ":" + minutes.substr(-2) + ':' + seconds.substr(-2)
-        return formattedTime
-      } 
+    //     let formattedTime = hours + ":" + minutes.substr(-2) + ':' + seconds.substr(-2)
+    //     return formattedTime
+    //   } 
     
 
     
-  getData = async(uid) => {
-    await firebase.firestore().collection('users').doc(uid).get().then(res => {
-      let displayName = res.data().displayName
-      let profilePicture = res.data().profilePicture
-      this.setState({displayName: displayName, profilePicture: profilePicture})
-    })
+  componentDidMount = () => {
+          console.log('mama e cam tarfa')
+    console.log(this.state.allStories)
+  setInterval(() => {
+    this.scrollToIndex()
+  }, 10000)
 
   }
 
-  componentDidMount = async() => {
-    await this.getData(this.state.item.creatorId)
-    console.log('mama e cam tarfa')
-   await console.log(this.state.allStories)
-
+  changeIndex = () => {
+  this.setState({
+    index: 2
+  })
   }
   
 
@@ -116,24 +103,48 @@ class FullScreenStorty extends React.Component {
         )
     })
   }
+
+  scrollToIndex = () => {
+    if(this.state.dynamicIndex < this.state.allStories.length - 1){
+      this.setState({
+        dynamicIndex: this.state.dynamicIndex + 1
+      })
+    }else{
+      return
+    }
+    // this.scrollview_ref.scrollTo
+    this.scrollview_ref.scrollTo({
+      x: this.arr[this.state.dynamicIndex],
+      y: 0,
+      animated: true
+    })
+  }
   
 
     render() {
       
         return (
-          <View style={{flex: 1}}>
-          <Swiper loop={false} horizontal>
+          <ScrollView ref={ref => {this.scrollview_ref = ref}} horizontal={true} scrollEventThrottle={10} pagingEnabled={true} >
           {this.state.allStories.map((item, index) => {
-            return(
-              <View key={index}>
-                <FullScreenSignleStory displayName={this.state.displayName} profilePicture={this.state.profilePicture} image={item.image} mood={item.mood} activity={item.activity} />
+            if (typeof item.video === 'undefined'){
+              return (<View onLayout={event => {
+                const layout = event.nativeEvent.layout
+                this.arr[index] = layout.x
+              }} style={{flex: 1, width: width, height: height}} key={index}>
+                <FullScreenSignleStory uid={item.creatorId} image={item.image} mood={item.mood} activity={item.activity} />
 
-              </View>
-            )
+              </View>)
+            }else{
+              return(
+                <View style={{flex: 1, width: width, height: height}} key={index} onLayout={event => {
+                  const layout = event.nativeEvent.layout
+                  this.arr[index] = layout.x
+                }}>
+                <FullScreenSignleStoryVideo uid={item.creatorId} video={item.video} mood={item.mood} activity={item.activity}/>
+                </View>
+              )}
           })}
-          </Swiper>
-
-        </View>
+      </ScrollView>
         )
 
     }

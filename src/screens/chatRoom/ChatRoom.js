@@ -42,7 +42,7 @@ class ChatRoom extends Component {
             changePhoto: false,
             imageUri: '',
             chatSettings: false,
-            lessMessages: []
+            lessMessages: [],
         }
     }
 
@@ -244,6 +244,12 @@ class ChatRoom extends Component {
             chatSettings: false
         })
     }
+
+    getReplier = async(id) => {
+        let initialQuery = await firebase.firestore().collection('users').doc(id).get()
+        let data = await initialQuery.data().displayName
+        return String(data)
+    }
     
     render() {
         return (
@@ -317,7 +323,7 @@ class ChatRoom extends Component {
             
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10}}>
                 <TouchableOpacity
-                    // onPress={() => this.props.navigation.goBack()}
+                    onPress={() => this.props.navigation.goBack(null)}
                   style={{
                     backgroundColor: 'transparent',
                     margin: 4,
@@ -358,6 +364,7 @@ class ChatRoom extends Component {
                     data={this.state.messages}
                     renderItem={({ item }) => (
                         <View>
+                        {(typeof item.reply === 'undefined') ? null : <Text>{item.reply} has replied to your story!</Text>}
                             {(typeof (item.location) === 'undefined') ? <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> :
                               (typeof item.video === 'undefined') ?
                                                 <ChatRoomPost
@@ -369,7 +376,8 @@ class ChatRoom extends Component {
                                                     timestamp={item.timestamp}
                                                     image={item.image} 
                                                     /> : 
-                                <VideoComponent video={item.video} creatorId={item.sender}/>}
+                                <VideoComponent video={item.video} creatorId={item.sender}/>
+                                }
 
                             {/* <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> */}
                         </View>

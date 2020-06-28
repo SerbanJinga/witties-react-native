@@ -58,7 +58,8 @@ export default class Slider extends Component {
     arr = []
     this.getStreakFromChatRoomId()
     // this._stopAutoPlay();
-    // this._startAutoPlay();
+      // this._startAutoPlay();
+    // clearInterval()
   }
 
   // componentWillUnmount() {

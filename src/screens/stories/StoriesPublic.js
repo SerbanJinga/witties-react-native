@@ -15,6 +15,9 @@ import FriendList from '../friendSystem/FriendList'
 import StreakVideo from '../chatRoom/StreakVideo'
 let stories = []
 
+let reallyFinal = []
+let prinAstaFiltrez = []
+
 
 let finalArray = []
 const { height, width } = Dimensions.get('window')
@@ -35,7 +38,10 @@ const { height, width } = Dimensions.get('window')
             chat: false,
             searchChats: "",
             lastVisible: {},
-            allStoriesFromId: []
+            allStoriesFromId: [],
+            reallyFinal: [],
+            prinAstaFiltrez: []
+            
         }
     }
 
@@ -43,13 +49,10 @@ const { height, width } = Dimensions.get('window')
 
 
     componentDidMount = async() => {
+      prinAstaFiltrez = []
+      reallyFinal = []
       arr = []
-      allStoriesFromAllUsers = []
-      newArr = []
-      otherArr = []
-      finalArray = []
-      stories = []
-      await this.retrieveData()
+      await this.retrieveDataFromFriends()
       await Font.loadAsync({
         font1: require('../../../assets/SourceSansPro-Black.ttf')
       })
@@ -58,82 +61,72 @@ const { height, width } = Dimensions.get('window')
       })
     }
 
+    retrieveDataFromFriends = async() => {
+      const currentId = firebase.auth().currentUser.uid
+      let friendsQuery = await firebase.firestore().collection('users').doc(currentId).get()
+      let friendsData = await friendsQuery.data().friends
+      friendsData.forEach(friend => this.getStoriesFromFriend(friend))
+    }
 
+    getStoriesFromFriend = async(friend) => {
+      let initialQuery = await firebase.firestore().collection('status-public').doc(friend).get()
+      let friendStories = await initialQuery.data().statuses
+      friendStories.forEach(friendStory => reallyFinal.push(friendStory))
+      // reallyFinal.push(friendStories)
+      arr.push(friendStories[0])
+      // console.log(arr)
+      this.setState({
+        documentData: arr
+      })
 
+      console.log(reallyFinal )
+      this.setState({
+        reallyFinal: reallyFinal
+      })
+    }
 
-
-    retrieveData = async() => {
-        const currentId = firebase.auth().currentUser.uid
-     
-        let friendsQuery = firebase.firestore().collection('users').doc(currentId)
-        let friendSnapshots = await friendsQuery.get()
-        let friendsData = await friendSnapshots.data().friends
-        this.setState({
-          myFriends: friendsData
-        })
-
-        this.state.myFriends.forEach(async friend => {
-          let initialQuery = firebase.firestore().collection('status-public').doc(friend)
-          let querySnapshot = await initialQuery.get()
-          let queryDocumentData = querySnapshot.data().statuses
-          arr.push(queryDocumentData[queryDocumentData.length - 1])
-          queryDocumentData.forEach(doc => allStoriesFromAllUsers.push(doc))
-          this.setState({documentData: arr, allStoriesFromAllUsers: allStoriesFromAllUsers})
-          console.log('mamamieieairia', this.state.allStoriesFromAllUsers)
-        })
-      }
-
-
-
-
-  
-      // getAllStoriesFromId = async(uid) => {
-      //   let initialQuery = await firebase.firestore().collection("status-public").where('creatorId', '==', uid)
-      //   let documentSnapshots = await initialQuery.get()
-      //   let allStories = (await documentSnapshots).docs.map(doc => doc.data().statuses)
-      //   this.setState({
-      //     allStories: allStories
-      //   })
-      //   // allStories.forEach(story => this.setState({allStories: story}))
-      //    newArr = [...this.state.allStories, ...this.state.allStatuses]
-      //    otherArr = newArr.reduce((acc, current) => {
-      //     const x = acc.find(item => item.timestamp === current.timestamp)
-      //     if(!x){
-      //       return acc.concat([current])
-      //     }else{
-      //       return acc;
-      //     }
-      //   }, [])
-      //   console.log('---------------------------')
-      //   console.log(otherArr)
-      //   // allStatuses.filter(value => this.state.allStories.includes(value))
-      //   this.setState({
-      //     allStatuses: otherArr
-      //   })
-      // }
-
-      getAllStoriesFromId = async(uid) => {
-        let initialQuery = await firebase.firestore().collection("status-public").where('creatorId', '==', uid)
-        let documentSnapshots = await initialQuery.get()
-        let allStoriesFromId = await documentSnapshots.docs.map(doc => doc.data().statuses)
-        allStoriesFromId.forEach(story => {
-          finalArray.push(story)
-        })
-        stories = this.state.allStoriesFromAllUsers.filter(element => !finalArray.includes(element))
-        console.log(finalArray)
-
-
-
-        this.setState({
-          allStoriesFromId: stories
-        })
-      }
-
-    onPress = async (item) => {
-      await this.getAllStoriesFromId(item.creatorId)
+    getAllStoriesFromId = async(uid) => {
+      prinAstaFiltrez = []
+      // console.log(this.state.reallyFinal)
+      let idQuery = await firebase.firestore().collection('status-public').doc(uid).get()
+      let idDatas = await idQuery.data().statuses
+      idDatas.forEach(data => prinAstaFiltrez.push(data))
       
-      this.props.navigation.navigate('FullScreenStory',    { status: item, allStories: this.state.allStoriesFromId, transition: 'collapseExpand'})
+      for(let i = 0; i < this.state.reallyFinal.length; i++)
+        if(this.state.reallyFinal[i].creatorId !== uid){
+          prinAstaFiltrez.push(this.state.reallyFinal[i])
+        }
+
+        console.log(prinAstaFiltrez)
+        this.setState({
+          prinAstaFiltrez: prinAstaFiltrez
+        })
+        // console.log(story.timestamp)
+    }
+
+    retrieveAllStories = async() => {
+      let initialQuery = await firebase.firestore().collection('status-public').get()
+      let initalData = await initialQuery.docs.map(doc => doc.data().statuses)
+      console.log(initalData)
+    }
+
+
+
+
+
+    
+
+
+
+
+
+    onPress =  async(item) => {
+      console.log(item.creatorId)
+      await this.getAllStoriesFromId(item.creatorId).then(
+      setTimeout(() => {
+        this.props.navigation.navigate('FullScreenStory', {status: item, allStories: prinAstaFiltrez})  
       
+      }, 2000))
     }
 
     openNewChatOverlay = () => {
@@ -179,7 +172,7 @@ const { height, width } = Dimensions.get('window')
                 style={[styles.shadow, { overflow: 'visible' }]}
                  data = {this.state.documentData}
                  renderItem={({item}) => (
-                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item.creatorId)}/>
+                     <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
                      
                  )}   
                 keyExtractor={(item, index) => String(index)}
@@ -198,6 +191,7 @@ const { height, width } = Dimensions.get('window')
                
 
                 <ChatRoomsList/>
+                {/* <Button onPress={() => this.props.navigation.navigate('TestAnimation', {transition: 'bottomTransition'})} title="Navigate"/> */}
                   {/* <StreakVideo/> */}
                 <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} fullScreen animationType="slide">
                   <View style={{flex: 1}}>

@@ -23,6 +23,7 @@ import ChannelStatus from '../components/ChannelStatus'
 import Timeline from '../screens/Timeline/Timeline'
 import PlacesInput from 'react-native-places-input';
 import CameraScreen from '../screens/camera/Camera'
+import Map from '../screens/map/Map'
 import { SafeAreaView } from 'react-native-safe-area-context'
 const { width, height } = Dimensions.get('window')
 let arr = []
@@ -58,6 +59,9 @@ export default class Home extends Component {
     //  const func = await firebase.functions().httpsCallable('recommendedFriends')
     //  func().then(res => console.log('SE POATE', res.data)).catch(err => console.log('nu merge'))
      
+    // setInterval(() => {
+    //   this.habarnam()
+    // }, 500)
     }
 
 
@@ -112,7 +116,8 @@ export default class Home extends Component {
                   showsPagination={false}
                   index={1}>
                     <View style={{flex: 1}}>
-                      <CameraScreen/>
+                      <Map/>
+                      {/* <CameraScreen/> */}
                     </View>
                     <Swiper
                       horizontal={false}

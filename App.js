@@ -14,6 +14,8 @@ import FullScreenStory from './src/screens/stories/FullScreenStory'
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
 import Camera from './src/screens/camera/Camera';
 import StreakVideoCamera from './src/screens/chatRoom/StreakVideoCamera';
+import TestAnimation from './src/screens/stories/TestAnimation';
+import { zoomIn, zoomOut } from 'react-navigation-transitions'
 require('firebase/firestore');
 
 console.disableYellowBox=true;
@@ -32,35 +34,40 @@ const db = firebase.firestore()
 export const database = db;
 // <=============== END FIREBASE ===================>
 
-let CollapseExpand = (index, position) => {
-  const inputRange = [index - 1, index, index + 1];
+let SlideFromRight = (index, position, width) => {
+  const translateX = position.interpolate({
+    inputRange: [index - 1, index],
+    outputRange: [width, 0],
+  })
+
+  return { transform: [ { translateX } ] }
+};
+
+let SlideFromBottom = (index, position, height) => {
+  const translateY = position.interpolate({
+    inputRange: [index - 1, index],
+    outputRange: [height, 0],
+  })
+
+  return { transform: [ { translateY } ] }
+};
+
+let CollapseTransition = (index, position) => {
   const opacity = position.interpolate({
-    inputRange,
-    outputRange: [0, 1, 1],
+    inputRange: [index - 1, index, index + 1],
+    outputRange: [0, 1, 1]
   });
 
   const scaleY = position.interpolate({
-    inputRange,
-    outputRange: ([0, 1, 1]),
+    inputRange: [index - 1, index, index + 1],
+    outputRange: [0, 1, 1]
   });
 
   return {
     opacity,
-    transform: [
-      { scaleY }
-    ]
-  };
-};
-
-let SlideFromRight = (index, position, width) => {
-  const inputRange = [index - 1, index, index + 1];
-  const translateX = position.interpolate({
-    inputRange: [index - 1, index, index + 1],
-    outputRange: [width, 0, 0]
-  })
-  const slideFromRight = { transform: [{ translateX }] }
-  return slideFromRight
-};
+    transform: [ { scaleY } ]
+  }
+}
 
 const TransitionConfiguration = () => {
   return {
@@ -73,16 +80,20 @@ const TransitionConfiguration = () => {
     screenInterpolator: (sceneProps) => {
       const { layout, position, scene } = sceneProps;
       const width = layout.initWidth;
+      const height = layout.initHeight;
       const { index, route } = scene
       const params = route.params || {}; // <- That's new
       const transition = params.transition || 'default'; // <- That's new
       return {
-        collapseExpand: CollapseExpand(index, position),
         default: SlideFromRight(index, position, width),
+        bottomTransition: SlideFromBottom(index, position, height),
+        collapseTransition: CollapseTransition(index, position)
       }[transition];
     },
   }
 }
+
+
 const navigator = createStackNavigator(
   {
     Auth: AuthNavigator,
@@ -100,19 +111,16 @@ const navigator = createStackNavigator(
       name: 'Story',
     },
     CameraScreen: Camera,
-    StreakVideoCamera: StreakVideoCamera
+    StreakVideoCamera: StreakVideoCamera,
+    TestAnimation: {
+      name: 'TestAnimation',
+      screen: TestAnimation,
+      
+    }
   },{
     initialRouteName: 'Auth',
     headerMode: null,
-    navigationOptions: {
-      cardStack: {
-        gesturesEnabled: false
-      },
-      gesturesEnabled: false
-    },
-    gesturesEnabled: false,
-    transitionConfig: TransitionConfiguration 
-  
+    transitionConfig: TransitionConfiguration,
   }, 
   );
 
