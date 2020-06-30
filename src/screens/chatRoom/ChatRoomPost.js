@@ -5,8 +5,10 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Octicons from 'react-native-vector-icons/Octicons'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
+import { withNavigation } from 'react-navigation'
+import { SharedElement } from 'react-native-shared-element'
 const { height, width } = Dimensions.get('window')
-export default class ChatRoomPost extends Component {
+ class ChatRoomPost extends Component {
 
     constructor(props) {
         super(props)
@@ -58,19 +60,23 @@ export default class ChatRoomPost extends Component {
     }
 
     render() {
+        const { navigation } = this.props
 
         return (
             <TouchableOpacity
-                activeOpacity={0.8}
-                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start" }}
-                onPress={() => this.props.press()}>
-                <ImageBackground
+                activeOpacity={0.8} 
+                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10 }}
+                onPress={() => navigation.push('ChatRoomPostDetail', { image: this.props.image, timestamp: this.props.timestamp })}>
+                 <ImageBackground
                     style={[styles.flex, styles.destination, styles.shadow]}
                     imageStyle={{ borderRadius: theme.sizes.radius }}
                     source={{ uri: this.props.image }}
                 >
                     <View style={[styles.column, { justifyContent: 'center' }]}>
+                    <SharedElement id={this.props.image}>
+
                         <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
+                    </SharedElement>
 
                         <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
                         <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
@@ -85,8 +91,9 @@ export default class ChatRoomPost extends Component {
 
                     </View>
                 </ImageBackground>
+               
 
-            </TouchableOpacity >
+            </TouchableOpacity>
 
 
         )
@@ -222,3 +229,4 @@ const styles = StyleSheet.create({
 //<Text>Mood: {this.props.mood}</Text>
 //<Text>Text: {this.props.text}</Text>
 //<Text>Cine a pus story: {this.props.creatorId}</Text>
+export default withNavigation(ChatRoomPost)

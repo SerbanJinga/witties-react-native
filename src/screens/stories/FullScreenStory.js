@@ -119,7 +119,7 @@ class FullScreenStorty extends React.Component {
       animated: true
     })
   }
-  
+
 
     render() {
       
@@ -140,7 +140,7 @@ class FullScreenStorty extends React.Component {
                   const layout = event.nativeEvent.layout
                   this.arr[index] = layout.x
                 }}>
-                <FullScreenSignleStoryVideo uid={item.creatorId} video={item.video} mood={item.mood} activity={item.activity}/>
+                <FullScreenSignleStoryVideo press={() => this.scrollToIndex()} uid={item.creatorId} video={item.video} mood={item.mood} activity={item.activity}/>
                 </View>
               )}
           })}

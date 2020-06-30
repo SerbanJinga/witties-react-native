@@ -17,7 +17,7 @@ import {
     Text,
 
   } from 'react-native';
-import { AntDesign } from '@expo/vector-icons'
+import { AntDesign, Entypo } from '@expo/vector-icons'
 import * as theme from '../../styles/theme'
 let arr = []
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
@@ -28,7 +28,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 const { width, height } = Dimensions.get('screen')
 import firebase from 'firebase'
 import * as Progress from 'react-native-progress'
-import { Overlay, Input, Button } from 'react-native-elements';
+import { Overlay, Input, Button, Avatar, Divider } from 'react-native-elements';
 export default class FullScreenSignleStory extends Component{
 
 constructor(props){
@@ -39,7 +39,10 @@ constructor(props){
     displayName: "",
     profilePicture: "",
     reply: false,
-    replyText: ""
+    replyText: "",
+    profile: false,
+    discriminator: "",
+    careScore: 0
   }
 }
 
@@ -48,10 +51,14 @@ getDisplayName = async() => {
   let initialQuery = await firebase.firestore().collection('users').doc(this.props.uid).get()
   let profilePicture = await initialQuery.data().profilePicture
   let displayName = await initialQuery.data().displayName
+  let careScore = await initialQuery.data().careScore
+  let discriminator = await initialQuery.data().discriminator
   console.log(displayName, 'daflaflakfa')
   this.setState({
     profilePicture: profilePicture,
-    displayName: displayName
+    displayName: displayName,
+    careScore: careScore,
+    discriminator: discriminator
   })
 }
 
@@ -109,9 +116,21 @@ getDisplayName = async() => {
     // console.log(data)
   
   }
+
+  openProfileDetails = () => {
+    this.setState({
+      profile: true
+    })
+  }
+
+  closeProfileDetails = () => {
+    this.setState({
+      profile: false
+    })
+  }
 render(){
     return(
-        <TouchableOpacity onPress={() => this.openOverlay()}>
+        <TouchableOpacity onLongPress={() => this.openOverlay()}>
           
 <ImageBackground
   style={[styles.flex, styles.destination]}
@@ -121,6 +140,7 @@ render(){
     {/* <Progress.Bar style={{marginLeft: 10, marginRight: 10}} progress={this.state.progress} indeterminate={this.state.indeterminate} width={width} height={2}/> */}
     
 
+<TouchableOpacity onPress={() => this.openProfileDetails()}>
   <View style={[styles.row, { justifyContent: 'space-between' }]}>
     <View style={{ flex: 0 }}>
       <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
@@ -142,6 +162,37 @@ render(){
     </View>
 
   </View>
+      <Overlay animationType="slide" fullScreen onBackdropPress={() => this.closeProfileDetails()} isVisible={this.state.profile} overlayStyle={{width: width, position: 'absolute', bottom: 0}}>
+      <View style={{flex: 1}}>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <TouchableOpacity onPress={() => this.closeProfileDetails()}>
+                    <AntDesign
+                        size={26}
+                        name="down"
+                        color="#b2b8c2"
+                    />
+                    </TouchableOpacity>
+                    <Text style={{fontFamily: 'font1', fontSize: 20}}>{this.state.displayName}</Text>
+                    <AntDesign
+                        size={26}
+                        name="bars"
+                        color="#b2b8c2"
+                    />
+                </View>
+                <View style={{flex: 0, alignItems: 'center', marginTop: 40}}>
+                    <Avatar size={100} source={{uri: this.state.profilePicture}} rounded/>
+                    <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
+                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.displayName}#{this.state.discriminator}</Text>
+                <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
+                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.careScore}</Text>
+                </View>
+                <Button style={{marginTop: 40}} titleStyle={{fontFamily: 'font1'}} title="See Friendship" type="clear"/>
+
+                </View>
+                <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
+            </View>      
+      </Overlay>
+  </TouchableOpacity>
 
 </ImageBackground>   
 

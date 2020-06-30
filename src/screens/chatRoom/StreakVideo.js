@@ -33,8 +33,10 @@ export default class Slider extends Component {
       
       ],
       allStreaks: [],
-      index: 0
+      index: 0,
+      dynamicIndex: 0
     }
+    this.arr = []
   }
 
   
@@ -60,6 +62,9 @@ export default class Slider extends Component {
     // this._stopAutoPlay();
       // this._startAutoPlay();
     // clearInterval()
+    // setInterval(() => {
+    //   this.scrollToIndex()
+    // }, 2000)
   }
 
   // componentWillUnmount() {
@@ -69,36 +74,47 @@ export default class Slider extends Component {
   _onPlaybackStatusUpdate = playbackStatus => {
     if (playbackStatus.didJustFinish)
       this.scrollToIndex()
+      // setTimeout(() => {this.scrollToIndex()}, 1000)
     };
 
   // 
  
 
   scrollToIndex = () => {
-    // if(this.state.index)
-    this.setState({
-      index: this.state.index + 1
+    
+    if(this.state.dynamicIndex < this.state.allStreaks.length - 1){
+      this.setState({
+        dynamicIndex: this.state.dynamicIndex + 1
+      })
+    }else{
+      return
+    }
+
+    this.scrollview_ref.scrollTo({
+      x: this.arr[this.state.dynamicIndex],
+      y: 0,
+      animated: true
     })
-    this.flatListRef.scrollToIndex({animated: true, index: index});
   }
 
   render() {
     return (
       <View style={{marginTop: 10, marginBottom: 10}}>
-        <FlatList
-          horizontal
-        data={this.state.allStreaks}
-          style={{ flex: 1 }}
-          ref={(ref) => { this.flatListRef = ref; }}
-          keyExtractor={item => item}
-          getItemLayout={this.getItemLayout}
-          initialNumToRender={2}
-          renderItem={({ item, index}) => (
+      <ScrollView ref={ref => {this.scrollview_ref = ref}} horizontal={true} pagingEnabled={true}>
+        {this.state.allStreaks.map((item, index) => {
+          return(
+            <View onLayout={event => {
+              const layout = event.nativeEvent.layout
+              this.arr[index] = layout.x
+            }}>
             <Video onPlaybackStatusUpdate=
     {(playbackStatus) => this._onPlaybackStatusUpdate(playbackStatus)} source={{uri: item}} resizeMode="cover" style={{ width: width - 20, height: 200, borderRadius: 20 }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
- 
-            )}
-        />
+                 
+          </View> 
+          )
+        })}
+      </ScrollView>
+        
       </View>
     );
   }

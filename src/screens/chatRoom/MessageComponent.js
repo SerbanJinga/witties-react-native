@@ -16,7 +16,8 @@ export default class MessageComponent extends Component {
             translatedDate: '',
             marginLeft: 0,
             marginRight: 0,
-            fontsLoaded: false
+            fontsLoaded: false,
+            displayName: ""
 
         }
     }
@@ -32,6 +33,14 @@ export default class MessageComponent extends Component {
     return formattedTime
   } 
 
+  _renderName = async () => {
+    let displayNameQuery = await firebase.firestore().collection('users').doc(this.state.sender).get()
+    let displayNameData = await displayNameQuery.data().displayName
+    this.setState({
+        displayName: displayNameData
+    })
+  }
+
     componentDidMount = async() => {
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf'),
@@ -40,6 +49,8 @@ export default class MessageComponent extends Component {
         this.setState({
             fontsLoaded: true
         })
+
+        await this._renderName()
         console.log(this.state.sender)
         console.log("-----------------------------------------")
         console.log(this.state.date)
@@ -65,7 +76,10 @@ export default class MessageComponent extends Component {
 {
         return (
             <View style={[styles.submit, {marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]}>
+                <Text style={{fontFamily: 'font1', lineHeight: 20}}>{this.state.displayName} a trimis: </Text>
+                
                 <Text style={{fontFamily: 'font1'}}>{this.state.msg}</Text>
+
                 <Text style={{fontFamily: 'font2', marginLeft: 20}}>{this._renderTimestamps(this.state.date)}</Text>
         </View>
         )

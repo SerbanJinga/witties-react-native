@@ -6,6 +6,7 @@ import Octicons from 'react-native-vector-icons/Octicons'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
 import { Video } from 'expo-av'
+import { Overlay } from 'react-native-elements'
 const { height, width } = Dimensions.get('window')
 
 export default class VideoComponent extends Component {
@@ -13,11 +14,41 @@ export default class VideoComponent extends Component {
     constructor(props){
         super(props)
         this.state = {
-            video: props.video
+            video: props.video,
+            overlay: false,
+            marginLeft: 0,
+            marginRight: 0
         }
     }
 
 
+    componentDidMount = () => {
+            if(this.props.creatorId === firebase.auth().currentUser.uid){
+                this.setState({
+                    marginLeft: 50,
+                    marginRight: 0
+                })
+            }else{
+                this.setState({
+                    marginLeft: 0,
+                    marginRight: 50
+                })
+            }
+    }
+
+
+    openOnLongPress = () => {
+        this.setState({
+            overlay: true
+        })
+    }
+
+
+    closeOnLongPress = () => {
+        this.setState({
+            overlay: false
+        })
+    }
 
     render(){
         return(
@@ -25,16 +56,19 @@ export default class VideoComponent extends Component {
 
  <TouchableOpacity
                 activeOpacity={0.8}
-                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10 }}
-                onPress={() => this.props.press()}>
+                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10, marginLeft: this.state.marginLeft, marginRight: this.state.marginRight }}
+                onPress={() => console.log('m-ai apasat')}
+                onLongPress={() => this.openOnLongPress()}>
                 <View
                     style={[styles.flex, styles.shadow]}
                     imageStyle={{ borderRadius: theme.sizes.radius }}
                 >
                     <Video source={{uri: this.state.video}} resizeMode="cover" style={styles.destination} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
                 </View>
-
-            </TouchableOpacity >
+            <Overlay onBackdropPress={() => this.closeOnLongPress()} isVisible={this.state.overlay} overlayStyle={{position: 'absolute', bottom: 0, width: width}}>
+                <Text>like video </Text>
+            </Overlay>
+            </TouchableOpacity>
             )
     }
 }

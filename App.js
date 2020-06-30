@@ -16,6 +16,10 @@ import Camera from './src/screens/camera/Camera';
 import StreakVideoCamera from './src/screens/chatRoom/StreakVideoCamera';
 import TestAnimation from './src/screens/stories/TestAnimation';
 import { zoomIn, zoomOut } from 'react-navigation-transitions'
+import ChatRoomPost from './src/screens/chatRoom/ChatRoomPost'
+import ChatRoomPostDetail from './src/screens/chatRoom/ChatRoomPostDetail'
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
+import ChatCameraScreen from './src/screens/chatRoom/ChatCameraScreen'
 require('firebase/firestore');
 
 console.disableYellowBox=true;
@@ -94,7 +98,7 @@ const TransitionConfiguration = () => {
 }
 
 
-const navigator = createStackNavigator(
+const navigator = createSharedElementStackNavigator(
   {
     Auth: AuthNavigator,
     Home: {
@@ -116,7 +120,10 @@ const navigator = createStackNavigator(
       name: 'TestAnimation',
       screen: TestAnimation,
       
-    }
+    },
+    ChatRoomPost: ChatRoomPost,
+    ChatRoomPostDetail: ChatRoomPostDetail,
+    ChatCameraScreen: ChatCameraScreen
   },{
     initialRouteName: 'Auth',
     headerMode: null,

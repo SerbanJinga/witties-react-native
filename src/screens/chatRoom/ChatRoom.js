@@ -3,7 +3,7 @@ import { Text, Input, Button, Icon, Divider, Avatar , Overlay} from 'react-nativ
 import { Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions, FlatList, Keyboard, TouchableWithoutFeedback, ScrollView, TouchableOpacity } from 'react-native'
 import MessageComponent from '../chatRoom/MessageComponent'
 import firebase from 'firebase'
-import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
+import { MaterialIcons, Feather, AntDesign } from '@expo/vector-icons'
 import _ from "lodash"
 import * as ImagePicker from 'expo-image-picker'
 
@@ -44,6 +44,34 @@ class ChatRoom extends Component {
             chatSettings: false,
             lessMessages: [],
         }
+    }
+
+    pickImage = async() => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3]
+        })
+
+        if(!result.cancelled){
+            console.log('bravo')
+        }
+    }
+
+    pickVideo = async() => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+            allowsEditing: true,
+            aspect: [4, 3]
+        })
+
+        if(!result.cancelled){
+            console.log('bravo, cu video')
+        }
+    }
+
+    openCamera = () => {
+
     }
 
     _onTouchAvatar = () => {
@@ -250,11 +278,26 @@ class ChatRoom extends Component {
         let data = await initialQuery.data().displayName
         return String(data)
     }
+
+    renderArr = () => {
+        return(
+        <View style={{flexDirection: 'row', marginVertical: 'auto'}} >
+        <TouchableOpacity onPress={() => this.pickImage()} style={{marginRight: 8}}>
+            <Feather name="image" size={24} color="black"/>
+        </TouchableOpacity>
+            <TouchableOpacity onPress={() => this.pickVideo()}>
+                <Feather name="video" size={24} color="black"/>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginLeft: 8}} onPress={() => this.props.navigation.navigate('ChatCameraScreen', { roomId: this.state.roomId})}>
+                <Feather name="camera" size={24} color="black"/>
+            </TouchableOpacity>
+        </View>
+        )
+    }
     
     render() {
         return (
-            <View style={styles.container}>
-           
+            <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding": "height"} style={styles.container}>
             <Overlay overlayStyle={{width: width, height: height}} isVisible={this.state.changeChatOverlay} animationType="slide">
             <ScrollView style={{flex: 1}}>
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -341,15 +384,18 @@ class ChatRoom extends Component {
                 
                 </View>
                 <Divider/>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
                 <View style={{flex: 1}}>
                     <Input
+                    
                         placeholderTextColor="#B1B1B1"
                         returnKeyType="done"
-                        rightIcon={<Button title="Send" type="clear" onPress={() => {
+                        rightIcon={this.state.currentMessage.length !== 0 ? <Button title="Send" type="clear" onPress={() => {
                             if (this.state.currentMessage != "")
                                 this.createMessage(this.state.currentMessage)
                             this.setState({ currentMessage: '' })
-                        }}/>}
+                        }}/> : this.renderArr()}
                         containerStyle={{position:'absolute',bottom:10}}
                         inputContainerStyle={{ paddingHorizontal: 10, borderWidth: 1, borderColor: "#b2b8c2",borderRadius: '20', height: 44}}
                         value={this.state.currentMessage}
@@ -368,6 +414,7 @@ class ChatRoom extends Component {
                             {(typeof (item.location) === 'undefined') ? <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> :
                               (typeof item.video === 'undefined') ?
                                                 <ChatRoomPost
+                                                    item={item}
                                                     postedFor={item.hoursPosted}
                                                     activity={item.activity}
                                                     mood={item.mood}
@@ -392,7 +439,9 @@ class ChatRoom extends Component {
                     style={{position:'absolute',top:0,bottom:65,left:5,right:5}}
                 />
                 </View>
-                </View>
+                </TouchableWithoutFeedback>
+
+                </KeyboardAvoidingView>
                 
 
 
