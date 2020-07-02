@@ -1,9 +1,13 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Dimensions, TouchableOpacity, Clipboard, Alert } from 'react-native'
 import { ListItem, Button, Text, Avatar, Divider } from 'react-native-elements'
 import { Overlay } from 'react-native-elements'
 import * as Font from 'expo-font'
 import { AntDesign, Entypo } from '@expo/vector-icons'
+import FullProfile from './FullProfile'
+import Toast, { DURATION } from 'react-native-easy-toast'
+import firebase from 'firebase'
+
 const { width, height } = Dimensions.get('window')
 
 export default class AddFriend extends Component {
@@ -54,6 +58,102 @@ export default class AddFriend extends Component {
             showFullProfile: false
         })
     }
+
+    _copyToClipboard = (name, discriminator) => {
+        let string = name + "#" + discriminator
+        Clipboard.setString(string)
+        this.refs.copyToClipboard.show("Copied!")
+    }
+
+
+    showBlockAlert = (name, uid) => {
+        Alert.alert(
+            `Block ${name}?`,
+            "You can not turn back.",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log('nimic '),
+                    style: 'cancel'
+                },
+                {
+                    text: "Block",
+                    onPress: () => this.blockUser(uid),
+                    style: 'destructive'
+                }
+            ],
+            {cancelable: 'false'}
+        )
+    }
+
+    blockUser = (uid) => {
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            blockedUsers: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+
+        firebase.firestore().collection('users').doc(uid).update({
+            blockedBy: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
+    }
+
+    _sendRequest = async(uid) => {
+        console.log('se trimite')
+        // this.state.friendRequsts.push(uid)
+        // await this.getToken(uid)
+        await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            sentRequests: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+
+        await firebase.firestore().collection('users').doc(uid).update({
+            receivedRequests: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
+  
+
+    }
+
+
+    addFriendProps = async (name, uid) => {
+        console.log(name, uid)
+        if(this.state.buttonTitle === 'Add Friend'){
+           await this._sendRequest(uid).then(
+            this.setState({
+                buttonTitle: 'Added'
+            }))
+            console.log('ce')
+        }else{
+            console.log('ce ce ce')
+            Alert.alert(
+                `Remove ${name}?`,
+                "You can not turn back.",
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log('nimic '),
+                        style: 'cancel'
+                    },
+                    {
+                        text: "Remove",
+                        onPress: () => this.removeFriendRequest(uid),
+                        style: 'destructive'
+                    }
+                ],
+                {cancelable: 'false'}
+            )        }
+    }
+
+    removeFriendRequest = (uid) => {
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            sentRequests: firebase.firestore.FieldValue.arrayRemove(uid)
+        })
+
+        firebase.firestore().collection('users').doc(uid).update({
+            receivedRequests: firebase.firestore.FieldValue.arrayRemove(firebase.auth().currentUser.uid)
+        })
+        this.setState({
+            buttonTitle: "Add Friend"
+        })
+    }
+
     render(){
         return(
             <TouchableOpacity onPress={() => this._pressTouchableOpacity()}>
@@ -65,10 +165,7 @@ export default class AddFriend extends Component {
                     <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.props.displayName}</Text>
                     <Text style={{fontFamily: 'font1', marginLeft: 4}}>#{this.props.discriminator}</Text>
                     </View>
-                <Button title={this.state.buttonTitle} type="clear" titleStyle={{fontFamily: 'font1'}} onPress={() => {this.props.press()
-                this.setState({
-                    buttonTitle: "Added"
-                })}}/>
+                <Button title={this.state.buttonTitle} type="clear" titleStyle={{fontFamily: 'font1'}} onPress={() => this.addFriendProps(this.props.displayName, this.props.uid)}/>
                 </View>
                 <Divider style={{marginTop: 20}}/>
 
@@ -100,11 +197,11 @@ export default class AddFriend extends Component {
                     </TouchableOpacity>
                     <Divider style={{marginTop: 0}}/>
 
-                    <TouchableOpacity style={{padding: 10, paddingBottom: 20}}>
+                    <TouchableOpacity style={{padding: 10, paddingBottom: 20}} onPress={() => this._copyToClipboard()}>
                         <Text style={{fontFamily: 'font1', fontSize: 18}}>Copy Username</Text>
                     </TouchableOpacity>
                     <Divider style={{marginTop: 0}}/>
-                    <TouchableOpacity style={{padding: 10}}>
+                    <TouchableOpacity style={{padding: 10}} onPress={() => this.showBlockAlert(this.props.displayName, this.props.uid)}>
                         <Text style={{fontFamily: 'font1', fontSize: 18, color: 'red'}}>Block User</Text>
                     </TouchableOpacity>
                     <Divider style={{marginTop: 0}}/>
@@ -112,40 +209,21 @@ export default class AddFriend extends Component {
                     <TouchableOpacity style={{padding: 10}}>
                         <Text style={{fontFamily: 'font1', fontSize: 18, color: '#b2b8c2', alignSelf: 'center'}}>Done</Text>
                     </TouchableOpacity>
-                    
+                    <Toast
+                    ref="copyToClipboard"
+                    style={{backgroundColor: '#4BB543'}}
+                    textStyle={{color: '#fff'}}
+                    position='top'
+                    opacity={0.8}
+                    fadeInDuration={750}
+                />
                    
                 </View>
+                
         </Overlay>
 
         <Overlay overlayStyle={{width: width, height: height}} animationType="slide" isVisible={this.state.showFullProfile}>
-            <View style={{flex: 1}}>
-                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <TouchableOpacity onPress={() => this._closeProfileDetails()}>
-                    <AntDesign
-                        size={26}
-                        name="down"
-                        color="#b2b8c2"
-                    />
-                    </TouchableOpacity>
-                    <Text style={{fontFamily: 'font1', fontSize: 20}}>{this.props.displayName}</Text>
-                    <AntDesign
-                        size={26}
-                        name="bars"
-                        color="#b2b8c2"
-                    />
-                </View>
-                <View style={{flex: 0, alignItems: 'center', marginTop: 40}}>
-                    <Avatar size={100} source={{uri: this.props.profilePicture}} rounded/>
-                    <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
-                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.props.displayName}#{this.props.discriminator}</Text>
-                <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
-                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.props.careScore}</Text>
-                </View>
-                <Button style={{marginTop: 40}} titleStyle={{fontFamily: 'font1'}} title="Add Friend" type="clear"/>
-
-                </View>
-                <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
-            </View>
+        <FullProfile added={this.state.buttonTitle} addFriend={()=> this.props.press()} displayName={this.props.displayName} discriminator={this.props.discriminator} careScore={this.props.careScore} profilePicture={this.props.profilePicture} close={() => this._closeProfileDetails()} uid={this.props.uid}/>
         </Overlay>
             </TouchableOpacity>                
         )

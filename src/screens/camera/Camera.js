@@ -249,9 +249,9 @@ closeSettings = () => {
 
 renderCamera = () => {
   return(
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, backgroundColor: 'transparent'}}>
     <DoubleTap onDoubleTap={() => this.handleCameraType()}>
-        <Camera ratio={'16: 9'} style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}} flashMode={this.state.withFlash}>
+        <Camera mirror={false} ratio={'16: 9'} style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}} flashMode={this.state.withFlash}>
 
     <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>   
     <TouchableOpacity
@@ -396,7 +396,7 @@ renderGallery = () => {
   return(
       <Overlay isVisible={this.state.showPhoto} overlayStyle={{flex: 1}}>
          <View style={{flex: 1}}>
-                <ImageBackground source={{uri: this.state.pictureTaken}} style={{width: width, height: height}}>
+                <ImageBackground source={{uri: this.state.pictureTaken}} style={{width: width, height: height, backgroundColor: 'transparent'}}>
                 <View style={{flex: 0, flexDirection: 'row', margin: 20}}>
                 <TouchableOpacity
                 onPress={() => this._pressOverlay()}

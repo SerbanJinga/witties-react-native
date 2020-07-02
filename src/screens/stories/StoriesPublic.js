@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, FlatList, Animated, SafeAreaView, Text, ActivityIndicator, TextInput } from 'react-native'
+import { View, StyleSheet, Dimensions, FlatList, Animated, SafeAreaView, Text, ActivityIndicator, ScrollView, RefreshControl } from 'react-native'
 import firebase from 'firebase'
 import Status from '../../components/Status'
 import * as theme from '../../styles/theme'
@@ -10,7 +10,7 @@ import Modal from 'react-native-modal'
 let arr = []
 let allStoriesFromAllUsers = []
 import FullScreenStory from './FullScreenStory'
-import { Overlay, Button, SearchBar, Input } from 'react-native-elements'
+import { Overlay, Button, SearchBar, Input, ThemeConsumer } from 'react-native-elements'
 import FriendList from '../friendSystem/FriendList'
 import StreakVideo from '../chatRoom/StreakVideo'
 let stories = []
@@ -154,10 +154,23 @@ const { height, width } = Dimensions.get('window')
       }
     }
 
+
+   
+    onRefresh = () => {
+      this.setState({
+          refreshing: true
+      })
+setTimeout(() => {
+  this.setState({
+    refreshing: false
+  })
+}, 2000)
+  }
+
     render(){
       if(this.state.fontsLoaded){
         return(
-            <View style={[ styles.column, styles.destinations ]}>
+            <ScrollView style={{flex: 1}} refreshControl={<RefreshControl tintColor="red" onRefresh={() => this.onRefresh()} refreshing={this.state.refreshing}/>}>
                   <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>News</Text>
                 
                 <SafeAreaView style={styles.container} >
@@ -177,7 +190,7 @@ const { height, width } = Dimensions.get('window')
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
-                ListFooterComponent={this.renderFooter}
+                // ListFooterComponent={this.renderFooter}
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
@@ -194,11 +207,11 @@ const { height, width } = Dimensions.get('window')
                 {/* <Button onPress={() => this.props.navigation.navigate('TestAnimation', {transition: 'bottomTransition'})} title="Navigate"/> */}
                   {/* <StreakVideo/> */}
                 <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} fullScreen animationType="slide">
-                  <View style={{flex: 1}}>
+                  <SafeAreaView style={{flex: 1}}>
                     <FriendList close={()=>this.closeNewChatOverlay()}/>
-                  </View>
+                  </SafeAreaView>
                 </Overlay>
-            </View>
+            </ScrollView>
             )}else{
               return (<ActivityIndicator size="large"/>)
             }

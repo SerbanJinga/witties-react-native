@@ -20,6 +20,7 @@ const { width2, height2 } = Dimensions.get("screen")
 import SwipeablePanel from "rn-swipeable-panel";
 import VideoComponent from './VideoComponent'
 import StreakVideo from './StreakVideo'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 class ChatRoom extends Component {
     constructor(props) {
@@ -297,8 +298,11 @@ class ChatRoom extends Component {
     
     render() {
         return (
-            <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding": "height"} style={styles.container}>
+            <SafeAreaView style={{flex: 1}}>
+
+<KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding": "height"} style={styles.container}>
             <Overlay overlayStyle={{width: width, height: height}} isVisible={this.state.changeChatOverlay} animationType="slide">
+
             <ScrollView style={{flex: 1}}>
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                     <TouchableOpacity onPress={() => this._closeChatDetails()}>
@@ -328,7 +332,8 @@ class ChatRoom extends Component {
                     
                     {this.renderStreakVideo()}
                 </ScrollView>
-                <Overlay animationType='fade' onBackdropPress={() => this._closeChatSettings()} isVisible={this.state.chatSettings} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
+
+                <Overlay animationType='fade' onBackdropPress={() => this._closeChatSettings()} isVisible={this.state.chatSettings} overlayStyle={{width: width, borderRadius: 10, position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                         <Avatar size={40} source={{uri: this.state.profilePicture}} rounded/>
@@ -364,20 +369,20 @@ class ChatRoom extends Component {
                 </Overlay>
             </Overlay>
             
-                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10}}>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center'}}>
                 <TouchableOpacity
                     onPress={() => this.props.navigation.goBack(null)}
                   style={{
                     backgroundColor: 'transparent',
-                    margin: 4,
-                    marginRight: 10,
+                    // margin: 4,
+                    // marginRight: 10,
                  }}>
               <AntDesign
                   name="arrowleft"
-                  style={{fontSize: 26, fontWeight: "bold"}}
+                  style={{fontSize: 24, fontWeight: "bold"}}
               />
                           </TouchableOpacity> 
-                          <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5}}>{this.state.roomName}</Text>
+                          <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 0}}>{this.state.roomName}</Text>
 
                     <Avatar onPress={() => this._onTouchAvatar()} rounded source={{uri: this.state.profilePicture}}/>
                     
@@ -443,6 +448,7 @@ class ChatRoom extends Component {
 
                 </KeyboardAvoidingView>
                 
+                </SafeAreaView>
 
 
             

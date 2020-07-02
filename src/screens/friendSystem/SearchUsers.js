@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard, Alert, SectionList } from 'react-native'
+import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard, Alert, SectionList, RefreshControl } from 'react-native'
 import { Text, SearchBar, Button, Avatar, Overlay, Input, Divider, Tooltip } from 'react-native-elements'
 // import Clipboard from '@react-native-community/clipboard'
 import firebase from 'firebase'
@@ -101,7 +101,7 @@ console.log(arr)
         });
         this.setState({fontsLoaded: true})
         await this.getCurrentUser()
-        await this.retrieveData().then(this.setState({documentData: arr}))
+        await this.retrieveData()
         await this.addedMe()
         await this._retrieveProfilePicture()
     }
@@ -134,7 +134,7 @@ console.log(arr)
     renderFooter = () => {
         try{
             if(this.state.loading || this.state.refreshing){
-                return(<ActivityIndicator/>)
+                return(<ActivityIndicator size="large" color="red"/>)
             }else{
                 return null
             }
@@ -144,6 +144,7 @@ console.log(arr)
     }
 
     retrieveData = async() => {
+        arr = []
         console.log('merge JKFALFKLAGKLA FKALGLA G')
         let documentT;
         const func = firebase.functions().httpsCallable('friendSystem')
@@ -158,8 +159,8 @@ console.log(arr)
              console.log('-------------------------')
              console.log(documentT)
              console.log('-------------------------  ')
-            documentT.forEach(element => {
-                this._getUserFromUid(element)
+            await documentT.forEach(async element => {
+                await this._getUserFromUid(element)
             })
         }).then(
         this.setState({
@@ -176,12 +177,16 @@ console.log(arr)
         let documentSnapshots = await initialQuery.get()
         let documentData = await documentSnapshots.data()
         arr.push(documentData)
+        this.setState({
+            documentData: arr
+        })
     }
 
     addedMe = async () => {
+        addedMe = []
         let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
         let addData = await initialQuery.data().receivedRequests
-        addData.forEach(element => this.getAddedMeUser(element))
+        addData.forEach(async element => await this.getAddedMeUser(element))
     }
 
     getAddedMeUser = async(uid) => {
@@ -320,6 +325,22 @@ console.log(arr)
         )
     }
 
+    onRefresh = () => {
+        this.setState({
+            refreshing: true
+        })
+        setTimeout(async() => {
+            await this.addedMe().then(this.setState({
+                addedMe: addedMe
+            }))
+            await this.retrieveData().then(
+            this.setState({
+                documentData: arr,
+                refreshing: false
+            }))
+        }, 2000)
+    }
+
 
     render(){
             const loaded = this.state.fontsLoaded
@@ -354,7 +375,10 @@ console.log(arr)
                     isVisible={this.state.searchOverlay}
                     overlayStyle={{width: width, height: height}}
                 >
-                <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+                <SafeAreaView style={{flex: 1}}>
+                <ScrollView style={{flex: 1, flexDirection: 'column'}} refreshControl={
+                    <RefreshControl tintColor="red" onRefresh={() => this.onRefresh()} refreshing={this.state.refreshing}/>
+                }>
                 <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start'}}>
                 <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>  
                 <TouchableOpacity onPress={() => this._onCloseSearch()}>
@@ -393,10 +417,10 @@ console.log(arr)
                 <FlatList
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
-                    <AddFriend careScore={item.careScore} discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
+                    <AddFriend uid={item.uid} careScore={item.careScore} discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
                  )}   
                 keyExtractor={(item, index) => String(index)}
-                ListFooterComponent={this.renderFooter}
+                // ListFooterComponent={this.renderFooter}
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
@@ -404,6 +428,7 @@ console.log(arr)
                 />
              
 </ScrollView>
+</SafeAreaView>
                 </Overlay>
 
                 {/* profile overlay */}
@@ -413,8 +438,8 @@ console.log(arr)
                     overlayStyle={{width: width, height: height}}
                     isVisible={this.state.profileOverlay}
                 >
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', marginTop: 10}}>
+                    <SafeAreaView style={{flex: 1, flexDirection: 'column'}}>
+                        <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center'}}>
                             <TouchableOpacity
                             onPress={() => this._onCloseAvatar()}
                                 style={{
@@ -422,9 +447,9 @@ console.log(arr)
                                     alignItems: 'center',
                                     backgroundColor: 'transparent',                  
                                 }}>
-                            <AntDesign name="close" size={20}/>
+                            <AntDesign name="close" size={22}/>
                             </TouchableOpacity>
-                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 8}}>Account</Text>
+                            <Text style={{fontSize: 20, fontFamily: 'font1', marginLeft: 8}}>Account</Text>
                         </View>
                         <View style={{flex: 0, flexDirection: 'row', padding: 15}}>
                             <Avatar source={{uri: this.state.profilePicture}} rounded/>
@@ -493,7 +518,7 @@ console.log(arr)
                             </View>
                         </TouchableOpacity>
                         
-                    </View>
+                    </SafeAreaView>
 
                 <Toast
                     ref="copyToClipboard"
@@ -504,7 +529,7 @@ console.log(arr)
                     fadeInDuration={750}
                 />
                   <Overlay animationType="slide" isVisible={this.state.settings} fullScreen overlayStyle={{width: width}}>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
+                    <View style={{flex: 1, flexDirection: 'column', top: 10}}>
                         <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                         <TouchableOpacity onPress={() => this._closeSettings()}>
                     <AntDesign
@@ -530,8 +555,8 @@ console.log(arr)
                     </View>
                 </Overlay>
                 </Overlay>
-              
-                <Timeline/>
+                
+                {/* <Timeline/> */}
             </View>)
             }else{
                 return (<View style={{flex: 1, width: width, height: height, alignItems: 'center', justifyContent: 'center'}}>

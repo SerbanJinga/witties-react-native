@@ -110,13 +110,13 @@ export default class Home extends Component {
     render(){
         return(
 
-         <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+         <View style={{flex: 1}}>
           <Swiper
                   loop={false}
                   showsPagination={false}
                   index={1}>
                     <View style={{flex: 1}}>
-                      <Map/>
+                      {/* <Map/> */}
                       {/* <CameraScreen/> */}
                     </View>
                     <Swiper
@@ -124,19 +124,19 @@ export default class Home extends Component {
                       loop={false}
                       showsPagination={false}
                       index={1}>
-                      <View style={{flex: 1}}>
+                      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                         {/* <UserProfile/> */}
-                      </View>
-                      <View style={{flex: 1}}>
-                        {/* <SearchUsers/> */}
-                      </View>
+                      </SafeAreaView>
+                      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+                        <SearchUsers/>
+                      </SafeAreaView>
                     </Swiper>        
-                    <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
+                    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                         <StoriesPublic/>
                        
-                    </ScrollView>
+                    </SafeAreaView>
        </Swiper>
-</SafeAreaView>
+</View>
           )
 
     }

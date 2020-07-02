@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import { ListItem, Button, Text, Avatar, Divider } from 'react-native-elements'
 import { Overlay } from 'react-native-elements'
+import FullProfile from './FullProfile'
 import * as Font from 'expo-font'
 import { AntDesign, Entypo } from '@expo/vector-icons'
 const { width, height } = Dimensions.get('window')
@@ -118,34 +119,7 @@ export default class AddedMe extends Component {
         </Overlay>
 
         <Overlay overlayStyle={{width: width, height: height}} animationType="slide" isVisible={this.state.showFullProfile}>
-            <View style={{flex: 1}}>
-                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <TouchableOpacity onPress={() => this._closeProfileDetails()}>
-                    <AntDesign
-                        size={26}
-                        name="down"
-                        color="#b2b8c2"
-                    />
-                    </TouchableOpacity>
-                    <Text style={{fontFamily: 'font1', fontSize: 20}}>{this.props.displayName}</Text>
-                    <AntDesign
-                        size={26}
-                        name="bars"
-                        color="#b2b8c2"
-                    />
-                </View>
-                <View style={{flex: 0, alignItems: 'center', marginTop: 40}}>
-                    <Avatar size={100} source={{uri: this.props.profilePicture}} rounded/>
-                    <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
-                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.props.displayName}#{this.props.discriminator}</Text>
-                <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
-                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.props.careScore}</Text>
-                </View>
-                <Button style={{marginTop: 40}} titleStyle={{fontFamily: 'font1'}} title="Add Friend" type="clear"/>
-
-                </View>
-                <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
-            </View>
+        <FullProfile addFriend={()=> this.props.press()} displayName={this.props.displayName} discriminator={this.props.discriminator} careScore={this.props.careScore} profilePicture={this.props.profilePicture} close={() => this._closeProfileDetails()} uid={this.props.uid}/>
         </Overlay>
             </TouchableOpacity>                
         )
