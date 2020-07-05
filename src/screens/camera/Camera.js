@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
-import { Overlay, Icon } from 'react-native-elements'
-import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView, Animated, StyleSheet } from 'react-native'
+import { Overlay } from 'react-native-elements'
+import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView, Animated, StyleSheet, Alert } from 'react-native'
 import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
 import { FontAwesome, MaterialCommunityIcons, Ionicons, Feather, AntDesign, MaterialIcons } from '@expo/vector-icons'
@@ -10,7 +10,9 @@ import Gallery from './Gallery'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
 import * as ImagePicker from 'expo-image-picker'
-import { Avatar, SearchBar, Button } from 'react-native-elements'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+
+import { Avatar, SearchBar, Button,  } from 'react-native-elements'
 import ActivityPopup from '../ActivityPop/ActivityPopup'
 import { Video } from 'expo-av'
 import SendToList from './SendToList'
@@ -18,6 +20,12 @@ import { Send } from 'react-native-gifted-chat'
 import DoubleTap from './DoubleTap'
 import VideoPlayer from 'expo-video-player'
 import { withNavigation } from 'react-navigation'
+import PlacesInput from 'react-native-places-input';
+
+import { SafeAreaView } from 'react-native-safe-area-context'
+import SendTo from './SendTo'
+import TaggedList from './TaggedList'
+import ListActivities from '../ActivityPop/ListActivities'
 
 const { width, height } = Dimensions.get('window')
 
@@ -43,8 +51,61 @@ let lastTap = null
             showVideo: false,
             openSend: false,
             settings: false,
-            showListVideo: false
+            showListVideo: false,
+            publicIcon: 'earth',
+            moodOverlay: false,
+            activityOverlay: false,
+            tagFriendsOverlay: false,
+            locationOverlay: false,
+            timePostedOverlay: false,
+            sendToOverlay: false,
+            moodIcon: "emoticon-kiss",
+            mood: "",
+            location: "",
+            selectedActivity: "",
+            taggedUsers: [],
+            selectedValueHours: "",
+            cameraIcon: "camera"
           }
+    }
+
+    openActivityOverlay = () => {
+      this.setState({
+        activityOverlay: true
+      })
+    }
+
+
+    
+    closeActivityOverlay = () => {
+      this.setState({
+        activityOverlay: false
+      })
+    }
+
+
+    openTagFriends = () => {
+      this.setState({
+        tagFriendsOverlay: true
+      })
+    }
+
+    closeTagFriends = () => {
+      this.setState({
+        tagFriendsOverlay: false
+      })
+    }
+
+    _pressPublic = () => {
+      if(this.state.publicIcon === 'earth'){
+        this.setState({
+          publicIcon: 'lock'
+        })
+      }else{
+        this.setState({
+          publicIcon: 'earth'
+        })
+      }
     }
 
     async changeLocationIcon() {
@@ -109,7 +170,7 @@ let lastTap = null
         }else if (this.state.hasPermission === false){
             console.log('n a mers')
         }
-    }
+      }
 
 
     handleCameraType=()=>{
@@ -206,7 +267,8 @@ startTimer = () => {
 checkTimer = async() => {
   if(this.state.onPressCamera === true){
     this.setState({
-      cameraDoes: "video"
+      cameraDoes: "video",
+      cameraIcon: "video-camera"
     })
     let video = await this.camera.recordAsync()
     console.log(video)
@@ -329,7 +391,7 @@ renderCamera = () => {
         backgroundColor: 'transparent',
       }}>
       <FontAwesome
-          name="camera"
+          name={this.state.cameraIcon}
           style={{ color: "#fff", fontSize: 30}}
       />
     </TouchableOpacity>
@@ -383,6 +445,26 @@ _postOnStory = () => {
   firebase.firestore().collection()
 }
 
+_closeOverlay = () => {
+  Alert.alert(
+    `Discard picture?`,
+    "You can not turn back.",
+    [
+        {
+            text: "Cancel",
+            onPress: () => console.log('nimic '),
+            style: 'cancel'
+        },
+        {
+            text: "Discard",
+            onPress: () => this._pressOverlay(),
+            style: 'destructive'
+        }
+    ],
+    {cancelable: 'false'}
+)
+}
+
 _pressOverlay = () => {
   this.setState({ showPhoto: false, pictureTaken: '' })
 }
@@ -391,82 +473,432 @@ sendPost = () => {
 
 }
 
+openMoodOverlay = () => {
+  this.setState({
+    moodOverlay: true
+  })
+}
+
+closeMoodOverlay = () => {
+  this.setState({
+    moodOverlay: false
+  })
+}
+
+openLocationOverlay = () => {
+  this.setState({
+    locationOverlay: true
+  })
+}
+
+
+closeLocationOverlay = () => {
+  this.setState({
+    locationOverlay: false
+  })
+}
+
+closeActivityOverlayFromList = (selectedActivity) => {
+  // console.log('s a transmis', selectedActivity)
+  this.setState({
+    selectedActivity: selectedActivity,
+    activityOverlay: false,
+  })
+
+  console.log(selectedActivity, 'a mers')
+}
+
+closeTagFriendsProps = (taggedUsers) => {
+  console.log('mama mia', taggedUsers)
+  this.setState({
+    taggedUsers: taggedUsers,
+    tagFriendsOverlay: false
+  })
+}
+
+openTimeOverlay = () => {
+  this.setState({
+    timePostedOverlay: true
+  })
+}
+
+
+closeTimeOverlay = () => {
+  this.setState({
+    timePostedOverlay: false
+  })
+}
+
+sendImage = () => {
+  let foo = {
+    
+    
+}
+  this.setState({
+    sendToOverlay: true
+  })
+}
+
+closeSendTo = () => {
+  this.setState({
+    sendToOverlay: false
+  })
+}
+
 renderGallery = () => {
   
   return(
-      <Overlay isVisible={this.state.showPhoto} overlayStyle={{flex: 1}}>
-         <View style={{flex: 1}}>
+      <Overlay isVisible={this.state.showPhoto}>
                 <ImageBackground source={{uri: this.state.pictureTaken}} style={{width: width, height: height, backgroundColor: 'transparent'}}>
-                <View style={{flex: 0, flexDirection: 'row', margin: 20}}>
+                <SafeAreaView style={{flex: 1, flexDirection: 'row', margin: 10}}>               
+                <View style={{flex: 0, margin: 0, alignItems: 'flex-start'}}>
                 <TouchableOpacity
-                onPress={() => this._pressOverlay()}
+                onPress={() => this._closeOverlay()}
               style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
+                backgroundColor: 'transparent'
               }}>
               <AntDesign
                   name="close"
                   style={{ color: "#fff", fontSize: 30}}
               />
+
             </TouchableOpacity>   
-            <TouchableOpacity
-                onPress={() => this._pressOverlay()}
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-                marginLeft: width / 1.8
-              }}>
-              <MaterialCommunityIcons
-                  name="download"
-                  style={{ color: "#fff", fontSize: 30}}
+           
+
+           
+             </View>
+
+
+             <View style={{flex: 1, flexDirection: 'column', alignItems: 'flex-end', margin: 0}}>
+            <TouchableOpacity style={{marginBottom: 20}}>
+              <MaterialCommunityIcons 
+                  name="format-text" 
+                  style={{ color: "#fff", fontSize: 30 }}
               />
-            </TouchableOpacity>    
-            <TouchableOpacity
-                onPress={() => this._pressOverlay()}
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-                marginLeft: 20
-              }}>
-              <MaterialCommunityIcons
-                  name="menu"
-                  style={{ color: "#fff", fontSize: 30}}
+            </TouchableOpacity>
+        
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openMoodOverlay()}>
+              <MaterialCommunityIcons 
+                  name={this.state.moodIcon}
+                  style={{color: '#fff', fontSize: 30}}
               />
-            </TouchableOpacity>  
-                
-             </View>
-             <View style={{flex: 0, flexDirection: 'row', margin: 20, position: 'absolute', bottom: 20, alignContent: 'center', justifyContent: 'space-between'}}>
-             <View style={{flex: 0, flexDirection: 'column', alignItems: 'center', margin: 10}}>              
-              <Avatar onPress={() => this._postOnStory()} containerStyle={{borderWidth: 2, borderColor: 'white',  borderStyle: 'solid'}} rounded source={{uri: this.state.profilePicture}}/>
-              <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Your Story</Text>
-             </View>
-             <View style={{flex: 0, flexDirection: 'column', alignItems: 'center', margin: 10}}>              
-             <Avatar onPress={() => this.openSwipeablePanel()} containerStyle={{borderWidth: 2, borderColor: 'white', borderStyle: 'solid'}} rounded source={{uri: 'https://image.flaticon.com/icons/png/512/32/32441.png'}}/>
-              <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Edit</Text>
-             </View>
-             <TouchableOpacity>
-            <TouchableOpacity style={{backgroundColor: '#0984e3', borderRadius: '40'}} onPress={()=> this.openSendTo()}>
-            <View style={{flex: 0, justifyContent: 'center',alignContent: 'center', alignItems: 'center',marginTop: 20, marginLeft: 80, flexDirection: 'row'}}>
-
-             <Text style={{color: '#fff', marginRight:15, fontFamily: 'font1', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>Send to</Text>
-              <MaterialCommunityIcons
-                name="send"
-                style={{fontSize: 20}}
-                color="#fff"
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openActivityOverlay()}>
+              <MaterialCommunityIcons name="basketball" style={{color: '#fff', fontSize: 30}}/>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openTagFriends()}>
+              <Ionicons
+                name="md-pricetags"
+                style={{color: '#fff', fontSize: 30}}
               />
-              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openLocationOverlay()}>
+            <MaterialIcons name="location-on" style={{color: '#fff', fontSize: 30}} />
 
-              </TouchableOpacity>
+            </TouchableOpacity>
 
-              </TouchableOpacity>
-             </View>
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this._pressPublic()}>
+            <MaterialCommunityIcons name={this.state.publicIcon} style={{color: '#fff', fontSize: 30}} />
 
+            </TouchableOpacity>
+            
+            
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openTimeOverlay()}>
+            <Ionicons name="ios-time" style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+              
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.sendImage()}>
+            <Ionicons name="ios-send" style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+
+            </View>
+            <Overlay isVisible={this.state.moodOverlay} fullScreen animationType="slide">
+              <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeMoodOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Mood</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+              <View style={styles.moodView}>
+                        <Button
+                            titleStyle={{fontFamily: 'font1'}}
+                            title=" Happy"
+                            type="clear"
+                            icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'happy', moodIcon: 'emoticon' }) 
+                            this.closeMoodOverlay() }}
+
+                        />
+                        <Button
+                            titleStyle={{fontFamily: 'font1'}}
+                            title=" Angry"
+                            type="clear"
+                            icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'angry', moodIcon: 'emoticon-angry' }) 
+                            this.closeMoodOverlay() } }
+
+                        />
+                    </View>
+
+                    <View style={styles.moodView}>
+                        <Button
+                            titleStyle={{fontFamily: 'font1'}}
+                            title=" Cool"
+                            type="clear"
+                            icon={<Icon name={'emoticon-cool'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'cool', moodIcon: 'emoticon-cool' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                        <Button
+                            titleStyle={{fontFamily: 'font1'}}
+                            title=" Sad"
+                            type="clear"
+                            icon={<Icon name={'emoticon-cry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'sad', moodIcon: 'emoticon-cry' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                    </View>
+
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" Dead"
+                            titleStyle={{fontFamily: 'font1'}}
+                            type="clear"
+                            icon={<Icon name={'emoticon-dead'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'dead', moodIcon: 'emoticon-dead' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                        <Button
+                            title=" Excited"
+                            titleStyle={{fontFamily: 'font1'}}
+                            type="clear"
+                            icon={<Icon name={'emoticon-excited'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'excited', moodIcon: 'emoticon-excited' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                    </View>
+
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" Flirty"
+                            titleStyle={{fontFamily: 'font1'}}
+                            type="clear"
+                            icon={<Icon name={'emoticon-kiss'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'flirty', moodIcon: 'emoticon-kiss' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                        <Button
+                            title=" Ok"
+                            titleStyle={{fontFamily: 'font1'}}
+                            type="clear"
+                            icon={<Icon name={'emoticon-neutral'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'ok', moodIcon: 'emoticon-neutral'}) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                    </View>
+                </SafeAreaView>
+            </Overlay>
+
+            <Overlay isVisible={this.state.sendToOverlay} fullScreen animationType="slide">
+            <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeSendTo()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Send To</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+              <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid}/>
+            </SafeAreaView>
+            </Overlay>
+
+            <Overlay isVisible={this.state.timePostedOverlay} fullScreen animationType="slide">
+            <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeTimeOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Hours Posted</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+
+            <View style={styles.moodView}>
+                        <Button
+                            title=" 30 min"
+                            type="clear"
+                            // icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '30 min', timePostedOverlay: false }) }}
+
+                        />
+                        <Button
+                            title=" 1 hour"
+                            type="clear"
+                            // icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '1 hour', timePostedOverlay: false }) }}
+
+                        />
+                    </View>
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" 2 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '2 hours', timePostedOverlay: false }) }}
+
+                        />
+                        <Button
+                            title=" 4 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '4 hours', timePostedOverlay: false }) }}
+                        />
+                    </View>
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" 8 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '8 hours', timePostedOverlay: false }) }}
+
+                        />
+                        <Button
+                            title=" 16 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '16hours', timePostedOverlay: false }) }}
+
+                        />
+                    </View>
+                  </SafeAreaView>
+            </Overlay>
+
+            <Overlay isVisible={this.state.activityOverlay} fullScreen animationType="slide">
+              
+                <SafeAreaView style={{flex: 1}}>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeActivityOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Activity</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+
+                   <ListActivities close={this.closeActivityOverlayFromList}/>
+              
+              </SafeAreaView>
+            </Overlay>
+
+            <Overlay isVisible={this.state.tagFriendsOverlay} fullScreen animationType="slide">
+              <SafeAreaView style={{flex: 1}}>
+              <TaggedList close={this.closeTagFriendsProps}/>
+              </SafeAreaView>
+            </Overlay>
+
+            <Overlay isVisible={this.state.locationOverlay} fullScreen animationType="slide">
+              <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeLocationOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Location</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+              <PlacesInput
+                          stylesContainer={{
+            position: 'relative',
+            alignSelf: 'stretch',
+            margin: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            shadowOpacity: 0,
+            borderColor: '#dedede',
+            borderWidth: 1,
+            marginBottom: 10,
+            // borderRadius: 8
+        }}
+                            googleApiKey="AIzaSyBV_c_ySGNav7CWXBhIWPvWpJIaKIWBP88"
+                            placeHolder={"Search for location"}
+                            language={"en-US"}
+                            onSelect={place => {
+                                this.setState({ location: place.result.name })
+                                //   console.log(place.result.name)
+                            }}
+
+                        />
+              </SafeAreaView>
+            </Overlay>
+
+</SafeAreaView>
+
+          
                 </ImageBackground>
           
-            </View>
             <Overlay overlayStyle={{width: width, height: height - 200, position: 'absolute', bottom: 0}} onBackdropPress={() => this.closeSwipablePanel()} animationType='fade' isVisible={this.state.showAct}>
               <ActivityPopup imageFromCamera={this.state.pictureTaken}/>
             </Overlay>
@@ -491,22 +923,380 @@ closeVideo = () => {
   })
 }
 
+_closeVideoOverlay = () => {
+  Alert.alert(
+    `Discard video?`,
+    "You can not turn back.",
+    [
+        {
+            text: "Cancel",
+            onPress: () => console.log('nimic '),
+            style: 'cancel'
+        },
+        {
+            text: "Discard",
+            onPress: () => this._pressVideoOverlay(),
+            style: 'destructive'
+        }
+    ],
+    {cancelable: 'false'}
+)
+}
+
+_pressVideoOverlay = () => {
+  this.setState({
+    video: "",
+    cameraIcon: "camera"
+  })
+}
+
 renderVideo = () => {
   // const opacity = React.useMemo(() => new Animated.Value(0), []);
   // console.log('se randeaza')
   return(
-  <Overlay isVisible={this.state.showVideo} overlayStyle={{flex: 1, width: width, height: height}}>
-<View style={styles.container}>
- 
-      <Video source={{uri: this.state.video}} resizeMode="cover" style={styles.video} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
-      <TouchableOpacity style={styles.button} onPress={() => this.pressVideo()}>
-        <Text style={{fontSize: 40}}>Send to</Text>
-      </TouchableOpacity>
-</View>  
+  <Overlay isVisible={this.state.showVideo}>
+        <Video source={{uri: this.state.video}} resizeMode="cover" style={{width: width, height: height}} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping>
+      <SafeAreaView style={{flex: 1, flexDirection: 'row', margin: 10, zIndex: 1}}>
+        <View style={{flex: 0, margin: 0, alignItems: 'flex-start'}}>
+        <TouchableOpacity
+                onPress={() => this._closeVideoOverlay()}
+              style={{
+                backgroundColor: 'transparent'
+              }}>
+              <AntDesign
+                  name="close"
+                  style={{ color: "#fff", fontSize: 30}}
+              />
 
-<Overlay isVisible={this.state.showListVideo}>
-  <SendToList video={this.state.video}/>
-</Overlay>
+            </TouchableOpacity>   
+        
+        
+        </View>
+        <View style={{flex: 1, flexDirection: 'column', alignItems: 'flex-end', margin: 0}}>
+            <TouchableOpacity style={{marginBottom: 20}}>
+              <MaterialCommunityIcons 
+                  name="format-text" 
+                  style={{ color: "#fff", fontSize: 30 }}
+              />
+            </TouchableOpacity>
+        
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openMoodOverlay()}>
+              <MaterialCommunityIcons 
+                  name={this.state.moodIcon}
+                  style={{color: '#fff', fontSize: 30}}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openActivityOverlay()}>
+              <MaterialCommunityIcons name="basketball" style={{color: '#fff', fontSize: 30}}/>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openTagFriends()}>
+              <Ionicons
+                name="md-pricetags"
+                style={{color: '#fff', fontSize: 30}}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openLocationOverlay()}>
+            <MaterialIcons name="location-on" style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this._pressPublic()}>
+            <MaterialCommunityIcons name={this.state.publicIcon} style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+            
+            
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openTimeOverlay()}>
+            <Ionicons name="ios-time" style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+              
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.sendImage()}>
+            <Ionicons name="ios-send" style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+
+            </View>
+
+            <Overlay isVisible={this.state.moodOverlay} fullScreen animationType="slide">
+              <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeMoodOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Mood</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+              <View style={styles.moodView}>
+                        <Button
+                            title=" Happy"
+                            type="clear"
+                            icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'happy', moodIcon: 'emoticon' }) 
+                            this.closeMoodOverlay() }}
+
+                        />
+                        <Button
+                            title=" Angry"
+                            type="clear"
+                            icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'angry', moodIcon: 'emoticon-angry' }) 
+                            this.closeMoodOverlay() } }
+
+                        />
+                    </View>
+
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" Cool"
+                            type="clear"
+                            icon={<Icon name={'emoticon-cool'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'cool', moodIcon: 'emoticon-cool' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                        <Button
+                            title=" Sad"
+                            type="clear"
+                            icon={<Icon name={'emoticon-cry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'sad', moodIcon: 'emoticon-cry' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                    </View>
+
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" Dead"
+                            type="clear"
+                            icon={<Icon name={'emoticon-dead'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'dead', moodIcon: 'emoticon-dead' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                        <Button
+                            title=" Excited"
+                            type="clear"
+                            icon={<Icon name={'emoticon-excited'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'excited', moodIcon: 'emoticon-excited' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                    </View>
+
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" Flirty"
+                            type="clear"
+                            icon={<Icon name={'emoticon-kiss'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'flirty', moodIcon: 'emoticon-kiss' }) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                        <Button
+                            title=" Ok"
+                            type="clear"
+                            icon={<Icon name={'emoticon-neutral'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ mood: 'ok', moodIcon: 'emoticon-neutral'}) 
+                            this.closeMoodOverlay()}}
+
+                        />
+                    </View>
+                </SafeAreaView>
+            </Overlay>
+
+            <Overlay isVisible={this.state.activityOverlay} fullScreen animationType="slide">
+              
+                <SafeAreaView style={{flex: 1}}>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeActivityOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Activity</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+
+                   <ListActivities close={this.closeActivityOverlayFromList}/>
+              
+              </SafeAreaView>
+            </Overlay>
+
+            <Overlay isVisible={this.state.tagFriendsOverlay} fullScreen animationType="slide">
+              <SafeAreaView style={{flex: 1}}>
+              <TaggedList close={this.closeTagFriendsProps}/>
+              </SafeAreaView>
+            </Overlay>
+
+            
+            <Overlay isVisible={this.state.locationOverlay} fullScreen animationType="slide">
+              <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeLocationOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Location</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+              <PlacesInput
+                          stylesContainer={{
+            position: 'relative',
+            alignSelf: 'stretch',
+            margin: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            shadowOpacity: 0,
+            borderColor: '#dedede',
+            borderWidth: 1,
+            marginBottom: 10,
+            // borderRadius: 8
+        }}
+                            googleApiKey="AIzaSyBV_c_ySGNav7CWXBhIWPvWpJIaKIWBP88"
+                            placeHolder={"Search for location"}
+                            language={"en-US"}
+                            onSelect={place => {
+                                this.setState({ location: place.result.name })
+                                //   console.log(place.result.name)
+                            }}
+
+                        />
+              </SafeAreaView>
+            </Overlay>
+
+            
+            <Overlay isVisible={this.state.timePostedOverlay} fullScreen animationType="slide">
+            <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeTimeOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Hours Posted</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+
+            <View style={styles.moodView}>
+                        <Button
+                            title=" 30 min"
+                            type="clear"
+                            // icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '30 min', timePostedOverlay: false }) }}
+
+                        />
+                        <Button
+                            title=" 1 hour"
+                            type="clear"
+                            // icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '1 hour', timePostedOverlay: false }) }}
+
+                        />
+                    </View>
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" 2 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '2 hours', timePostedOverlay: false }) }}
+
+                        />
+                        <Button
+                            title=" 4 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '4 hours', timePostedOverlay: false }) }}
+                        />
+                    </View>
+                    <View style={styles.moodView}>
+                        <Button
+                            title=" 8 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '8 hours', timePostedOverlay: false }) }}
+
+                        />
+                        <Button
+                            title=" 16 hours"
+                            type="clear"
+                            // icon={<Icon name={'emoticon-angry'} size={28} />}
+                            containerStyle={styles.bigButton}
+                            onPress={() => { this.setState({ selectedValueHours: '16hours', timePostedOverlay: false }) }}
+
+                        />
+                    </View>
+                  </SafeAreaView>
+            </Overlay>
+
+            
+            <Overlay isVisible={this.state.sendToOverlay} fullScreen animationType="slide">
+            <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeSendTo()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Send To</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+              <SendToList videoFile={this.state.video} video={true} close={() => this.closeSendTo()} closeEvery={() => this._pressVideoOverlay()} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid}/>
+            </SafeAreaView>
+            </Overlay>
+
+
+            
+      </SafeAreaView>
+</Video>
 </Overlay>
 
   )
@@ -538,6 +1328,7 @@ const styles = StyleSheet.create({
    width: width,
    height: height,
   //  flex: 1
+  flex: 1
   },
   video: {
    position: 'absolute',
@@ -554,7 +1345,27 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     zIndex: 2,
-  }
+  },
+  button: {
+    marginHorizontal: 5,
+    backgroundColor: '#f5f6fa',
+    borderRadius: 30,
+    width: 50,
+
+},
+bigButton: {
+    marginHorizontal: 15,
+    backgroundColor: '#f5f6fa',
+    borderRadius: 30,
+    width: width * 0.3,
+    // height: height * 0.6
+
+},
+moodView: {
+    flexDirection: "row",
+    justifyContent: 'center',
+    marginBottom: 10,
+}
 });
 
 export default withNavigation(CameraScreen)

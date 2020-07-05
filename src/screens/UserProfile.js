@@ -14,8 +14,11 @@ import ReceiveFriend from '../screens/friendSystem/ReceiveFriend'
 import ReceiveFriendRequest from './friendSystem/ReceiveFriendRequest'
 import FriendList from './friendSystem/FriendList'
 import AllFriends from './friendSystem/AllFriends'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import AddedMe from './friendSystem/AddedMe'
 let arr = []
 let friendsArr = []
+let addedMe = []
 const { width, height } = Dimensions.get('window')
 
  export default class UserProfile extends Component {
@@ -30,8 +33,54 @@ const { width, height } = Dimensions.get('window')
             friends: [],
             friendsNumber: 0,
             friendsOverlay: false,
-            settings: false
+            settings: false,
+            addFriends: false,
+            documentData: [],
+            loading: false,
+            refreshing: false,
+            addedMe: [],
+            filteredData: [],
+            searchText: ""
         }
+    }
+
+
+    
+    _acceptFriend = (uid) => {
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(uid)
+        })    
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            receivedRequests: firebase.firestore.FieldValue.arrayRemove(uid)
+        })
+
+        firebase.firestore().collection('users').doc(uid).update({
+            sentRequests: firebase.firestore.FieldValue.arrayRemove(firebase.auth().currentUser.uid)
+        })
+        firebase.firestore().collection('users').doc(uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
+    }
+
+    getToken = async(uid) => {
+        let initialQuery = await firebase.firestore().collection("users").where('uid', '==', uid)
+        let documentSnapshots = initialQuery.get()
+        let documentData = (await documentSnapshots).docs.map(doc => doc.data().tokens)
+        this.sendNotification(documentData[0], uid)
+    }
+    _sendRequest = async(uid) => {
+        console.log('se trimite')
+        this.state.friendRequsts.push(uid)
+        await this.getToken(uid)
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            sentRequests: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+
+        await firebase.firestore().collection('users').doc(uid).update({
+            receivedRequests: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+        })
+  
+
     }
 
    
@@ -50,6 +99,7 @@ const { width, height } = Dimensions.get('window')
     componentDidMount = async () => {
         arr = []
         friendsArr = []
+        addedMe = []
         this._retrieveUserData()
         this._retrieveImage()
         await this._retrieveAllFriends()
@@ -60,6 +110,46 @@ const { width, height } = Dimensions.get('window')
         this.setState({fontsLoaded: true})
         this.retrieveHowManyFriends()
     }
+    retrieveData = async() => {
+        arr = []
+        console.log('merge JKFALFKLAGKLA FKALGLA G')
+        let documentT;
+        const func = firebase.functions().httpsCallable('friendSystem')
+        try{
+            this.setState({
+                loading: true,
+                refreshing: true
+            })
+         
+        await func().then(async res => {
+             documentT = await res.data.documentData
+             console.log('-------------------------')
+             console.log(documentT)
+             console.log('-------------------------  ')
+            await documentT.forEach(async element => {
+                await this._getUserFromUid(element)
+            })
+        }).then(
+        this.setState({
+            loading: false,
+            refreshing: false
+        }))
+    }catch(error){
+            console.log(error)
+        }
+    }   
+   
+
+    _getUserFromUid = async (uid) => {
+        let initialQuery = await firebase.firestore().collection('users').doc(uid)
+        let documentSnapshots = await initialQuery.get()
+        let documentData = await documentSnapshots.data()
+        arr.push(documentData)
+        this.setState({
+            documentData: arr
+        })
+    }
+
 
 
     _openOptions = () => {
@@ -68,6 +158,14 @@ const { width, height } = Dimensions.get('window')
         })
     }
     
+
+    search = (searchText) => {
+        this.setState({searchText: searchText})
+        let filteredData = this.state.documentData.filter(function(item){
+            return item.displayName.toLowerCase().includes(searchText)
+        })
+        this.setState({filteredData: filteredData})
+    }
 
     _pickImage = async() => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -150,6 +248,41 @@ closeFriends = () => {
         friendsOverlay: false
     })
 }
+
+addFriends = async() => {
+    await this.addedMe()
+    await this.retrieveData().then(
+    this.setState({
+        addFriends: true
+    }))
+}
+
+addedMe = async () => {
+    addedMe = []
+    let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+    let addData = await initialQuery.data().receivedRequests
+    addData.forEach(async element => await this.getAddedMeUser(element))
+}
+
+
+getAddedMeUser = async(uid) => {
+    let initialQuery = await firebase.firestore().collection('users').doc(uid).get()
+    let data = await initialQuery.data()
+    addedMe.push(data)
+    console.log('adlafjakfjkalfjalkdal')
+    console.log(addedMe)
+    this.setState({
+        addedMe: addedMe
+    })
+}
+
+closeAddFriends = () => {
+    this.setState({
+        addFriends: false
+    })
+}
+
+
     render(){
         if(this.state.fontsLoaded){return(
             <View style={{backgroundColor: '#fff', width: width, height: height, marginTop: 20, flex: 1, flexDirection: 'column'}}>
@@ -177,11 +310,81 @@ closeFriends = () => {
                 <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
                 <Divider style={{width: width}}/>
 
-                <Text style={{fontFamily: "font1", fontSize: 15, marginTop: 10, marginLeft: 10}}>News</Text>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{fontFamily: 'font1', fontSize: 15, margin: 10}}>Friends</Text>
+                  <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
+                </View>
                 <AllFriends/>
                 
                 </View>
 
+
+                <Overlay animationType="slide" onBackdropPress={() => this.closeAddFriends()} fullScreen isVisible={this.state.addFriends}>
+                    <SafeAreaView style={{flex: 1}}>
+                        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+                        <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <TouchableOpacity onPress={() => this.closeAddFriends()}>
+                    <AntDesign
+                        size={26}
+                        name="down"
+                        color="#b2b8c2"
+                    />
+                    </TouchableOpacity>
+                    <Text style={{fontFamily: 'font1', fontSize: 20}}>Add Friends</Text>
+                    <TouchableOpacity onPress={() => this._openOptions()}>
+                    <AntDesign
+                        size={26}
+                        name="bars"
+                        color="#b2b8c2"
+                    />
+                    </TouchableOpacity>
+                    </View>
+                    <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>  
+              <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
+    backgroundColor:"#fff",
+    borderBottomColor: '#ecedef',
+    borderTopColor: '#ecedef',
+    borderLeftColor: '#ecedef',
+    borderRightColor: '#ecedef',
+    borderWidth: 1,
+    borderRadius: 10,
+    margin: 10,
+    width: width / 1.2
+}}  inputContainerStyle={{backgroundColor: '#fff', height: 30}} value={this.state.searchText} onChangeText={this.search} />
+            <TouchableOpacity onPress={() => this.openFilter()}>
+                <AntDesign name="filter" size={20}/>
+            </TouchableOpacity>
+
+           </View>
+           {this.state.addedMe.length !== 0 ?
+           <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Added Me</Text>
+           : null}
+            <FlatList
+                        data={this.state.addedMe}
+                        renderItem={({item}) => (
+                        <AddedMe careScore={item.careScore} discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._acceptFriend(item.uid)}/>
+                    )}  
+                    keyExtractor={(item, index) => String(index)}
+
+                />
+            <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Discover More</Text>
+
+                <FlatList
+                 data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
+                 renderItem={({item}) => (
+                    <AddFriend uid={item.uid} careScore={item.careScore} discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
+                 )}   
+                keyExtractor={(item, index) => String(index)}
+                // ListFooterComponent={this.renderFooter}
+                onEndReached={this.retrieveMore}
+                onEndReachedThreshold={0}
+                refreshing={this.state.refreshing}
+                onRefresh={this.handleRefresh}
+                />
+             
+                        </ScrollView>
+                    </SafeAreaView>
+                </Overlay>
                 <Overlay animationType="slide" onBackdropPress={() => this.closeFriends()} fullScreen isVisible={this.state.friendsOverlay}>
                 <View style={{flex: 1}}>
                     <FriendList close={() => this.closeFriends()}/>

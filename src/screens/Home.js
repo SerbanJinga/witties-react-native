@@ -117,7 +117,7 @@ export default class Home extends Component {
                   index={1}>
                     <View style={{flex: 1}}>
                       {/* <Map/> */}
-                      {/* <CameraScreen/> */}
+                      <CameraScreen/>
                     </View>
                     <Swiper
                       horizontal={false}
@@ -128,12 +128,12 @@ export default class Home extends Component {
                         {/* <UserProfile/> */}
                       </SafeAreaView>
                       <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                        <SearchUsers/>
+                        {/* <SearchUsers/> */}
                       </SafeAreaView>
                     </Swiper>        
                     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                        <StoriesPublic/>
-                       
+                        {/* <StoriesPublic/> */}
+                        <ActivityPopup/>
                     </SafeAreaView>
        </Swiper>
 </View>

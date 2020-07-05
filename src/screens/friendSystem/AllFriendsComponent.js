@@ -9,6 +9,7 @@ import { withNavigation } from 'react-navigation'
 import { FlatList } from 'react-native-gesture-handler'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import RecommendedFriend from './RecommendedFriend'
+import FullProfile from './FullProfile'
 
 let twoUserArr = []
 let arr = []
@@ -324,86 +325,8 @@ const { width, height } = Dimensions.get('window')
                    
                 </View>
                 <Overlay overlayStyle={{width: width, height: height}} animationType="slide" isVisible={this.state.showFullProfile}>
-            <View style={{flex: 1}}>
-                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <TouchableOpacity onPress={() => this._closeProfileDetails()}>
-                    <AntDesign
-                        size={26}
-                        name="down"
-                        color="#b2b8c2"
-                    />
-                    </TouchableOpacity>
-                    <Text style={{fontFamily: 'font1', fontSize: 20}}>{this.props.displayName}</Text>
-                    <TouchableOpacity onPress={() => this._openOptions()}>
-                    <AntDesign
-                        size={26}
-                        name="bars"
-                        color="#b2b8c2"
-                    />
-                    </TouchableOpacity>
-                </View>
-                <View style={{flex: 0, alignItems: 'center', marginTop: 40}}>
-                    <Avatar size={100} source={{uri: this.props.profilePicture}} rounded/>
-                    <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
-                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.props.displayName}#{this.props.discriminator}</Text>
-                <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
-                <Text style={{fontFamily: "font1", fontSize: 15}}>{this.props.careScore}</Text>
-                </View>
-                <Button style={{marginTop: 40}} titleStyle={{fontFamily: 'font1'}} title="See Friendship" type="clear"/>
+                <FullProfile addFriend={()=> this.props.press()} displayName={this.props.displayName} discriminator={this.props.discriminator} careScore={this.props.careScore} profilePicture={this.props.profilePicture} close={() => this._closeProfileDetails()} uid={this.props.uid}/>
 
-                </View>
-                <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
-                <FlatList
-                    data={this.state.suggestedFriendsData}
-                    renderItem={({item}) => (
-                        <RecommendedFriend profilePicture={item.profilePicture} displayName={item.displayName} uid={item.uid} discriminator={item.discriminator} press={() => this._sendRequest(item.uid)}/>
-                    )}   
-                keyExtractor={(item, index) => String(index)}
-                />
-            </View>
-            <Overlay animationType='fade' onBackdropPress={() => this._closeOptions()} isVisible={this.state.options} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
-                <View style={{flex: 1}}>
-                    <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
-                        <Avatar size={40} source={{uri: this.props.profilePicture}} rounded/>
-                            <TouchableOpacity onPress={() => this._openProfileDetails()}>
-
-                                    <View style={{flex: 0, alignItems: 'center'}}>
-                                        <Text style={{fontFamily: 'font1', marginLeft: 6, fontSize: 18}}>{this.props.displayName}#{this.props.discriminator}</Text>
-                                        <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>
-                                            <Text style={{color: '#b2b8c2', fontFamily: 'font2', fontSize: 16, marginLeft: 6}}>View Profile</Text>
-                                            <AntDesign
-                                                style={{marginTop: 2, marginLeft: 4}}
-                                                size={15}
-                                                name="right"
-                                                color="#b2b8c2"
-                                            />
-                                        </View>
-                                    </View>
-
-                            </TouchableOpacity>
-                    </View>
-                    <Divider style={{marginTop: 10}}/>
-                    <TouchableOpacity style={{padding: 10}}>
-                        <Text style={{fontFamily: 'font1', fontSize: 18}}>Accept Friend</Text>
-                    </TouchableOpacity>
-                    <Divider style={{marginTop: 0}}/>
-
-                    <TouchableOpacity style={{padding: 10, paddingBottom: 20}}>
-                        <Text style={{fontFamily: 'font1', fontSize: 18}}>Copy Username</Text>
-                    </TouchableOpacity>
-                    <Divider style={{marginTop: 0}}/>
-                    <TouchableOpacity style={{padding: 10}} >
-                        <Text style={{fontFamily: 'font1', fontSize: 18, color: 'red'}}>Block User</Text>
-                    </TouchableOpacity>
-                    <Divider style={{marginTop: 0}}/>
-                    
-                    <TouchableOpacity style={{padding: 10}}>
-                        <Text style={{fontFamily: 'font1', fontSize: 18, color: '#b2b8c2', alignSelf: 'center'}}>Done</Text>
-                    </TouchableOpacity>
-                    
-                   
-                </View>
-                </Overlay>
         </Overlay>
         
         </Overlay>

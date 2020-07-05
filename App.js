@@ -10,6 +10,7 @@ import firebase from 'firebase'
 import _ from 'lodash'
 import SearchUsers from './src/screens/friendSystem/SearchUsers'
 import FullScreenStory from './src/screens/stories/FullScreenStory'
+import SendToList from './src/screens/camera/SendToList'
 
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
 import Camera from './src/screens/camera/Camera';
@@ -20,6 +21,7 @@ import ChatRoomPost from './src/screens/chatRoom/ChatRoomPost'
 import ChatRoomPostDetail from './src/screens/chatRoom/ChatRoomPostDetail'
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 import ChatCameraScreen from './src/screens/chatRoom/ChatCameraScreen'
+import SendTo from './src/screens/camera/SendTo';
 require('firebase/firestore');
 
 console.disableYellowBox=true;
@@ -123,7 +125,8 @@ const navigator = createSharedElementStackNavigator(
     },
     ChatRoomPost: ChatRoomPost,
     ChatRoomPostDetail: ChatRoomPostDetail,
-    ChatCameraScreen: ChatCameraScreen
+    ChatCameraScreen: ChatCameraScreen,
+    SendToList: SendToList
   },{
     initialRouteName: 'Auth',
     headerMode: null,

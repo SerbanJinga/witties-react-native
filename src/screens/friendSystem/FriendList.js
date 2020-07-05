@@ -91,6 +91,10 @@ let roomArrId = []
                 chatRoomsIn: firebase.firestore.FieldValue.arrayUnion(uid)
             })
         })
+        this.setState({
+            nextOverlay: false
+        })
+        this.props.navigation.goBack(null)
     }
 
     createChatRoom = () => {
@@ -202,7 +206,7 @@ let roomArrId = []
     }
     render(){
         return(
-            <View style={{flex: 1, flexDirection: 'column'}}>
+            <SafeAreaView style={{flex: 1, flexDirection: 'column'}}>
                 <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <TouchableOpacity
                         onPress={()=> this.props.close()}
@@ -223,7 +227,7 @@ let roomArrId = []
                 </View>
                 
             
-                <SafeAreaView style={styles.container}>
+                <View style={styles.container}>
                 <FlatList
                  data = {this.state.documentData}
                     renderItem={({item}) => (
@@ -236,7 +240,7 @@ let roomArrId = []
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
                 />
-            </SafeAreaView>
+            </View>
             <Overlay overlayStyle={{width: width, height: height}} animationType="fade" isVisible={this.state.nextOverlay}>
                     <View style={{flex: 1, flexDirection: 'column'}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
@@ -278,7 +282,7 @@ let roomArrId = []
                         </View>
                     </View>
             </Overlay>
-            </View>
+            </SafeAreaView>
         )
     }
     

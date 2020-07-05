@@ -14,7 +14,7 @@ export default class ActivitySelect extends Component {
     }
 
     componentDidMount() {
-        console.log(this.state.name)
+        // console.log(this.state.name)
     }
 
     render() {
@@ -36,11 +36,11 @@ export default class ActivitySelect extends Component {
                     onPress={() => {
                         if(typeof this.props.otherData === 'undefined'){
                             this.props.mama(this.state.name);
-                            console.log('s a transmis asta:',this.state.name)
+                            // console.log('s a transmis asta:',this.state.name)
                             return;
                         }
                         this.props.mama(this.props.otherData)
-                        console.log('s a transmis asta:',this.props.otherData)
+                        // console.log('s a transmis asta:',this.props.otherData)
                         
 
                         

@@ -65,7 +65,7 @@ const { height, width } = Dimensions.get('window')
       const currentId = firebase.auth().currentUser.uid
       let friendsQuery = await firebase.firestore().collection('users').doc(currentId).get()
       let friendsData = await friendsQuery.data().friends
-      friendsData.forEach(friend => this.getStoriesFromFriend(friend))
+      friendsData.forEach(async friend => await this.getStoriesFromFriend(friend))
     }
 
     getStoriesFromFriend = async(friend) => {
@@ -197,7 +197,7 @@ setTimeout(() => {
                 />
             </SafeAreaView>
             
-                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                   <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Messages</Text>
                   <Button onPress={()=> this.openNewChatOverlay()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 10}} type="clear" title="New"/>
                 </View>

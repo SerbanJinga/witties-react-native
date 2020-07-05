@@ -6,6 +6,7 @@ import * as Font from 'expo-font'
 import { AntDesign, Entypo } from '@expo/vector-icons'
 
 import AllFriendsComponent from './AllFriendsComponent'
+import { SafeAreaView } from 'react-native-safe-area-context'
 let arr = []
 const { width, height } = Dimensions.get('window')
 export default class AllFriends extends Component{
@@ -87,7 +88,7 @@ export default class AllFriends extends Component{
 
             />
             <Overlay isVisible={this.state.overlayFriends} fullScreen overlayStyle={{width: width}} animationType="slide">
-                <View style={{flex: 1}}>
+                <SafeAreaView style={{flex: 1}}>
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                     <TouchableOpacity onPress={() => this.closeSearch()}>
                     <AntDesign
@@ -130,7 +131,7 @@ export default class AllFriends extends Component{
                 )}
 
             />
-                </View>
+                </SafeAreaView>
             </Overlay>
             </View>
 

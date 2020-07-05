@@ -302,7 +302,7 @@ class ChatRoom extends Component {
 
 <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding": "height"} style={styles.container}>
             <Overlay overlayStyle={{width: width, height: height}} isVisible={this.state.changeChatOverlay} animationType="slide">
-
+            <SafeAreaView style={{flex: 1}}>
             <ScrollView style={{flex: 1}}>
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                     <TouchableOpacity onPress={() => this._closeChatDetails()}>
@@ -326,15 +326,18 @@ class ChatRoom extends Component {
                 <Button onPress={() => this.changePhoto()} style={{marginTop: 20}} titleStyle={{fontFamily: 'font1'}} title="Change Group Photo" type="clear"/>
 
                 </View>
-                <Text style={{fontFamily: 'font1', fontSize: 20, padding: 10}}>Participants</Text>
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <Text style={{fontFamily: 'font1', fontSize: 20, padding: 10}}>Participants</Text>
+                    <Button titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 10}} onPress={() => this.props.navigation.navigate('FriendList')} type="clear" title="Add"/>
+                </View>
                     {this.renderParticipants()}
                 <Text style={{fontFamily: 'font1', fontSize: 20, padding: 10}}>Daily Streak</Text>
                     
                     {this.renderStreakVideo()}
                 </ScrollView>
-
+</SafeAreaView>
                 <Overlay animationType='fade' onBackdropPress={() => this._closeChatSettings()} isVisible={this.state.chatSettings} overlayStyle={{width: width, borderRadius: 10, position: 'absolute', bottom: 0}}>
-                <View style={{flex: 1}}>
+                <SafeAreaView style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                         <Avatar size={40} source={{uri: this.state.profilePicture}} rounded/>
                             <TouchableOpacity onPress={() => this._openProfileDetails()}>
@@ -365,7 +368,7 @@ class ChatRoom extends Component {
                     <TouchableOpacity style={{padding: 10}}>
                         <Text style={{fontFamily: 'font1', fontSize: 18, color: '#b2b8c2', alignSelf: 'center'}}>Done</Text>
                     </TouchableOpacity>
-                    </View>
+                    </SafeAreaView>
                 </Overlay>
             </Overlay>
             

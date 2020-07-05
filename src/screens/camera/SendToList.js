@@ -4,10 +4,11 @@ import {SearchBar} from 'react-native-elements'
 import { AntDesign } from '@expo/vector-icons'
 import firebase from 'firebase'
 import SendTo from './SendTo'
+import { withNavigation } from 'react-navigation'
 const {width, height} = Dimensions.get('window')
 let arr = []
 
-export default class SendToList extends Component{
+ class SendToList extends Component{
     constructor(props){
         super(props)
         this.state = {
@@ -32,13 +33,19 @@ export default class SendToList extends Component{
         this.setState({
             documentData: arr
         })
-        console.log(this.state.documentData)
+        // console.log(this.state.documentData)
 
     }
 
     componentDidMount = async () => {
+        if(this.props.video === true){
+            console.log('bravo,')
+        }else{
+            console.log('e poza,')
+        }
         arr = []
         await this._retrieveData()
+        // console.log(this.props.image)
 
     }
 
@@ -48,7 +55,7 @@ export default class SendToList extends Component{
         this.setState({
             sendTo: sendToFinal
         })
-        console.log(this.state.sendTo)
+        // console.log(this.state.sendTo)
 
     }   
 
@@ -61,13 +68,13 @@ export default class SendToList extends Component{
             sendTo: sendToFinal
         })
 
-        console.log(this.state.sendTo)
+        // console.log(this.state.sendTo)
     }
 
     uploadVideo = async() => {
         const timestamp = firebase.auth().currentUser.uid + "/" + Date.now()
         const path = `videos/${timestamp}`
-        const response = await fetch(this.props.video)
+        const response = await fetch(this.props.videoFile)
         const file = await response.blob()
 
         let upload = firebase.storage().ref(path).put(file)
@@ -84,23 +91,77 @@ export default class SendToList extends Component{
 
     }
 
+    uploadPhoto = async() => {
+        const timestamp = firebase.auth().currentUser.uid + "/" + Date.now()
+        const path = `photos/${timestamp}`
+        const response = await fetch(this.props.image)
+        const file = await response.blob()
+        let upload = firebase.storage().ref(path).put(file)
+        upload.on("state_changed", snapshot => {}, err => {
+            
+        }, async () => {
+            const url = await upload.snapshot.ref.getDownloadURL()
+            this.setState({
+                imageUri: url
+            })
+            this.upload()
+        })
+    }
 
 
     sendPost = () => {
         let foo = {
             video: this.state.imageUri,
-            sender: firebase.auth().currentUser.uid,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            mood: this.props.mood,
+            text: this.props.text,
+            activity: this.props.activity,
+            timestamp: Date.now(),
+            hoursPosted: this.props.hoursPosted,
+            location: this.props.location,
+            creatorId: this.props.creatorId,
+            taggedUsers: this.props.taggedUsers,
+            albums: []
         }
         this.state.sendTo.forEach(chatRoom => {
             firebase.firestore().collection('messages').doc(chatRoom).update({
                 messages: firebase.firestore.FieldValue.arrayUnion(foo)
             })
         })
-        // this.props.close()
-        // this.props.closeEvery()
+        this.props.close()
+        this.props.closeEvery()
     }
 
+    decideUpload = () => {
+        if(this.props.video){
+            this.uploadVideo()
+        }else{
+            this.uploadPhoto()
+        }
+    }
+
+
+    upload = () => {
+        let foo = {
+            mood: this.props.mood,
+            text: this.props.text,
+            activity: this.props.activity,
+            image: this.state.imageUri,
+            timestamp: Date.now(),
+            hoursPosted: this.props.hoursPosted,
+            location: this.props.location,
+            creatorId: this.props.creatorId,
+            taggedUsers: this.props.taggedUsers,
+            albums: []
+        }
+        this.state.sendTo.forEach(chatRoom => {
+            firebase.firestore().collection('messages').doc(chatRoom).update({
+                messages: firebase.firestore.FieldValue.arrayUnion(foo)
+            })
+        })
+        this.props.close()
+        this.props.closeEvery()
+    }
 
 
     render(){
@@ -122,7 +183,7 @@ export default class SendToList extends Component{
                     margin: 10,
                     width: width / 1.3
                 }}  inputContainerStyle={{backgroundColor: '#fff', height: 30}} value={this.state.searchText} onChangeText={this.search} />
-        <TouchableOpacity onPress={() => this.uploadVideo()}>
+        <TouchableOpacity onPress={() => this.decideUpload()}>
             <AntDesign name="arrowright" size={20}/>
         </TouchableOpacity>
 
@@ -147,3 +208,4 @@ export default class SendToList extends Component{
     }
 }
 
+export default withNavigation(SendToList)

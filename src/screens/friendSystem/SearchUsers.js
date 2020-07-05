@@ -229,7 +229,7 @@ console.log(arr)
     }
     _sendRequest = async(uid) => {
         console.log('se trimite')
-        this.state.friendRequsts.push(uid)
+        // this.state.friendRequsts.push(uid)
         await this.getToken(uid)
         firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
             sentRequests: firebase.firestore.FieldValue.arrayUnion(uid)
