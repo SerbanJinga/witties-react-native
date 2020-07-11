@@ -69,17 +69,24 @@ const { height, width } = Dimensions.get('window')
     }
 
     getStoriesFromFriend = async(friend) => {
-      let initialQuery = await firebase.firestore().collection('status-public').doc(friend).get()
-      let friendStories = await initialQuery.data().statuses
+      let initialQuery = await firebase.firestore().collection('status-public').doc(friend).collection('statuses').get()
+      let friendStories = initialQuery.docs.map(doc => doc.data())
+      // let friendStories = await initialQuery.data().statuses
       friendStories.forEach(friendStory => reallyFinal.push(friendStory))
       // reallyFinal.push(friendStories)
+      // reallyFinal.push(friendStor)
+      // reallyFinal.push(fr)
+      // console.log(friendStories)
       arr.push(friendStories[0])
       // console.log(arr)
       this.setState({
         documentData: arr
       })
 
-      console.log(reallyFinal )
+
+
+
+      console.log('AICI TATA', reallyFinal )
       this.setState({
         reallyFinal: reallyFinal
       })
@@ -88,16 +95,18 @@ const { height, width } = Dimensions.get('window')
     getAllStoriesFromId = async(uid) => {
       prinAstaFiltrez = []
       // console.log(this.state.reallyFinal)
-      let idQuery = await firebase.firestore().collection('status-public').doc(uid).get()
-      let idDatas = await idQuery.data().statuses
+      let idQuery = await firebase.firestore().collection('status-public').doc(uid).collection('statuses').get()
+      // let idDatas = await idQuery.data().statuses
+      let idDatas = idQuery.docs.map(doc => doc.data())
+      console.log('dadadada', idDatas)
       idDatas.forEach(data => prinAstaFiltrez.push(data))
       
       for(let i = 0; i < this.state.reallyFinal.length; i++)
         if(this.state.reallyFinal[i].creatorId !== uid){
           prinAstaFiltrez.push(this.state.reallyFinal[i])
         }
-
-        console.log(prinAstaFiltrez)
+        // console.log('filtrare')
+        // console.log(prinAstaFiltrez)
         this.setState({
           prinAstaFiltrez: prinAstaFiltrez
         })
@@ -123,10 +132,11 @@ const { height, width } = Dimensions.get('window')
     onPress =  async(item) => {
       console.log(item.creatorId)
       await this.getAllStoriesFromId(item.creatorId).then(
-      setTimeout(() => {
+        // setTimeout(() => {console.log('filtrarea mea', prinAstaFiltrez)}, 2000)
+        setTimeout(() => {
         this.props.navigation.navigate('FullScreenStory', {status: item, allStories: prinAstaFiltrez})  
       
-      }, 2000))
+        }, 2000))
     }
 
     openNewChatOverlay = () => {
@@ -174,6 +184,7 @@ setTimeout(() => {
                   <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>News</Text>
                 
                 <SafeAreaView style={styles.container} >
+                {this.state.documentData.length !== 0 ?
                 <FlatList
                 // decelerationRate={0}
                 horizontal
@@ -194,7 +205,8 @@ setTimeout(() => {
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
-                />
+                />:                 <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>You currently have no stories to see.</Text>
+}
             </SafeAreaView>
             
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -206,7 +218,7 @@ setTimeout(() => {
                 <ChatRoomsList/>
                 {/* <Button onPress={() => this.props.navigation.navigate('TestAnimation', {transition: 'bottomTransition'})} title="Navigate"/> */}
                   {/* <StreakVideo/> */}
-                <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} overlayStyle={{width: width, height: height}} fullScreen animationType="slide">
+                <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} fullScreen animationType="slide">
                   <SafeAreaView style={{flex: 1}}>
                     <FriendList close={()=>this.closeNewChatOverlay()}/>
                   </SafeAreaView>

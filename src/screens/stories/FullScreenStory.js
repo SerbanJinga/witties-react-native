@@ -68,16 +68,6 @@ class FullScreenStorty extends React.Component {
 
     
    
-    // _renderTimestamps = (timestamp) => {
-    //     let date = new Date(timestamp * 1000)
-    //     let hours = date.getHours()
-    //     let minutes = "0" + date.getMinutes()
-    //     let seconds = "0" + date.getSeconds()
-    
-    //     let formattedTime = hours + ":" + minutes.substr(-2) + ':' + seconds.substr(-2)
-    //     return formattedTime
-    //   } 
-    
 
     
   componentDidMount = () => {
@@ -112,7 +102,6 @@ class FullScreenStorty extends React.Component {
     }else{
       return
     }
-    // this.scrollview_ref.scrollTo
     this.scrollview_ref.scrollTo({
       x: this.arr[this.state.dynamicIndex],
       y: 0,

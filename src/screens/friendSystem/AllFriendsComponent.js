@@ -253,20 +253,20 @@ const { width, height } = Dimensions.get('window')
         if(this.state.fontsLoaded){
         return(
            
-            <TouchableOpacity onPress={() => this._pressTouchableOpacity()}>
+            <TouchableOpacity style={{width: width / 3, height: 40}} onPress={() => this._pressTouchableOpacity()}>
         
-        <View style={{flex: 1, padding: 10}}>
+        <View style={{flex: 0, padding: 10, width: width, height: 40}}>
             <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                 <Avatar size={40} rounded source={{uri: this.props.profilePicture}}/>
-                <View style={{flex: 1, flexDirection: 'column',}}>
+                <View style={{flex: 0, flexDirection: 'column',}}>
                 <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.props.displayName}</Text>
                 <Text style={{fontFamily: 'font1', marginLeft: 4}}>#{this.props.discriminator}</Text>
                 </View>
             </View>
-            <Divider style={{marginTop: 20}}/>
+            {/* <Divider style={{marginTop: 20}}/> */}
 
         </View>
-        <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
+        <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width, borderRadius: 10, position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                         <Avatar size={40} source={{uri: this.props.profilePicture}} rounded/>
@@ -298,7 +298,8 @@ const { width, height } = Dimensions.get('window')
                    
                     <Divider style={{marginTop: 10}}/>
 
-                    <TouchableOpacity style={{padding: 10}} onPress={() => this.sendMessage(this.props.uid, this.props.profilePicture, this.props.displayName)}>
+                    <TouchableOpacity style={{padding: 10}} onPress={() => { this.props.press()
+                     this.sendMessage(this.props.uid, this.props.profilePicture, this.props.displayName)}}>
                         <Text style={{fontFamily: 'font1', fontSize: 18}}>Send Message</Text>
                     </TouchableOpacity>
                     <Divider/>

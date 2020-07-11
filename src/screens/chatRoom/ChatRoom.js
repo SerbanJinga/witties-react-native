@@ -405,7 +405,7 @@ class ChatRoom extends Component {
                             this.setState({ currentMessage: '' })
                         }}/> : this.renderArr()}
                         containerStyle={{position:'absolute',bottom:10}}
-                        inputContainerStyle={{ paddingHorizontal: 10, borderWidth: 1, borderColor: "#b2b8c2",borderRadius: '20', height: 44}}
+                        inputContainerStyle={{ paddingHorizontal: 10, borderWidth: 1, borderColor: "#b2b8c2",borderRadius: 20, height: 44}}
                         value={this.state.currentMessage}
                         onChangeText={currentMessage => this.setState({ currentMessage })}
                         renderErrorMessage={false}

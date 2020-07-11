@@ -74,7 +74,7 @@ export default class ReceiveFriend extends Component {
             <Divider style={{marginTop: 20}}/>
 
         </View>
-        <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
+        <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width, borderRadius: 10, position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                         <Avatar size={40} source={{uri: this.props.profilePicture}} rounded/>
@@ -147,7 +147,7 @@ export default class ReceiveFriend extends Component {
                 </View>
                 <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
             </View>
-            <Overlay animationType='fade' onBackdropPress={() => this._closeOptions()} isVisible={this.state.options} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
+            <Overlay animationType='fade' onBackdropPress={() => this._closeOptions()} isVisible={this.state.options} overlayStyle={{width: width, borderRadius: 10, position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                         <Avatar size={40} source={{uri: this.props.profilePicture}} rounded/>

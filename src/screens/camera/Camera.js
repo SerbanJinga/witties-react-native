@@ -28,6 +28,9 @@ import TaggedList from './TaggedList'
 import ListActivities from '../ActivityPop/ListActivities'
 
 const { width, height } = Dimensions.get('window')
+const screenWidth = Dimensions.get('screen').width
+const screenHeight = Dimensions.get('screen').height
+
 
 let lastTap = null
  class CameraScreen extends Component {
@@ -156,11 +159,16 @@ let lastTap = null
     }
 
     componentDidMount  = async() =>  {
+      await Permissions.askAsync(Permissions.CAMERA)
       await Font.loadAsync({
         font1: require('../../../assets/SourceSansPro-Black.ttf')
       })
       this.setState({
         fontsLoaded: true
+      })
+
+      await this.camera.getSupportedRatiosAsync().then(res => {
+        console.log('arrrrrrr', res)
       })
         await this._getProfilePicture()
         const { status } = await Camera.requestPermissionsAsync()
@@ -311,9 +319,9 @@ closeSettings = () => {
 
 renderCamera = () => {
   return(
-    <View style={{flex: 1, backgroundColor: 'transparent'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: 'black'}}>
     <DoubleTap onDoubleTap={() => this.handleCameraType()}>
-        <Camera mirror={false} ratio={'16: 9'} style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref}} flashMode={this.state.withFlash}>
+        <Camera mirror={false} ratio="2:1" style={{flex: 1}}  type={this.state.type} ref={(ref) => { this.camera = ref}} flashMode={this.state.withFlash}>
 
     <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>   
     <TouchableOpacity
@@ -426,7 +434,7 @@ renderCamera = () => {
   </Overlay>
   </Camera>
   </DoubleTap>
-  </View>)
+  </SafeAreaView>)
 }
 
 openSendTo = () => {
@@ -461,7 +469,7 @@ _closeOverlay = () => {
             style: 'destructive'
         }
     ],
-    {cancelable: 'false'}
+    {cancelable: false}
 )
 }
 
@@ -549,7 +557,7 @@ renderGallery = () => {
   
   return(
       <Overlay isVisible={this.state.showPhoto}>
-                <ImageBackground source={{uri: this.state.pictureTaken}} style={{width: width, height: height, backgroundColor: 'transparent'}}>
+                <ImageBackground source={{uri: this.state.pictureTaken}} style={{width: width + 5, height: screenHeight, backgroundColor: 'transparent'}}>
                 <SafeAreaView style={{flex: 1, flexDirection: 'row', margin: 10}}>               
                 <View style={{flex: 0, margin: 0, alignItems: 'flex-start'}}>
                 <TouchableOpacity
@@ -939,7 +947,7 @@ _closeVideoOverlay = () => {
             style: 'destructive'
         }
     ],
-    {cancelable: 'false'}
+    {cancelable: false}
 )
 }
 

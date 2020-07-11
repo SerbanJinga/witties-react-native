@@ -3,6 +3,7 @@ import { View, StyleSheet, Dimensions, ActivityIndicator } from 'react-native'
 import firebase from 'firebase'
 import * as theme from '../styles/theme'
 const { width, height } = Dimensions.get('window');
+import * as Font from 'expo-font'
 
 export default class LoadingScreen extends Component {
 
@@ -13,8 +14,10 @@ export default class LoadingScreen extends Component {
         }
     }
 
-     componentDidMount =  () => {
-        
+     componentDidMount =  async() => {
+        await Font.loadAsync({
+            font1: require('../../assets/SourceSansPro-Black.ttf')
+        })
       
         
         

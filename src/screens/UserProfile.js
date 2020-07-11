@@ -16,12 +16,13 @@ import FriendList from './friendSystem/FriendList'
 import AllFriends from './friendSystem/AllFriends'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import AddedMe from './friendSystem/AddedMe'
+import AllChatsComponent from './AllChatsComponent'
 let arr = []
 let friendsArr = []
 let addedMe = []
 const { width, height } = Dimensions.get('window')
 
- export default class UserProfile extends Component {
+  class UserProfile extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -40,7 +41,8 @@ const { width, height } = Dimensions.get('window')
             refreshing: false,
             addedMe: [],
             filteredData: [],
-            searchText: ""
+            searchText: "",
+            scan: false
         }
     }
 
@@ -282,16 +284,33 @@ closeAddFriends = () => {
     })
 }
 
+addToStory = () => {
+    this.props.navigation.navigate('CameraScreen')
+}
+
+openOverlay = () => {
+    this.setState({
+        scan: true
+    })
+}
+
+closeOverlay = () => {
+    this.setState({
+        scan: false
+    })
+}
+
 
     render(){
         if(this.state.fontsLoaded){return(
-            <View style={{backgroundColor: '#fff', width: width, height: height, marginTop: 20, flex: 1, flexDirection: 'column'}}>
+            <SafeAreaView style={{backgroundColor: '#fff', width: width, height: height, marginTop: 0, flex: 1, flexDirection: 'column'}}>
                  
                 <View style={{flex: 0, flexDirection: 'column', alignItems: 'center'}}>
                    
                 <Avatar
+                    onLongPress={() => this.openOverlay()}
                     containerStyle={{marginTop: 20, marginLeft: 0}}
-                    size="xlarge"
+                    size={100}
                     rounded
                     source={{
                         uri: this.state.imageUri
@@ -303,9 +322,8 @@ closeAddFriends = () => {
                 <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
                 <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.userData.careScore}</Text>
                 </View>
-                <TouchableOpacity onPress={() => this.openFriends()}>
-                    <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.friends.length} Friends</Text>
-                </TouchableOpacity>
+                <Button onPress={()=> this.addToStory()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add to story"/>
+
                 </View>
                 <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
                 <Divider style={{width: width}}/>
@@ -314,9 +332,58 @@ closeAddFriends = () => {
                   <Text style={{fontFamily: 'font1', fontSize: 15, margin: 10}}>Friends</Text>
                   <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
                 </View>
-                <AllFriends/>
-                
+                <View style={{height: 80}}>
+                    <AllFriends/>
                 </View>
+                {/* <Divider style={{width: width, marginBottom: 20}}/> */}
+
+                <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>See All</Text>
+                <Divider style={{width: width, marginTop: 20}}/>
+                    
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{fontFamily: 'font1', fontSize: 15, margin: 10}}>Chats</Text>
+                  <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
+                </View>
+
+                <View style={{height: 80}}>
+                    {/* <AllFriends/> */}
+                <AllChatsComponent/>
+                </View>
+                <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>See All</Text>
+
+                </View>
+
+
+                
+
+                <Overlay animationType='fade' isVisible={this.state.scan} overlayStyle={{width: width / 1.5}} onBackdropPress={() => this.closeOverlay()}>
+                <View style={{flex: 0, flexDirection: 'column', alignItems: 'center'}}>
+                   
+                   <Avatar
+                       onLongPress={() => this.openOverlay()}
+                       containerStyle={{marginTop: 20, marginLeft: 0}}
+                       size={100}
+                       rounded
+                       source={{
+                           uri: this.state.imageUri
+                       }}
+                       onPress={() => this._openOptions()}
+                   />
+                   <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
+                   <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.userData.displayName}#{this.state.userData.discriminator}</Text>
+                   <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
+                   <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.userData.careScore}</Text>
+
+                   </View>
+                   <Button  titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0, alignSelf: 'center'}} type="clear" title="Copy Username" />
+                   <Button  titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0, alignSelf: 'center'}} type="clear" title="Share URl" />
+                   <Button  titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0, alignSelf: 'center'}} type="clear" title="Close" />
+                    
+
+                   </View>
+                </Overlay>
+
+
 
 
                 <Overlay animationType="slide" onBackdropPress={() => this.closeAddFriends()} fullScreen isVisible={this.state.addFriends}>
@@ -370,6 +437,7 @@ closeAddFriends = () => {
             <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>Discover More</Text>
 
                 <FlatList
+                    // horizontal={true}
                  data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                  renderItem={({item}) => (
                     <AddFriend uid={item.uid} careScore={item.careScore} discriminator={item.discriminator} displayName={item.displayName} profilePicture={item.profilePicture} press={() => this._sendRequest(item.uid)}/>
@@ -410,7 +478,7 @@ closeAddFriends = () => {
                     </View>
                 </Overlay>
                 
-            </View>
+            </SafeAreaView>
         )}else{
             return(
                 <ActivityIndicator size="large"/>
@@ -419,3 +487,4 @@ closeAddFriends = () => {
     }
 }
 
+export default withNavigation(UserProfile)

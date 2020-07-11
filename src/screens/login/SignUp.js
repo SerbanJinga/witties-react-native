@@ -299,7 +299,7 @@ class SignUp extends Component {
         return (
         
         <ScrollView style={styles.container}>
-            <View>
+            <SafeAreaView style={{flex: 1}}>
             <View style={{ marginTop: 60, alignItems: "center", justifyContent: "center" }}>
                         {/* <Image source={require("../../../assets/logo.png")} /> */}
                         <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500" }]}>Witties</Text>
@@ -327,8 +327,11 @@ class SignUp extends Component {
                     textContentType="name"
                     value={this.state.displayName}
                     onChangeText={displayName => this.setState({ displayName })}
+                    blurOnSubmit={false}
+                    onSubmitEditing={() => this.emailInput.focus()}
                 />
                 <Input 
+                ref={(input) => { this.emailInput = input }}
                     label="Email"
                     style={{marginTop: 32, marginBottom: 8}}
                     returnKeyType="next"
@@ -336,11 +339,14 @@ class SignUp extends Component {
                     labelStyle={{fontFamily: "font1"}}
                     value={this.state.email}
                     onChangeText={email => this.setState({ email })}
+                    onSubmitEditing={() => this.passwordInput.focus()}
+
                 />
                 <Input 
+                    ref={(input) => { this.passwordInput = input }}
                     label="Password"
                     style={styles.inputTitle}
-                    returnKeyType="next"
+                    returnKeyType="go"
                     secureTextEntry={true}
                     labelStyle={{fontFamily: "font1"}}
                     textContentType="newPassword"
@@ -386,7 +392,7 @@ class SignUp extends Component {
                         opacity={0.8}
                         fadeInDuration={750}
                     /> 
-                </View>        
+                </SafeAreaView>        
         </ScrollView>
         );}else{
             return(

@@ -495,7 +495,7 @@ renderGallery = () => {
               <Text style={{color: '#fff', marginTop: 15, fontFamily: 'font1'}}>Edit</Text>
              </View>
              <TouchableOpacity>
-            <TouchableOpacity style={{backgroundColor: '#0984e3', borderRadius: '40'}} onPress={()=> this.uploadPhoto()}>
+            <TouchableOpacity style={{backgroundColor: '#0984e3', borderRadius: 40}} onPress={()=> this.uploadPhoto()}>
             <View style={{flex: 0, justifyContent: 'center',alignContent: 'center', alignItems: 'center',marginTop: 20, marginLeft: 80, flexDirection: 'row'}}>
 
              <Text style={{color: '#fff', marginRight:15, fontFamily: 'font1', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>Send to</Text>

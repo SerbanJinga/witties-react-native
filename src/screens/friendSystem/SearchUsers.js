@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard, Alert, SectionList, RefreshControl } from 'react-native'
 import { Text, SearchBar, Button, Avatar, Overlay, Input, Divider, Tooltip } from 'react-native-elements'
-// import Clipboard from '@react-native-community/clipboard'
+import * as ImagePicker from 'expo-image-picker'
 import firebase from 'firebase'
 import { FlatList } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
-import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
+import { MaterialIcons, Entypo, AntDesign } from '@expo/vector-icons'
 import * as Font from 'expo-font'
 
 import AddFriend from './AddFriend'
@@ -15,6 +15,10 @@ import { withNavigation } from 'react-navigation'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import Timeline from '../../screens/Timeline/Timeline'
 import AddedMe from './AddedMe'
+import StoriesPublic from '../stories/StoriesPublic'
+import UserProfile from '../UserProfile'
+import AllFriends from './AllFriends'
+import AllChatsComponent from '../AllChatsComponent'
 
 const { width, height } = Dimensions.get('window')
 const heightS = Dimensions.get('screen').height
@@ -40,7 +44,7 @@ let addedMe = []
             filteredData:[],
             friendRequsts: [],
             currentUser: "",
-            profilePicture: '',
+            imageUri: '',
             searchOverlay: false,
             fontsLoaded: false,
             profileOverlay: false,
@@ -49,8 +53,17 @@ let addedMe = []
             email: firebase.auth().currentUser.email,
             allUsersUid: [],
             settings: false,
-            addedMe: []
+            addedMe: [],
+            careScore: 0,
+            profileDetails: false,
+            optionMenu: false
         }
+    }
+
+    openProfileOverlay = () => {
+        this.setState({
+            profileDetails: true
+        })
     }
 
 
@@ -69,10 +82,12 @@ let addedMe = []
         let documentData = documentSnapshots.data().profilePicture
         let displayNameDocumentData = documentSnapshots.data().displayName
         let discrim = documentSnapshots.data().discriminator
+        let careScore = documentSnapshots.data().careScore
         this.setState({
-            profilePicture: documentData,
+            imageUri: documentData,
             displayName: displayNameDocumentData,
-            discriminator: discrim
+            discriminator: discrim,
+            careScore: careScore
         })
     }
    
@@ -100,10 +115,11 @@ console.log(arr)
             font2: require('../../../assets/SourceSansPro-Regular.ttf')
         });
         this.setState({fontsLoaded: true})
+        await this._retrieveProfilePicture()
+
         await this.getCurrentUser()
         await this.retrieveData()
         await this.addedMe()
-        await this._retrieveProfilePicture()
     }
 
     search = (searchText) => {
@@ -341,6 +357,68 @@ console.log(arr)
         }, 2000)
     }
 
+    closeProfileDetails = () => {
+        this.setState({
+            profileDetails: false
+        })
+    }
+
+    addToStory = () => {
+        this.closeProfileDetails()
+        this._onCloseAvatar()
+        this.props.navigation.navigate('CameraScreen')
+    }
+
+    
+    _openOptions = () => {
+        this.setState({
+            optionMenu: !this.state.optionMenu
+        })
+    }
+
+
+    _deletePicture = () => {
+        alert("ai ales")
+    }
+
+    
+    _pickImage = async() => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3]
+        })
+
+        if(!result.cancelled){
+            this.setState({
+                imageUri: result.uri
+            })
+            this._uploadToStorage()
+        }
+    }
+
+    _uploadToStorage = async () => {
+        const path = `profiles_picture/${firebase.auth().currentUser.uid}`
+        const response = await fetch(this.state.imageUri)
+        const file = await response.blob()
+    
+        let upload = firebase.storage().ref(path).put(file)
+        upload.on("state_changed", snapshot => {}, err => {
+            console.log(err)
+        },
+        async () => {
+            const url = await upload.snapshot.ref.getDownloadURL()
+            console.log(url)
+            this.setState({imageUri: url})
+            this._uploadToFirestore(url)
+        })
+    }
+
+    _uploadToFirestore = (url) => {
+        firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
+            profilePicture: url
+        })
+    }
 
     render(){
             const loaded = this.state.fontsLoaded
@@ -364,7 +442,7 @@ console.log(arr)
             </TouchableOpacity>    
             <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5}}>Witties</Text>
 
-            <Avatar onPress={() => this._onPressAvatar()} rounded source={{uri: this.state.profilePicture}}/>
+            <Avatar onPress={() => this._onPressAvatar()} rounded source={{uri: this.state.imageUri}}/>
         
             </View>
             <Divider/>
@@ -373,7 +451,8 @@ console.log(arr)
                 <Overlay
                     animationType={'slide'}
                     isVisible={this.state.searchOverlay}
-                    overlayStyle={{width: width, height: height}}
+                    // overlayStyle={{width: width, height: height}}
+                    fullScreen
                 >
                 <SafeAreaView style={{flex: 1}}>
                 <ScrollView style={{flex: 1, flexDirection: 'column'}} refreshControl={
@@ -433,11 +512,13 @@ console.log(arr)
 
                 {/* profile overlay */}
                 <Overlay
+                    fullScreen
                     transparent={true}
                     animationType={'slide'}
-                    overlayStyle={{width: width, height: height}}
+                    // overlayStyle={{width: width, height: height}}
                     isVisible={this.state.profileOverlay}
                 >
+                <ScrollView style={{flex: 1}}>
                     <SafeAreaView style={{flex: 1, flexDirection: 'column'}}>
                         <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center'}}>
                             <TouchableOpacity
@@ -452,7 +533,7 @@ console.log(arr)
                             <Text style={{fontSize: 20, fontFamily: 'font1', marginLeft: 8}}>Account</Text>
                         </View>
                         <View style={{flex: 0, flexDirection: 'row', padding: 15}}>
-                            <Avatar source={{uri: this.state.profilePicture}} rounded/>
+                            <Avatar source={{uri: this.state.imageUri}} rounded/>
                             <View style={{flex: 0, flexDirection: 'column', marginLeft: 15}}>
                                 <TouchableOpacity onPress={() => this._copyToClipboard()}>
                                     <Text style={{fontFamily: 'font1'}}>{this.state.displayName}#{this.state.discriminator}</Text>
@@ -461,7 +542,7 @@ console.log(arr)
                             </View>
                         </View>
                         <Divider/>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => this.openProfileOverlay()}>
                             <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
                                 <MaterialIcons
                                     size={30}
@@ -484,7 +565,9 @@ console.log(arr)
                             </View>
                         </TouchableOpacity>
                         <Divider/>
-                        <TouchableOpacity onPress={() => this._onCloseAvatar()}>
+                        <TouchableOpacity onPress={() => {
+                         this.props.changeIndex()
+                         this._onCloseAvatar()}}>
                             <View style={{flex: 0, flexDirection: 'row',  alignItems: 'center', padding: 15}}>
                                 <MaterialIcons
                                     size={30}
@@ -519,6 +602,7 @@ console.log(arr)
                         </TouchableOpacity>
                         
                     </SafeAreaView>
+                    </ScrollView>
 
                 <Toast
                     ref="copyToClipboard"
@@ -554,7 +638,97 @@ console.log(arr)
                         </View>
                     </View>
                 </Overlay>
+                
+                <Overlay animationType="slide" isVisible={this.state.profileDetails} fullScreen>
+                <ScrollView style={{flex: 1}}>
+                    <SafeAreaView style={{flex: 1}}>
+                    <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
+                <TouchableOpacity onPress={() => this.closeProfileDetails()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>{this.state.displayName}</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>  
+            <View style={{flex: 0, flexDirection: 'column', alignItems: 'center'}}>
+                   
+                   <Avatar
+                       onLongPress={() => this.openOverlay()}
+                       containerStyle={{marginTop: 20, marginLeft: 0}}
+                       size={100}
+                       rounded
+                       source={{
+                           uri: this.state.imageUri
+                       }}
+                       onPress={() => this._openOptions()}
+                   />
+                   <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
+                   <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.displayName}#{this.state.discriminator}</Text>
+                   <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
+                   <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.careScore}</Text>
+                   </View>
+                   <Button onPress={()=> this.addToStory()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add to story"/>
+   
+                   </View>
+                   <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
+                   <Divider style={{width: width}}/>
+                   
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{fontFamily: 'font1', fontSize: 15, margin: 10}}>Friends</Text>
+                  <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
+                </View>
+                <View style={{height: 80}}>
+                    <AllFriends press={() => this._onCloseAvatar()}/>
+                </View>
+                   
+                <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>See All</Text>
+                <Divider style={{width: width, marginTop: 20}}/>
+                
+                <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{fontFamily: 'font1', fontSize: 15, margin: 10}}>Chats</Text>
+                  <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
+                </View>
+                <View style={{height: 80}}>
+                    {/* <AllFriends/> */}
+                <AllChatsComponent/>
+                </View>
+                <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>See All</Text>
+ 
+                   </View>
+
+                   
+            </SafeAreaView>
+</ScrollView>
+
+<Overlay onBackdropPress={this._openOptions} isVisible={this.state.optionMenu} overlayStyle={{position: 'absolute', bottom: 0, width: width}}>
+                    <View>
+                        
+                        <Button
+                            onPress={this._pickImage}
+                            type="clear"
+                            title="Select picture"
+                            titleStyle={{color: '#000', fontFamily: "font1"}}
+
+                        />
+                        <Divider/>
+                        <Button
+                            titleStyle={{color: 'red', fontFamily: "font1"}}
+                            onPress = {this._deletePicture}
+                            type="clear"
+                            title="Delete picture"
+                        />
+                    </View>
                 </Overlay>
+                </Overlay>
+                </Overlay>
+                {/* <StoriesPublic/> */}
                 
                 {/* <Timeline/> */}
             </View>)

@@ -77,14 +77,16 @@ export default class AllFriends extends Component{
     render(){
         if(this.state.fontsLoaded){
         return(
-            <View style={{flex: 1}}>
+            <View style={{flex: 1, height: 60}}>
             <FlatList
+                showsHorizontalScrollIndicator={false}
+                pagingEnabled={true}
+            horizontal={true}
                 data={this.state.documentData.slice(0, 4)}
                 renderItem={({item}) => (
                     
                     <AllFriendsComponent close={() => this.closeSearch()} uid={item.uid} careScore={item.careScore} displayName={item.displayName} discriminator={item.discriminator} profilePicture={item.profilePicture} press={() => this._acceptFriend(item.uid)}/>
                 )}
-                ListFooterComponent={<TouchableOpacity onPress={() => this.searchMore()} style={{alignSelf: 'center'}}><Text style={{fontFamily: 'font1'}}>Search more</Text></TouchableOpacity>}
 
             />
             <Overlay isVisible={this.state.overlayFriends} fullScreen overlayStyle={{width: width}} animationType="slide">

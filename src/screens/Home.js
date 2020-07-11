@@ -40,9 +40,16 @@ export default class Home extends Component {
         discriminator: '',
         expoPushToken: '',
         notification: {},
-        profilePicture: ""
+        profilePicture: "",
+        index: 1
       }
 
+    }
+
+    changeIndexTimeline = () => {
+      this.setState({
+        index: 2
+      })
     }
 
     
@@ -114,7 +121,7 @@ export default class Home extends Component {
           <Swiper
                   loop={false}
                   showsPagination={false}
-                  index={1}>
+                  index={this.state.index}>
                     <View style={{flex: 1}}>
                       {/* <Map/> */}
                       <CameraScreen/>
@@ -124,16 +131,16 @@ export default class Home extends Component {
                       loop={false}
                       showsPagination={false}
                       index={1}>
+                      {/* <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+                        <UserProfile/>
+                      </SafeAreaView> */}
                       <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                        {/* <UserProfile/> */}
-                      </SafeAreaView>
-                      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                        {/* <SearchUsers/> */}
+                        <SearchUsers changeIndex={() => this.changeIndexTimeline()}/>
                       </SafeAreaView>
                     </Swiper>        
                     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                        {/* <StoriesPublic/> */}
-                        <ActivityPopup/>
+                      {/* <Timeline/> */}
+                      {/* <ActivityPopup/> */}
                     </SafeAreaView>
        </Swiper>
 </View>

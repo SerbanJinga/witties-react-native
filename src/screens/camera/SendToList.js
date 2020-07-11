@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import { Text, View, StyleSheet, Dimensions, TouchableOpacity, FlatList, ScrollView } from 'react-native'
-import {SearchBar} from 'react-native-elements'
+import {SearchBar, Avatar, Divider} from 'react-native-elements'
 import { AntDesign } from '@expo/vector-icons'
 import firebase from 'firebase'
 import SendTo from './SendTo'
 import { withNavigation } from 'react-navigation'
 const {width, height} = Dimensions.get('window')
 let arr = []
+let friendArr = []
 
  class SendToList extends Component{
     constructor(props){
@@ -14,7 +15,10 @@ let arr = []
         this.state = {
             documentData: [],
             sendTo: [],
-            imageUri: ""
+            imageUri: "",
+            displayName: "",
+            profilePicture: "",
+            friendsData: []
         }
     }
 
@@ -38,15 +42,13 @@ let arr = []
     }
 
     componentDidMount = async () => {
-        if(this.props.video === true){
-            console.log('bravo,')
-        }else{
-            console.log('e poza,')
-        }
+        await this.retrieveMe()
+        
         arr = []
+        friendArr = []
         await this._retrieveData()
         // console.log(this.props.image)
-
+        await this.retrieveAllFriends()
     }
 
     mama = (uid) => {
@@ -55,7 +57,7 @@ let arr = []
         this.setState({
             sendTo: sendToFinal
         })
-        // console.log(this.state.sendTo)
+        console.log(this.state.sendTo)
 
     }   
 
@@ -68,7 +70,7 @@ let arr = []
             sendTo: sendToFinal
         })
 
-        // console.log(this.state.sendTo)
+        console.log(this.state.sendTo)
     }
 
     uploadVideo = async() => {
@@ -140,6 +142,17 @@ let arr = []
         }
     }
 
+    retrieveMe = async() => {
+        let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+        let profilePicture = await initialQuery.data().profilePicture
+        let displayName = await initialQuery.data().displayName
+
+        this.setState({
+            displayName: displayName,
+            profilePicture: profilePicture
+        })
+    }
+
 
     upload = () => {
         let foo = {
@@ -164,14 +177,29 @@ let arr = []
     }
 
 
+    retrieveAllFriends = async() => {
+        let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+        let data = await initialQuery.data().friends
+        data.forEach(friend => this.getFriend(friend))
+    }
+
+    getFriend = async(friend) => {
+        let query = await firebase.firestore().collection('users').doc(friend).get()
+        let data = await query.data()
+
+        friendArr.push(data)
+
+        this.setState({
+            friendsData: friendArr
+        })
+    }
+
     render(){
         return(
             <ScrollView style={{flex: 1, flexDirection: 'column'}}>
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start'}}>
             <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>  
-            <TouchableOpacity onPress={() => this.props.close()}>
-            <AntDesign name="close" size={20}/>
-        </TouchableOpacity>
+            
           <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
                     backgroundColor:"#fff",
                     borderBottomColor: '#ecedef',
@@ -187,8 +215,28 @@ let arr = []
             <AntDesign name="arrowright" size={20}/>
         </TouchableOpacity>
 
+
        </View>
        </View>
+
+       <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>My Story</Text>
+       <TouchableOpacity>
+        
+            <View style={{flex: 1, padding: 10}}>
+                <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
+                    <Avatar size={40} rounded source={{uri: this.state.profilePicture}}/>
+                    <View style={{flex: 1, flexDirection: 'column',}}>
+                    <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.state.displayName}</Text>
+                    </View>
+                </View>
+                <Divider style={{marginTop: 20}}/>
+
+            </View>
+            
+
+             </TouchableOpacity> 
+             <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>My Chats</Text>
+  
 
             <FlatList
                 data={this.state.documentData}
@@ -202,7 +250,23 @@ let arr = []
         //    refreshing={this.state.refreshing}
         //    onRefresh={this.handleRefresh}
            />
-               </ScrollView>             
+               <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>All Friends</Text>
+
+               <FlatList
+                data={this.state.friendsData}
+            renderItem={({item}) => (
+                <SendTo isUser={true} displayName={item.displayName} profilePicture={item.profilePicture} mama={this.mama} tata={this.tata} id={item.uid}/>
+            )}   
+           keyExtractor={(item, index) => String(index)}
+        //    ListFooterComponent={this.renderFooter}
+        //    onEndReached={this.retrieveMore}
+        //    onEndReachedThreshold={0}
+        //    refreshing={this.state.refreshing}
+        //    onRefresh={this.handleRefresh}
+           />
+               </ScrollView>
+               
+
 
             )
     }

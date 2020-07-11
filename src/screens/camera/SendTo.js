@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { View, Dimensions, StyleSheet } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { Text, Avatar, CheckBox, Divider } from 'react-native-elements'
+import { AntDesign } from '@expo/vector-icons'
 
 export default class SendTo extends Component {
     constructor(props){
@@ -35,11 +36,11 @@ export default class SendTo extends Component {
                     <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.props.displayName}</Text>
                     </View>
                     <CheckBox
-                        checkedIcon="dot-circle-o"
+                        checkedIcon={<AntDesign name="check" size={20} style={{color: '#0984e3'}}/>}
                         containerStyle={{backgroundColor: 'transparent',borderWidth: 0}}
-                        uncheckedIcon="circle-o"
+                        uncheckedIcon={<AntDesign name="" size={20}/>}
                         checked={this.state.selection}
-                          
+                        
                         />
                 </View>
                 <Divider style={{marginTop: 20}}/>

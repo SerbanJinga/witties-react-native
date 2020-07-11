@@ -142,15 +142,15 @@ class ChatRoomsList extends Component {
         let documentSnapshots = await inititalQuery.get()
         let documentData = documentSnapshots.docs.map(doc => doc.data())
         documentData.forEach(doc => arr.push(doc))
-        let lastVisible = arr[arr.length - 1]
+        // let lastVisible = arr[arr.length - 1]
         this.setState({
             documentData: arr,
-            lastVisible: lastVisible,
+            // lastVisible: lastVisible,
             loading: false
 
         })
 
-        console.log("LSASLOAG AGKAGAG", this.state.lastVisible)
+        // console.log("LSASLOAG AGKAGAG", this.state.lastVisible)
 
     }
 
@@ -198,7 +198,7 @@ class ChatRoomsList extends Component {
     value={this.state.searchChats}
     onChangeText={this.searchChats}
 />
-
+                    {this.state.documentData.length !== 0 ?
                     <FlatList
                     data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                         renderItem={({ item, index }) => (
@@ -212,7 +212,7 @@ class ChatRoomsList extends Component {
                         onEndReached={this.retrieveMore}
                         onEndReachedThreshold={0}
                         refreshing={this.state.refreshing}
-                    />
+                    />:  <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>You have no active chats.</Text>}
                 </SafeAreaView>
             )
         } else {

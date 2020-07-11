@@ -74,7 +74,7 @@ export default class AddedMe extends Component {
                 <Divider style={{marginTop: 20}}/>
 
             </View>
-            <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width, borderRadius: '10', position: 'absolute', bottom: 0}}>
+            <Overlay animationType='fade' onBackdropPress={() => this._closeFriendOverlay()} isVisible={this.state.overlayOpened} overlayStyle={{width: width, borderRadius: 10, position: 'absolute', bottom: 0}}>
                 <View style={{flex: 1}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                         <Avatar size={40} source={{uri: this.props.profilePicture}} rounded/>
@@ -118,7 +118,7 @@ export default class AddedMe extends Component {
                 </View>
         </Overlay>
 
-        <Overlay overlayStyle={{width: width, height: height}} animationType="slide" isVisible={this.state.showFullProfile}>
+        <Overlay fullScreen animationType="slide" isVisible={this.state.showFullProfile}>
         <FullProfile addFriend={()=> this.props.press()} displayName={this.props.displayName} discriminator={this.props.discriminator} careScore={this.props.careScore} profilePicture={this.props.profilePicture} close={() => this._closeProfileDetails()} uid={this.props.uid}/>
         </Overlay>
             </TouchableOpacity>                
