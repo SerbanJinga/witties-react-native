@@ -165,7 +165,7 @@ let friendArr = []
             location: this.props.location,
             creatorId: this.props.creatorId,
             taggedUsers: this.props.taggedUsers,
-            albums: []
+            albums: this.props.albums
         }
         this.state.sendTo.forEach(chatRoom => {
             firebase.firestore().collection('messages').doc(chatRoom).update({

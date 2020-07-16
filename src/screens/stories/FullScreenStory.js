@@ -113,7 +113,7 @@ class FullScreenStorty extends React.Component {
     render() {
       
         return (
-          <ScrollView ref={ref => {this.scrollview_ref = ref}} horizontal={true} scrollEventThrottle={10} pagingEnabled={true} >
+          <ScrollView ref={ref => {this.scrollview_ref = ref}} horizontal={true} scrollEventThrottle={10} pagingEnabled={true} showsHorizontalScrollIndicator={false}>
           {this.state.allStories.map((item, index) => {
             if (typeof item.video === 'undefined'){
               return (<View onLayout={event => {

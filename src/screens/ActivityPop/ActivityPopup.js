@@ -34,6 +34,7 @@ const friendsArr = [];
 import SwipeablePanel from 'rn-swipeable-panel'
 import PlacesInput from 'react-native-places-input';
 import ChatroomList from '../chatRoom/ChatRoomsList'
+import AlbumPopup from "./AlbumPopup";
 let replacer;
 export default class ActivityPopup extends React.Component {
     constructor(props) {
@@ -53,9 +54,11 @@ export default class ActivityPopup extends React.Component {
             gap7: 0,
             gap8: 0,
             gap9: 0,
+            gap10:0,
             taggedUsers: [],
 
             input2: '',
+            albums:[],
             //Aici se formeaza starea propriu zis
             postText: '',
             oneUserTag: '',
@@ -81,6 +84,7 @@ export default class ActivityPopup extends React.Component {
             usersSentTo: []
         }
         this.importSendUserList = this.importSendUserList.bind(this)
+        this.selectAlbum = this.selectAlbum.bind(this)
     }
 
 
@@ -214,6 +218,14 @@ export default class ActivityPopup extends React.Component {
         })
 
     }
+    //TODO let them choose multiple albums
+    selectAlbum = (cv) =>{
+        console.log("am ajuns aici iar cv este :",cv,"trb sa apara cv")
+        let z = []
+        z.push(cv)
+        this.setState({albums:z})
+        this.setState({gap10:0})
+    }
     sendActivity = async (url) => {
         let foo = {
             mood: this.state.mood,
@@ -226,7 +238,7 @@ export default class ActivityPopup extends React.Component {
             hoursPosted: this.state.selectedValueHours,
             location: this.state.location,
             creatorId: firebase.auth().currentUser.uid,
-            albums:[],
+            albums:this.state.albums,
 
             
         }
@@ -656,6 +668,14 @@ export default class ActivityPopup extends React.Component {
 
 
                 {/* -------------------------------Send To------------------------ */}
+                {/*--------------------------Album chooser & creator ---------------*/}
+                {(this.state.gap10 === 0) ? null : (<View style={{ height: this.state.gap10, width: (this.state.gap10 === 0) ? 0 : width * 0.8, backgroundColor: 'white' }}>
+                    <View style={styles.moodView}>
+
+                        <AlbumPopup open={this.selectAlbum}/>
+                    </View>
+                </View>)}
+                {/*--------------------------Album chooser & creator ---------------*/}
                 {/* --------Main comp------------------------ */}
                 <View style={styles.moodView}>
                     <Button title=''
@@ -672,7 +692,7 @@ export default class ActivityPopup extends React.Component {
                         onPress={() => {
 
                             if (this.state.gap3 === 0) {
-                                this.setState({ gap3: height / 3, gap: 0, gap2: 0, gap6: 0, gap7: 0, gap8: 0, gap9: 0 })
+                                this.setState({ gap3: height / 3, gap: 0, gap2: 0, gap6: 0, gap7: 0, gap8: 0, gap9: 0,gap10:0 })
                                 this.retrieveData()
                             } else
                                 this.setState({ gap3: 0 })
@@ -686,7 +706,7 @@ export default class ActivityPopup extends React.Component {
                         icon={<Icon3 name={'ios-happy'} size={28} />}
                         onPress={() => {
                             if (this.state.gap2 === 0)
-                                this.setState({ gap2: height / 3, gap: 0, gap3: 0, gap6: 0, gap7: 0, gap8: 0, gap9: 0 })
+                                this.setState({ gap2: height / 3, gap: 0, gap3: 0, gap6: 0, gap7: 0, gap8: 0, gap9: 0,gap10:0 })
                             else
                                 this.setState({ gap2: 0 })
                         }}
@@ -698,7 +718,7 @@ export default class ActivityPopup extends React.Component {
                         onPress={() => {
 
                             if (this.state.gap === 0) {
-                                this.setState({ gap: height / 3, gap2: 0, gap3: 0, gap6: 0, gap7: 0, gap8: 0, gap9: 0 })
+                                this.setState({ gap: height / 3, gap2: 0, gap3: 0, gap6: 0, gap7: 0, gap8: 0, gap9: 0,gap10:0 })
                                 this._retrieveFriendRequests();
                             }
                             else
@@ -713,7 +733,7 @@ export default class ActivityPopup extends React.Component {
                         containerStyle={styles.button}
                         onPress={() => {
                             if (this.state.gap7 === 0)
-                                this.setState({ gap7: height / 3, gap: 0, gap3: 0, gap6: 0, gap2: 0, gap8: 0, gap9: 0 })
+                                this.setState({ gap7: height / 3, gap: 0, gap3: 0, gap6: 0, gap2: 0, gap8: 0, gap9: 0,gap10:0 })
                             else
                                 this.setState({ gap7: 0 })
                         }}
@@ -728,12 +748,23 @@ export default class ActivityPopup extends React.Component {
                         containerStyle={styles.button}
                         onPress={() => {
                             if (this.state.gap8 === 0)
-                                this.setState({ gap8: height / 3, gap: 0, gap3: 0, gap6: 0, gap2: 0, gap7: 0, gap9: 0 })
+                                this.setState({ gap8: height / 3, gap: 0, gap3: 0, gap6: 0, gap2: 0, gap7: 0, gap9: 0,gap10:0 })
                             else
                                 this.setState({ gap8: 0 })
                         }}
                     />
-
+                    <Button
+                        title=""
+                        type="clear"
+                        icon={<Icon2 name={'photo-album'} size={28} />}
+                        containerStyle={styles.button}
+                        onPress={() => {
+                            if (this.state.gap10 === 0)
+                                this.setState({ gap10: height / 3, gap: 0, gap3: 0, gap6: 0, gap2: 0, gap7: 0, gap9: 0, gap8:0 })
+                            else
+                                this.setState({ gap10: 0 })
+                        }}
+                    />
                     <Button
                         // title={(this.state.public) ? " Public" : "Private"}
                         type="clear"
@@ -754,7 +785,7 @@ export default class ActivityPopup extends React.Component {
                         containerStyle={styles.button}
                         onPress={() => {
                             if (this.state.gap9 === 0)
-                                this.setState({ gap9: height / 3, gap: 0, gap3: 0, gap6: 0, gap2: 0, gap7: 0, gap8: 0 })
+                                this.setState({ gap9: height / 3, gap: 0, gap3: 0, gap6: 0, gap2: 0, gap7: 0, gap8: 0,gap10:0 })
                             else
                                 this.setState({ gap9: 0 })
                         }}

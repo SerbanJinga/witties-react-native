@@ -300,7 +300,7 @@ console.log(arr)
                     style: 'destructive'
                 }
             ],
-            {cancelable: 'false'}
+            {cancelable: false}
         )
     }
     _signOutUser = () => {
@@ -613,7 +613,7 @@ console.log(arr)
                     fadeInDuration={750}
                 />
                   <Overlay animationType="slide" isVisible={this.state.settings} fullScreen overlayStyle={{width: width}}>
-                    <View style={{flex: 1, flexDirection: 'column', top: 10}}>
+                    <SafeAreaView style={{flex: 1, flexDirection: 'column', top: 10}}>
                         <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                         <TouchableOpacity onPress={() => this._closeSettings()}>
                     <AntDesign
@@ -636,7 +636,7 @@ console.log(arr)
                         <Divider/>
                         
                         </View>
-                    </View>
+                    </SafeAreaView>
                 </Overlay>
                 
                 <Overlay animationType="slide" isVisible={this.state.profileDetails} fullScreen>
@@ -728,7 +728,7 @@ console.log(arr)
                 </Overlay>
                 </Overlay>
                 </Overlay>
-                {/* <StoriesPublic/> */}
+            <StoriesPublic/>
                 
                 {/* <Timeline/> */}
             </View>)

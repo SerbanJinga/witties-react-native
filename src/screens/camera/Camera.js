@@ -26,7 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import SendTo from './SendTo'
 import TaggedList from './TaggedList'
 import ListActivities from '../ActivityPop/ListActivities'
-
+import AlbumPopup from '../ActivityPop/AlbumPopup'
 const { width, height } = Dimensions.get('window')
 const screenWidth = Dimensions.get('screen').width
 const screenHeight = Dimensions.get('screen').height
@@ -62,14 +62,17 @@ let lastTap = null
             locationOverlay: false,
             timePostedOverlay: false,
             sendToOverlay: false,
+            AlbumOverlay: false,
             moodIcon: "emoticon-kiss",
             mood: "",
+            album:'',
             location: "",
             selectedActivity: "",
             taggedUsers: [],
             selectedValueHours: "",
             cameraIcon: "camera"
           }
+          this.selectAlbum = this.selectAlbum.bind(this)
     }
 
     openActivityOverlay = () => {
@@ -553,6 +556,24 @@ closeSendTo = () => {
   })
 }
 
+openAlbumOverlay = () =>{
+  console.log("sa deschis cevabasdjdaskdk")
+  this.setState({
+    AlbumOverlay: true
+  })
+}
+
+closeAlbumOverlay = () =>{
+  this.setState({
+    AlbumOverlay: false
+  })
+}
+
+selectAlbum = (cv) =>{
+  console.log("bine bossusle chiar s a transmis smecheria asta smr franta,", cv,"salut")
+this.setState({album:cv})
+this.closeAlbumOverlay()
+}
 renderGallery = () => {
   
   return(
@@ -618,6 +639,11 @@ renderGallery = () => {
               
             <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.sendImage()}>
             <Ionicons name="ios-send" style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openAlbumOverlay()}>
+            <Ionicons name="ios-albums" style={{color: '#fff', fontSize: 30}} />
 
             </TouchableOpacity>
 
@@ -750,7 +776,7 @@ renderGallery = () => {
                     color="#b2b8c2"
                 />
             </View>
-              <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid}/>
+              <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid}/>
             </SafeAreaView>
             </Overlay>
 
@@ -902,6 +928,26 @@ renderGallery = () => {
               </SafeAreaView>
             </Overlay>
 
+            <Overlay isVisible={this.state.AlbumOverlay} fullScreen animationType="slide">
+            <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeAlbumOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Albums</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+            <AlbumPopup open={this.selectAlbum}/>
+            </SafeAreaView>
+            </Overlay>
 </SafeAreaView>
 
           
@@ -1023,6 +1069,13 @@ renderVideo = () => {
             <Ionicons name="ios-send" style={{color: '#fff', fontSize: 30}} />
 
             </TouchableOpacity>
+
+            <TouchableOpacity style={{marginBottom: 20}} onPress={() => this.openAlbumOverlay()}>
+            <Ionicons name="ios-albums" style={{color: '#fff', fontSize: 30}} />
+
+            </TouchableOpacity>
+
+            
 
             </View>
 
@@ -1300,7 +1353,27 @@ renderVideo = () => {
               <SendToList videoFile={this.state.video} video={true} close={() => this.closeSendTo()} closeEvery={() => this._pressVideoOverlay()} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid}/>
             </SafeAreaView>
             </Overlay>
-
+            
+            <Overlay isVisible={this.state.AlbumOverlay} fullScreen animationType="slide">
+            <SafeAreaView style={{flex: 1}}>
+              <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40}}>
+                <TouchableOpacity onPress={() => this.closeAlbumOverlay()}>
+                <AntDesign
+                    size={26}
+                    name="down"
+                    color="#b2b8c2"
+                />
+                </TouchableOpacity>
+                <Text style={{fontFamily: 'font1', fontSize: 20}}>Albums</Text>
+                <AntDesign
+                    size={26}
+                    name="bars"
+                    color="#b2b8c2"
+                />
+            </View>
+             <AlbumPopup open={this.selectAlbum}/>
+            </SafeAreaView>
+            </Overlay>
 
             
       </SafeAreaView>

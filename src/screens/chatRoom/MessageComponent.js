@@ -5,6 +5,7 @@ import { timing } from 'react-native-reanimated'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
 import { TouchableHighlight } from 'react-native-gesture-handler'
+const { width, height } = Dimensions.get('window')
 
 export default class MessageComponent extends Component {
     constructor(props) {
@@ -75,13 +76,17 @@ export default class MessageComponent extends Component {
         if(this.state.fontsLoaded)
 {
         return (
-            <View style={[styles.submit, {marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]}>
+            // <View style={{flex: 1, wid}}
+            <TouchableOpacity style={{width: width}}>
+            <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]}>
+                {/* <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]} */}
                 <Text style={{fontFamily: 'font1', lineHeight: 20}}>{this.state.displayName} a trimis: </Text>
                 
                 <Text style={{fontFamily: 'font1'}}>{this.state.msg}</Text>
 
                 <Text style={{fontFamily: 'font2', marginLeft: 20}}>{this._renderTimestamps(this.state.date)}</Text>
         </View>
+        </TouchableOpacity>
         )
         }else{
             return(
@@ -103,6 +108,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
         paddingLeft: 10,
         paddingRight: 10,
+        // width: width,
         // alignSelf: 'flex-start'
     },
       submitText:{

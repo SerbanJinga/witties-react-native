@@ -21,7 +21,6 @@ import SwipeablePanel from "rn-swipeable-panel";
 import VideoComponent from './VideoComponent'
 import StreakVideo from './StreakVideo'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 class ChatRoom extends Component {
     constructor(props) {
         super(props)
@@ -45,6 +44,8 @@ class ChatRoom extends Component {
             chatSettings: false,
             lessMessages: [],
         }
+
+
     }
 
     pickImage = async() => {
@@ -55,7 +56,8 @@ class ChatRoom extends Component {
         })
 
         if(!result.cancelled){
-            console.log('bravo')
+            
+            this.props.navigation.navigate('SendPhoto', { photo: result.uri, width: result.width, height: result.height, chatRoomPhoto: this.state.profilePicture})
         }
     }
 
@@ -89,7 +91,7 @@ class ChatRoom extends Component {
         const sender = this.state.currentUser
 
         const newMessage = {
-            timestamp: timestamp,
+            timestamp: Date.now(),
             msg: msg,
             sender: firebase.auth().currentUser.uid
         }
@@ -117,10 +119,12 @@ class ChatRoom extends Component {
     }
 
     componentDidMount = async()=> {
-        userDataArray = []
-        await this.retrieveParticipants()
 
-        await this.retrieveData()
+        userDataArray = []
+        // await this.retrieveData()
+
+        // await this.retrieveParticipants()
+
     }
 
     renderHeader() {
@@ -160,7 +164,7 @@ class ChatRoom extends Component {
     }
 
 
-    retrieveData = async () => {
+    retrieveData =  async() => {
        
         let arrMsg = []
         let receivedQuery = await firebase.firestore().collection("messages").doc(this.state.roomId)
@@ -170,35 +174,64 @@ class ChatRoom extends Component {
             arrMsg.push(element)
         })
         arrMsg.reverse()
-
+        console.log(arrMsg)
         
         console.log('DAIFJAFJKAFJAKFJk')
         arrMsg.slice().sort((a, b) => a.timestamp - b.timestamp)
         this.setState({
             messages: arrMsg,
         })
-        console.log(this.state.messages)
+        // console.log(this.state.messages)
+
+        // firebase.firestore().collection('messages').where('chatRoomName', '==', this.state.roomId).onSnapshot(function(doc){
+        //     let docs = doc.docs.map(doc => doc.data())
+        //     console.log(docs)
+        // })
+        // let messageDataHabarnam = []
+     
+        firebase.firestore().collection('messages').doc(this.state.roomId).onSnapshot((doc) => {
+            let messageData = doc.data()
+            // this.setState({
+                // messages: messageData
+            // })
+            this.reloadData(doc.data().messages)
+           
+            // console.log(messageData)
+            // this.setState({
+            //     messages: messageData
+            // })
+        })
+        
     }
 
-    retrieveMore = async () => {
-        let howManyLoadInPlus = 6
-        let arrMsg = []
-        let receivedQuery = await firebase.firestore().collection("messages").doc(this.state.roomId)
-        let receivedSnapshots = await receivedQuery.get()
-        let receivedData = receivedSnapshots.data().messages.slice(-6 + howManyLoadInPlus)
-        receivedData.forEach(element => {
-            arrMsg.push(element)
+    reloadData = (docs) => {
+        console.log('s-a transmis ft bine')
+        console.log(docs)
+        this.setState({
+            messages: docs
         })
-        arrMsg.reverse()
+      
+    }
+
+    // retrieveMore = async () => {
+    //     let howManyLoadInPlus = 6
+    //     let arrMsg = []
+    //     let receivedQuery = await firebase.firestore().collection("messages").doc(this.state.roomId)
+    //     let receivedSnapshots = await receivedQuery.get()
+    //     let receivedData = receivedSnapshots.data().messages.slice(-6 + howManyLoadInPlus)
+    //     receivedData.forEach(element => {
+    //         arrMsg.push(element)
+    //     })
+    //     arrMsg.reverse()
 
         
-        console.log('DAIFJAFJKAFJAKFJk')
-        arrMsg.slice().sort((a, b) => a.timestamp - b.timestamp)
-        this.setState({
-            messages: arrMsg,
-        })
+    //     console.log('DAIFJAFJKAFJAKFJk')
+    //     arrMsg.slice().sort((a, b) => a.timestamp - b.timestamp)
+    //     this.setState({
+    //         messages: arrMsg,
+    //     })
 
-    }
+    // }
 
     renderParticipants = () => {
         
@@ -303,7 +336,7 @@ class ChatRoom extends Component {
 <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding": "height"} style={styles.container}>
             <Overlay overlayStyle={{width: width, height: height}} isVisible={this.state.changeChatOverlay} animationType="slide">
             <SafeAreaView style={{flex: 1}}>
-            <ScrollView style={{flex: 1}}>
+            {/* <ScrollView style={{flex: 1}}> */}
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
                     <TouchableOpacity onPress={() => this._closeChatDetails()}>
                     <AntDesign
@@ -334,7 +367,7 @@ class ChatRoom extends Component {
                 <Text style={{fontFamily: 'font1', fontSize: 20, padding: 10}}>Daily Streak</Text>
                     
                     {this.renderStreakVideo()}
-                </ScrollView>
+                {/* </ScrollView> */}
 </SafeAreaView>
                 <Overlay animationType='fade' onBackdropPress={() => this._closeChatSettings()} isVisible={this.state.chatSettings} overlayStyle={{width: width, borderRadius: 10, position: 'absolute', bottom: 0}}>
                 <SafeAreaView style={{flex: 1}}>
@@ -407,19 +440,24 @@ class ChatRoom extends Component {
                         containerStyle={{position:'absolute',bottom:10}}
                         inputContainerStyle={{ paddingHorizontal: 10, borderWidth: 1, borderColor: "#b2b8c2",borderRadius: 20, height: 44}}
                         value={this.state.currentMessage}
-                        onChangeText={currentMessage => this.setState({ currentMessage })}
+                        onChangeText={currentMessage => this.setState({ currentMessage: currentMessage })}
                         renderErrorMessage={false}
                     />
                    
-                   <Button title="Load more" titleStyle={{color: '#b2b8c2'}} type="clear" onPress={() => this.retrieveMore()}/>
+                   {/* <Button title="Load more" titleStyle={{color: '#b2b8c2'}} type="clear" onPress={() => this.retrieveMore()}/> */}
 
+                {/* <ScrollView> */}
                 <FlatList
-                    inverted
+                nestedScrollEnabled={true}
+                scrollEnabled={true}
+                    // initialScrollIndex={this.state.messages.length - 1}
+                    // onScrollToIndexFailed={() => console.log('failed')}
+                    // ref={ref => {this.flatListRef = ref}}
                     data={this.state.messages}
-                    renderItem={({ item }) => (
-                        <View>
-                        {(typeof item.reply === 'undefined') ? null : <Text>{item.reply} has replied to your story!</Text>}
-                            {(typeof (item.location) === 'undefined') ? <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> :
+                    renderItem={({ item, index }) => (
+                        <View style={{width: width, flex: 1}}>
+                        {(typeof item.reply === 'undefined') ? null : <View><Text>{item.reply} has replied to your story!</Text></View>}
+                            {(typeof (item.location) === 'undefined') ?  <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> :
                               (typeof item.video === 'undefined') ?
                                                 <ChatRoomPost
                                                     item={item}
@@ -435,17 +473,18 @@ class ChatRoom extends Component {
                                 }
 
                             {/* <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> */}
-                        </View>
+                                </View>
                     )}
                     keyExtractor={(item, index) => String(index)}
                     // ListHeaderComponent={this.renderHeader}
-                    ListFooterComponent={this.Renderpizdamatii}
-                    onEndReached={this.retrieveMore}
-                    onEndReachedThreshold={0}
-                    refreshing={this.state.refreshing}
+                    // ListFooterComponent={this.Renderpizdamatii}
+                    // onEndReached={this.retrieveMore}
+                    // onEndReachedThreshold={0}
+                    // refreshing={this.state.refreshing}
                     // renderHeader={this.renderHeader}
                     style={{position:'absolute',top:0,bottom:65,left:5,right:5}}
                 />
+                {/* </ScrollView> */}
                 </View>
                 </TouchableWithoutFeedback>
 
