@@ -1,26 +1,26 @@
 import React, { Component } from 'react'
-import { View, Dimensions, TouchableOpacity, ImageBackground } from 'react-native'
-import { Image, Avatar, Input } from 'react-native-elements'
-import { withNavigation } from 'react-navigation'
+import { View, TouchableOpacity, Dimensions } from 'react-native'
+import { Input, Avatar } from 'react-native-elements'
+import { Video } from 'expo-av'
 import { AntDesign } from '@expo/vector-icons'
+import { withNavigation } from 'react-navigation'
 import { SafeAreaView } from 'react-native-safe-area-context'
 const { width, height } = Dimensions.get('window')
 import firebase from 'firebase'
-class SendPhoto extends Component {
+
+class SendVideo extends Component{
     constructor(props){
         super(props)
         this.state = {
-            uri: props.navigation.state.params.photo,
+            uri: props.navigation.state.params.video,
             chatRoomDisplayPhoto: props.navigation.state.params.chatRoomPhoto,
             roomId: props.navigation.state.params.chatRoomId,
-            // width: props.navigation.state.params.width,
-            // height: props.navigation.state.params.height,
-            currentMessage: "",
-            imageUri: ""
+            videoUri: "",
+            currentMessage: ""
         }
     }
 
-    uploadPhoto = async() => {
+    uploadVideo = async() => {
         const timestamp = firebase.auth().currentUser.uid + "/" + Date.now()
         const path = `${this.state.roomId}/${timestamp}`
         const response = await fetch(this.state.uri)
@@ -31,7 +31,7 @@ class SendPhoto extends Component {
         }, async () => {
             const url = await upload.snapshot.ref.getDownloadURL()
             this.setState({
-                imageUri: url
+                videoUri: url
             })
             this.sendToChat()
         })
@@ -42,7 +42,7 @@ class SendPhoto extends Component {
             mood: "",
             text: this.state.currentMessage,
             activity: "",
-            image: this.state.imageUri,
+            video: this.state.videoUri,
             timestamp: Date.now(),
             hoursPosted: "",
             location: "",
@@ -50,12 +50,13 @@ class SendPhoto extends Component {
             taggedUsers: [],
             albums: []
         }
+
         await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').add({
             // messages: firebase.firestore.FieldValue.arrayUnion(foo)
             mood: "",
             text: this.state.currentMessage,
             activity: "",
-            image: this.state.imageUri,
+            video: this.state.videoUri,
             timestamp: Date.now(),
             hoursPosted: "",
             location: "",
@@ -64,10 +65,10 @@ class SendPhoto extends Component {
             albums: []
         }).then(() => this.props.navigation.goBack(null))
     }
+
     render(){
         return(
             <SafeAreaView style={{flex: 1}}>
-            {/* <ImageBackground source={{uri: this.state.uri}} style={{width: width, height: height, flex: 1}}> */}
             <View style={{flex: 1}}>
             <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center'}}>
                 <TouchableOpacity
@@ -89,8 +90,9 @@ class SendPhoto extends Component {
                     
                 
                 </View>
-                <Image source={{uri: this.state.uri}} style={{width: width, height: height}}/>
-                <View style={{flex: 0, backgroundColor: '#000', flexDirection: 'row', justifyContent: 'space-around', padding: 10, alignItems: 'center',  bottom: 0, position: 'absolute'}}>
+            <Video resizeMode="cover" shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping source={{uri: this.state.uri}} style={{width: width, height: height}}/>
+
+            <View style={{flex: 0, backgroundColor: '#000', flexDirection: 'row', justifyContent: 'space-around', padding: 10, alignItems: 'center',  bottom: 0, position: 'absolute'}}>
                 
                 <Input
                     
@@ -104,7 +106,7 @@ class SendPhoto extends Component {
                     renderErrorMessage={false}
                 />
                 <TouchableOpacity
-                    onPress={() => this.uploadPhoto()}
+                    onPress={() => this.uploadVideo()}
                   style={{
                     backgroundColor: 'transparent',
                  }}>
@@ -120,11 +122,10 @@ class SendPhoto extends Component {
                 
                 </View>
                 </View>
-                {/* <Image source={{uri: this.state.uri}} style={{width: this.state.width, height: this.state.height}}/> */}
-                {/* </ImageBackground> */}
-                </SafeAreaView>
+
+            </SafeAreaView>
         )
     }
 }
 
-export default withNavigation(SendPhoto)
+export default withNavigation(SendVideo)

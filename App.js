@@ -23,6 +23,7 @@ import { createSharedElementStackNavigator } from 'react-navigation-shared-eleme
 import ChatCameraScreen from './src/screens/chatRoom/ChatCameraScreen'
 import SendTo from './src/screens/camera/SendTo';
 import SendPhoto from './src/screens/chatRoom/SendPhoto';
+import SendVideo from './src/screens/chatRoom/SendVideo';
 require('firebase/firestore');
 
 console.disableYellowBox=true;
@@ -128,7 +129,8 @@ const navigator = createSharedElementStackNavigator(
     ChatRoomPostDetail: ChatRoomPostDetail,
     ChatCameraScreen: ChatCameraScreen,
     SendToList: SendToList,
-    SendPhoto: SendPhoto
+    SendPhoto: SendPhoto,
+    SendVideo: SendVideo
   },{
     initialRouteName: 'Auth',
     headerMode: null,

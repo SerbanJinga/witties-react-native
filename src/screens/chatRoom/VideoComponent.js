@@ -17,24 +17,42 @@ export default class VideoComponent extends Component {
             video: props.video,
             overlay: false,
             marginLeft: 0,
-            marginRight: 0
+            marginRight: 0,
+            displayName: "",
+            profilePicture: ""
         }
     }
 
+    getData = async (uid) => {
+        await firebase.firestore().collection('users').doc(uid).get().then(res => {
+            let displayName = res.data().displayName
+            let profilePicture = res.data().profilePicture
+            this.setState({ displayName: displayName, profilePicture: profilePicture })
+        })
 
-    componentDidMount = () => {
-            if(this.props.creatorId === firebase.auth().currentUser.uid){
-                this.setState({
-                    marginLeft: 50,
-                    marginRight: 0
-                })
-            }else{
-                this.setState({
-                    marginLeft: 0,
-                    marginRight: 50
-                })
-            }
     }
+    componentDidMount = async () => {
+        console.log(this.props.creatorId,"ar trebui sa fie egal cu ",firebase.auth().currentUser.uid)
+        console.log("-----------------------------------------")
+        console.log(this.state.date)
+        console.log("-----------------------------------------")
+        await this.getData(this.props.creatorId)
+
+        this.setState({ fontsLoaded: true })
+        // if (this.props.creatorId == firebase.auth().currentUser.uid)
+        //     this.setState({
+        //         marginLeft: 50,
+        //         marginRight: 0
+        //     })
+        // else
+        //     this.setState({
+        //         marginLeft: 0,
+        //         marginRight: 50
+        //     })
+    }
+
+
+  
 
 
     openOnLongPress = () => {
@@ -56,14 +74,29 @@ export default class VideoComponent extends Component {
 
  <TouchableOpacity
                 activeOpacity={0.8}
-                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10, marginLeft: this.state.marginLeft, marginRight: this.state.marginRight }}
+                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10}}
                 onPress={() => console.log('m-ai apasat')}
                 onLongPress={() => this.openOnLongPress()}>
                 <View
                     style={[styles.flex, styles.shadow]}
                     imageStyle={{ borderRadius: theme.sizes.radius }}
+                    
                 >
-                    <Video source={{uri: this.state.video}} resizeMode="cover" style={styles.destination} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+                    <Video source={{uri: this.state.video}} resizeMode="cover" style={styles.destination} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping>
+                    <View style={{zIndex: 1, flex: 0, margin: 10, flexDirection: 'column'}}>
+                    <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
+                    <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
+
+                        <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
+                            <Octicons
+                                name="smiley"
+                                size={theme.sizes.font * 0.8}
+                                color={theme.colors.white}
+                            />
+                            <Text> {this.props.text}</Text>
+                        </Text>
+                        </View>
+                        </Video>
                 </View>
             <Overlay onBackdropPress={() => this.closeOnLongPress()} isVisible={this.state.overlay} overlayStyle={{position: 'absolute', bottom: 0, width: width}}>
                 <Text>like video </Text>

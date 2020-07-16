@@ -142,6 +142,7 @@ export default class Home extends Component {
                       {/* <Timeline/> */}
                       {/* <ActivityPopup/> */}
                       <ChatRoomsList/>
+                      {/* <StoriesPublic/> */}
                     </SafeAreaView>
        </Swiper>
 </View>

@@ -47,16 +47,16 @@ const { height, width } = Dimensions.get('window')
         await this.getData(this.props.creatorId)
 
         this.setState({ fontsLoaded: true })
-        if (this.props.creatorId == firebase.auth().currentUser.uid)
-            this.setState({
-                marginLeft: 50,
-                marginRight: 0
-            })
-        else
-            this.setState({
-                marginLeft: 0,
-                marginRight: 50
-            })
+        // if (this.props.creatorId == firebase.auth().currentUser.uid)
+        //     this.setState({
+        //         marginLeft: 50,
+        //         marginRight: 0
+        //     })
+        // else
+        //     this.setState({
+        //         marginLeft: 0,
+        //         marginRight: 50
+        //     })
     }
 
     render() {

@@ -57,7 +57,7 @@ class ChatRoom extends Component {
 
         if(!result.cancelled){
             
-            this.props.navigation.navigate('SendPhoto', { photo: result.uri, width: result.width, height: result.height, chatRoomPhoto: this.state.profilePicture})
+            this.props.navigation.navigate('SendPhoto', { photo: result.uri, width: result.width, height: result.height, chatRoomPhoto: this.state.profilePicture, chatRoomId: this.state.roomId})
         }
     }
 
@@ -69,7 +69,7 @@ class ChatRoom extends Component {
         })
 
         if(!result.cancelled){
-            console.log('bravo, cu video')
+            this.props.navigation.navigate('SendVideo', { video: result.uri, chatRoomPhoto: this.state.profilePicture, chatRoomId: this.state.roomId })
         }
     }
 
@@ -104,8 +104,11 @@ class ChatRoom extends Component {
 
 
         //seteaza in baza de date
-        firebase.firestore().collection("messages").doc(this.state.roomId).update({
-            messages: firebase.firestore.FieldValue.arrayUnion(newMessage)
+        firebase.firestore().collection("messages").doc(this.state.roomId).collection('chats').add({
+            // messages: firebase.firestore.FieldValue.arrayUnion(newMessage)
+            timestamp: Date.now(),
+            msg: msg,
+            sender: firebase.auth().currentUser.uid
         })
     }
     _renderTimestamps = (timestamp) => {
@@ -121,7 +124,7 @@ class ChatRoom extends Component {
     componentDidMount = async()=> {
 
         userDataArray = []
-        // await this.retrieveData()
+        await this.retrieveData()
 
         // await this.retrieveParticipants()
 
@@ -166,21 +169,21 @@ class ChatRoom extends Component {
 
     retrieveData =  async() => {
        
-        let arrMsg = []
-        let receivedQuery = await firebase.firestore().collection("messages").doc(this.state.roomId)
-        let receivedSnapshots = await receivedQuery.get()
-        let receivedData = receivedSnapshots.data().messages.slice(-6)
-        receivedData.forEach(element => {
-            arrMsg.push(element)
-        })
-        arrMsg.reverse()
-        console.log(arrMsg)
+        // let arrMsg = []
+        // let receivedQuery = await firebase.firestore().collection("messages").doc(this.state.roomId)
+        // let receivedSnapshots = await receivedQuery.get()
+        // let receivedData = receivedSnapshots.data().messages.slice(-6)
+        // receivedData.forEach(element => {
+        //     arrMsg.push(element)
+        // })
+        // arrMsg.reverse()
+        // console.log(arrMsg)
         
-        console.log('DAIFJAFJKAFJAKFJk')
-        arrMsg.slice().sort((a, b) => a.timestamp - b.timestamp)
-        this.setState({
-            messages: arrMsg,
-        })
+        // console.log('DAIFJAFJKAFJAKFJk')
+        // arrMsg.slice().sort((a, b) => a.timestamp - b.timestamp)
+        // this.setState({
+        //     messages: arrMsg,
+        // })
         // console.log(this.state.messages)
 
         // firebase.firestore().collection('messages').where('chatRoomName', '==', this.state.roomId).onSnapshot(function(doc){
@@ -188,14 +191,13 @@ class ChatRoom extends Component {
         //     console.log(docs)
         // })
         // let messageDataHabarnam = []
+        console.log(this.state.roomId)
      
-        firebase.firestore().collection('messages').doc(this.state.roomId).onSnapshot((doc) => {
-            let messageData = doc.data()
-            // this.setState({
-                // messages: messageData
-            // })
-            this.reloadData(doc.data().messages)
-           
+        firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp').onSnapshot((doc) => {
+            // this.reloadData(doc.data().messages)
+            let documentData = doc.docs.map(doc => doc.data())
+            console.log(documentData)
+            this.reloadData(documentData)
             // console.log(messageData)
             // this.setState({
             //     messages: messageData
@@ -456,7 +458,7 @@ class ChatRoom extends Component {
                     data={this.state.messages}
                     renderItem={({ item, index }) => (
                         <View style={{width: width, flex: 1}}>
-                        {(typeof item.reply === 'undefined') ? null : <View><Text>{item.reply} has replied to your story!</Text></View>}
+                        {/* {(typeof item.reply === 'undefined') ? null : <View><Text>{item.reply} has replied to your story!</Text></View>} */}
                             {(typeof (item.location) === 'undefined') ?  <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> :
                               (typeof item.video === 'undefined') ?
                                                 <ChatRoomPost
@@ -469,7 +471,7 @@ class ChatRoom extends Component {
                                                     timestamp={item.timestamp}
                                                     image={item.image} 
                                                     /> : 
-                                <VideoComponent video={item.video} creatorId={item.sender}/>
+                                <VideoComponent timestamp={item.timestamp} item={item} video={item.video} creatorId={item.creatorId} text={item.text}/>
                                 }
 
                             {/* <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> */}
