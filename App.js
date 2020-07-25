@@ -24,6 +24,9 @@ import ChatCameraScreen from './src/screens/chatRoom/ChatCameraScreen'
 import SendTo from './src/screens/camera/SendTo';
 import SendPhoto from './src/screens/chatRoom/SendPhoto';
 import SendVideo from './src/screens/chatRoom/SendVideo';
+import Timeline from './src/screens/Timeline/Timeline';
+import StreakVideoAvatar from './src/screens/chatRoom/StreakVideoAvatar';
+import Map from './src/screens/map/Map';
 require('firebase/firestore');
 
 console.disableYellowBox=true;
@@ -130,7 +133,10 @@ const navigator = createSharedElementStackNavigator(
     ChatCameraScreen: ChatCameraScreen,
     SendToList: SendToList,
     SendPhoto: SendPhoto,
-    SendVideo: SendVideo
+    SendVideo: SendVideo,
+    Timeline: Timeline,
+    StreakVideoAvatar: StreakVideoAvatar,
+    Map: Map
   },{
     initialRouteName: 'Auth',
     headerMode: null,

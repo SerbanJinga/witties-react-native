@@ -125,7 +125,7 @@ class SignUp extends Component {
             displayName: this.state.displayName,
             careScore: this.state.careScore,
             discriminator: this.state.discriminator,
-            profilePicture: this.state.profilePicture,
+            profilePicture: "https://freesvg.org/img/abstract-user-flat-1.png",
             friends: this.state.friends,
             uid: firebase.auth().currentUser.uid,
             status: "",

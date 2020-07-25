@@ -450,14 +450,16 @@ class ChatRoom extends Component {
 
                 {/* <ScrollView> */}
                 <FlatList
+                onContentSizeChange={() => this.refs.flatList.scrollToEnd()}
+                // initialNumToRender={this.state.messages.length / 2}
                 nestedScrollEnabled={true}
                 scrollEnabled={true}
                     // initialScrollIndex={this.state.messages.length - 1}
                     // onScrollToIndexFailed={() => console.log('failed')}
-                    // ref={ref => {this.flatListRef = ref}}
+                    ref="flatList"
                     data={this.state.messages}
                     renderItem={({ item, index }) => (
-                        <View style={{width: width, flex: 1}}>
+                        <View key={index} style={{width: width, flex: 1}}>
                         {/* {(typeof item.reply === 'undefined') ? null : <View><Text>{item.reply} has replied to your story!</Text></View>} */}
                             {(typeof (item.location) === 'undefined') ?  <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> :
                               (typeof item.video === 'undefined') ?

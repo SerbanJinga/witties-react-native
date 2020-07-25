@@ -52,7 +52,6 @@ class SendVideo extends Component{
         }
 
         await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').add({
-            // messages: firebase.firestore.FieldValue.arrayUnion(foo)
             mood: "",
             text: this.state.currentMessage,
             activity: "",

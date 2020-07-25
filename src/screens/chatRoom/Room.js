@@ -16,7 +16,6 @@ class Room extends Component {
             fontsLoaded: false,
             openChangeImage: false,
             cameraOverlay: false,
-            padding: 6
         }
     }
 
@@ -160,16 +159,14 @@ class Room extends Component {
         if(this.state.fontsLoaded){
 
         return(
-          <View>
-            <TouchableOpacity style={{padding: this.state.padding}} onPress={() => this.props.press()}>
-                        <View style={{flex: 1, padding: 10}}>
+          <View style={{flex: 1, justifyContent: 'space-between'}}>
+            <TouchableOpacity style={{padding: 0}} onPress={() => this.props.press()}>
+                        <View style={{flex: 1, padding: 6}}>
                 <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
-                    <Avatar onPress={() => this._changeChatPicture()} size={40} rounded source={{uri: this.props.profilePicture}}/>
+                    <Avatar containerStyle={{borderWidth: 3, borderColor: '#f6b93b'}} onPress={() => this.props.navigation.navigate('StreakVideoAvatar', { roomId: this.props.roomId})} size={48} rounded source={{uri: this.props.profilePicture}}/>
                     <View style={{flex: 1, flexDirection: 'column',}}>
-                    <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.props.chatRoomName}</Text>
-                    {/* <Text style={{fontFamily: 'font2', marginLeft: 4}}>{this.props.lastMessage}</Text> */}
+                    <Text style={{marginLeft: 10, fontFamily: 'font1', fontSize: 18}}>{this.props.chatRoomName}</Text>
                     </View>
-                    {/* <Badge  status="primary" containerStyle={{marginLeft: "auto"}} badgeStyle={{width: 20, height: 20, borderRadius:20}} value={2}/> */}
                     <TouchableOpacity onPress={() => this.openCamera(this.props.roomId)}>
                     <AntDesign
                         color="#D4AF37"

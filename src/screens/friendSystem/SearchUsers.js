@@ -7,7 +7,7 @@ import { FlatList } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
-import { MaterialIcons, Entypo, AntDesign } from '@expo/vector-icons'
+import { MaterialIcons, Entypo, AntDesign, Feather, FontAwesome5 } from '@expo/vector-icons'
 import * as Font from 'expo-font'
 
 import AddFriend from './AddFriend'
@@ -258,10 +258,12 @@ console.log(arr)
 
     }
 
-    _onPressSearch = () => {
+    _onPressSearch = async() => {
         this.setState({
             searchOverlay: true
         })
+        await this.retrieveData()
+        await this.addedMe()
     }
     _onCloseSearch = () => {
         this.setState({
@@ -426,23 +428,55 @@ console.log(arr)
                 return(
             <View style={styles.container}>
    
-            <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10}}>  
+            <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-around', paddingLeft: 10, paddingRight: 10, paddingBottom: 10, paddingTop: 10,}}>  
+            <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5, marginRight: 'auto'}}>Witties</Text>
 
-                <TouchableOpacity
+
+
+            <TouchableOpacity
+                    onPress={()=> this.props.navigation.navigate('Timeline')}
+                  style={{
+                    backgroundColor: 'transparent',
+                    margin: 4,
+                    marginRight: 20,
+                 }}>
+              <MaterialIcons
+                  name="history"
+                  style={{fontSize: 26, fontWeight: "bold"}}  
+              />
+            </TouchableOpacity>   
+
+
+
+            <TouchableOpacity
                     onPress={()=> this._onPressSearch()}
                   style={{
                     backgroundColor: 'transparent',
                     margin: 4,
-                    marginRight: 10,
+                    marginRight: 20,
                  }}>
               <AntDesign
                   name="addusergroup"
                   style={{fontSize: 26, fontWeight: "bold"}}
               />
-            </TouchableOpacity>    
-            <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5}}>Witties</Text>
+            </TouchableOpacity>   
 
+
+            <TouchableOpacity
+                    onPress={()=> this.props.navigation.navigate("Map")}
+                  style={{
+                    backgroundColor: 'transparent',
+                    margin: 4,
+                    marginRight: 20,
+                 }}>
+              <Feather
+                name="map-pin"
+                style={{fontSize: 23, fontWeight: "bold"}}
+              />
+            </TouchableOpacity>   
             <Avatar onPress={() => this._onPressAvatar()} rounded source={{uri: this.state.imageUri}}/>
+
+          
         
             </View>
             <Divider/>

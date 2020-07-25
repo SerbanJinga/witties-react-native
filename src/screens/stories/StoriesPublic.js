@@ -18,6 +18,8 @@ let stories = []
 let reallyFinal = []
 let prinAstaFiltrez = []
 
+let timer;
+
 
 let finalArray = []
 const { height, width } = Dimensions.get('window')
@@ -70,6 +72,7 @@ const { height, width } = Dimensions.get('window')
 
     getStoriesFromFriend = async(friend) => {
       let initialQuery = await firebase.firestore().collection('status-public').doc(friend).collection('statuses').get()
+      if(initialQuery.empty){ return }
       let friendStories = initialQuery.docs.map(doc => doc.data())
       // let friendStories = await initialQuery.data().statuses
       friendStories.forEach(friendStory => reallyFinal.push(friendStory))
@@ -133,10 +136,14 @@ const { height, width } = Dimensions.get('window')
       console.log(item.creatorId)
       await this.getAllStoriesFromId(item.creatorId).then(
         // setTimeout(() => {console.log('filtrarea mea', prinAstaFiltrez)}, 2000)
-        setTimeout(() => {
+       timer = setTimeout(() => {
         this.props.navigation.navigate('FullScreenStory', {status: item, allStories: prinAstaFiltrez})  
       
         }, 2000))
+    }
+
+    componentWillMount = () => {
+      clearTimeout(timer)
     }
 
     openNewChatOverlay = () => {
@@ -186,9 +193,7 @@ setTimeout(() => {
                 <SafeAreaView style={styles.container} >
                 {this.state.documentData.length !== 0 ?
                 <FlatList
-                // decelerationRate={0}
                 horizontal
-                // pagingEnabled
                 scrollEnabled
                 showsHorizontalScrollIndicator={false}
                 scrollEventThrottle={16}
@@ -201,7 +206,6 @@ setTimeout(() => {
                  )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
-                // ListFooterComponent={this.renderFooter}
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}

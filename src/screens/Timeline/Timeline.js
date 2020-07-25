@@ -12,10 +12,9 @@ import {
     ImageBackground,
     Dimensions,
     FlatList,
-    ScrollView
-
-
+    ScrollView,
 } from 'react-native';
+
 import ActivityPopup from '../ActivityPop/ActivityPopup'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
@@ -32,10 +31,11 @@ const screenHeight = Dimensions.get('screen').height;
 import TimelinePost from './TimelinePost'
 import TimelineOverlay from "./TimelineOverlay";
 import { indexOf } from "lodash";
+import { withNavigation } from "react-navigation";
 let arr = []
 
 
-export default class Timeline extends React.Component {
+class Timeline extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -377,9 +377,9 @@ export default class Timeline extends React.Component {
                 right: 30,
                 bottom: 30,
                 opacity: (this.state.showAct) ? 0 : 1,
-
+                borderRadius: 60
             }} onPress={() => { this.setState({ showAct: true }) }}>
-                <Ionicons size={60} name={"ios-add"} style={[{ color: theme.colors.white, backgroundColor: theme.colors.blue, paddingHorizontal: 15, borderRadius: 60 }]} />
+                <Ionicons size={60} name={"ios-add"} style={[{ color: theme.colors.white, backgroundColor: theme.colors.blue, paddingHorizontal: 15, }]} />
             </TouchableOpacity>
             <Overlay isVisible={this.state.openFilter} fullScreen animationType="slide">
                 {/* zr */}
@@ -602,3 +602,5 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
 })
+
+export default withNavigation(Timeline)
