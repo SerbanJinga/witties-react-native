@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { Button, Text, CheckBox, SearchBar, Overlay, ButtonGroup, Divider } from 'react-native-elements'
-import { View, Dimensions, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { View, Dimensions, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native'
 import firebase from 'firebase'
 import { render } from 'react-dom'
-import { FlatList,  } from 'react-native-gesture-handler'
+import { FlatList, ScrollView,  } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { withNavigation } from 'react-navigation';
 import ActivityPopupChatroomSelect from '../ActivityPop/ActivityPopupChatroomSelect'
@@ -76,6 +76,7 @@ class ChatRoomsList extends Component {
     }
 
     _retrieveData = async () => {
+        console.log('se face cv aici')
         try{
             this.setState({
                 loading: true
@@ -185,6 +186,7 @@ class ChatRoomsList extends Component {
         if (this.state.type !== 0) {
             return (
                 <SafeAreaView>
+                <ScrollView style={{flex: 1}} refreshControl={<RefreshControl tintColor="red" onRefresh={() => console.log('refresh aici.....')}/>}>
                 <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
     backgroundColor:"#fff",
     borderBottomColor: '#ecedef',
@@ -213,6 +215,7 @@ class ChatRoomsList extends Component {
                         onEndReachedThreshold={0}
                         refreshing={this.state.refreshing}
                     />:  <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>You have no active chats.</Text>}
+           </ScrollView>
                 </SafeAreaView>
             )
         } else {

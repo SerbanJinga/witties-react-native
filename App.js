@@ -105,7 +105,7 @@ const TransitionConfiguration = () => {
 }
 
 
-const navigator = createSharedElementStackNavigator(
+const navigator = createStackNavigator(
   {
     Auth: AuthNavigator,
     Home: {
@@ -140,7 +140,6 @@ const navigator = createSharedElementStackNavigator(
   },{
     initialRouteName: 'Auth',
     headerMode: null,
-    transitionConfig: TransitionConfiguration,
   }, 
   );
 

@@ -54,7 +54,7 @@ const { height, width } = Dimensions.get('window')
       prinAstaFiltrez = []
       reallyFinal = []
       arr = []
-      await this.retrieveDataFromFriends()
+      // await this.retrieveDataFromFriends()
       await Font.loadAsync({
         font1: require('../../../assets/SourceSansPro-Black.ttf')
       })
@@ -64,6 +64,7 @@ const { height, width } = Dimensions.get('window')
     }
 
     retrieveDataFromFriends = async() => {
+      arr = []
       const currentId = firebase.auth().currentUser.uid
       let friendsQuery = await firebase.firestore().collection('users').doc(currentId).get()
       let friendsData = await friendsQuery.data().friends
@@ -74,14 +75,8 @@ const { height, width } = Dimensions.get('window')
       let initialQuery = await firebase.firestore().collection('status-public').doc(friend).collection('statuses').get()
       if(initialQuery.empty){ return }
       let friendStories = initialQuery.docs.map(doc => doc.data())
-      // let friendStories = await initialQuery.data().statuses
       friendStories.forEach(friendStory => reallyFinal.push(friendStory))
-      // reallyFinal.push(friendStories)
-      // reallyFinal.push(friendStor)
-      // reallyFinal.push(fr)
-      // console.log(friendStories)
       arr.push(friendStories[0])
-      // console.log(arr)
       this.setState({
         documentData: arr
       })
@@ -173,11 +168,17 @@ const { height, width } = Dimensions.get('window')
 
 
    
-    onRefresh = () => {
+    onRefresh = async() => {
       this.setState({
           refreshing: true
       })
-setTimeout(() => {
+      // const chat = new ChatRoomsList()
+      // chat._retrieveData()
+      
+setTimeout(async () => {
+  await this.retrieveDataFromFriends().then(this.setState({
+    documentData: arr
+  }))
   this.setState({
     refreshing: false
   })
@@ -191,7 +192,7 @@ setTimeout(() => {
                   <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>News</Text>
                 
                 <SafeAreaView style={styles.container} >
-                {this.state.documentData.length !== 0 ?
+                {1 !== 0 ?
                 <FlatList
                 horizontal
                 scrollEnabled
@@ -199,7 +200,7 @@ setTimeout(() => {
                 scrollEventThrottle={16}
                 snapToAlignment='center'
                 style={[styles.shadow, { overflow: 'visible' }]}
-                 data = {this.state.documentData}
+                 data = {this.props.stories.length === 0 ? this.state.documentData : this.props.stories}
                  renderItem={({item}) => (
                      <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)}/>
                      

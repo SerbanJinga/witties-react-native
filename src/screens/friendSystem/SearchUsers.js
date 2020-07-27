@@ -56,7 +56,8 @@ let addedMe = []
             addedMe: [],
             careScore: 0,
             profileDetails: false,
-            optionMenu: false
+            optionMenu: false,
+            // items: props.navigation.state.params.roomId
         }
     }
 
@@ -109,7 +110,7 @@ let addedMe = []
         arr = []
         addedMe = []
         
-console.log(arr)
+console.log('DATELE', this.props.data)
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf'),
             font2: require('../../../assets/SourceSansPro-Regular.ttf')
@@ -474,7 +475,7 @@ console.log(arr)
                 style={{fontSize: 23, fontWeight: "bold"}}
               />
             </TouchableOpacity>   
-            <Avatar onPress={() => this._onPressAvatar()} rounded source={{uri: this.state.imageUri}}/>
+            <Avatar onPress={() => this._onPressAvatar()} rounded source={{uri: this.state.imageUri === '' ? 'https://cdn0.iconfinder.com/data/icons/basic-ui-element-s94-2/64/Basic_UI_Icon_Pack_-_Outline_user-512.png' : this.state.imageUri}}/>
 
           
         
@@ -567,7 +568,7 @@ console.log(arr)
                             <Text style={{fontSize: 20, fontFamily: 'font1', marginLeft: 8}}>Account</Text>
                         </View>
                         <View style={{flex: 0, flexDirection: 'row', padding: 15}}>
-                            <Avatar source={{uri: this.state.imageUri}} rounded/>
+                            <Avatar source={{uri: this.state.imageUri === '' ? 'https://cdn0.iconfinder.com/data/icons/basic-ui-element-s94-2/64/Basic_UI_Icon_Pack_-_Outline_user-512.png' : this.state.imageUri}} rounded/>
                             <View style={{flex: 0, flexDirection: 'column', marginLeft: 15}}>
                                 <TouchableOpacity onPress={() => this._copyToClipboard()}>
                                     <Text style={{fontFamily: 'font1'}}>{this.state.displayName}#{this.state.discriminator}</Text>
@@ -762,7 +763,7 @@ console.log(arr)
                 </Overlay>
                 </Overlay>
                 </Overlay>
-            <StoriesPublic/>
+            <StoriesPublic stories={this.props.stories}/>
                 
                 {/* <Timeline/> */}
             </View>)

@@ -277,7 +277,7 @@ class Timeline extends React.Component {
 
 
     render() {
-        return (<View style={{ height: screenHeight, flex: 1 }}>
+        return (<SafeAreaView style={{ height: screenHeight, flex: 1, width: width, backgroundColor: '#fff' }}>
             <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
                 <SearchBar round placeholder="Search" style={{ fontFamily: 'font1', padding: 20 }} lightTheme inputStyle={{ fontFamily: 'font1' }} placeholderTextColor="#ecedef" containerStyle={{
                     backgroundColor: "#fff",
@@ -383,7 +383,7 @@ class Timeline extends React.Component {
             </TouchableOpacity>
             <Overlay isVisible={this.state.openFilter} fullScreen animationType="slide">
                 {/* zr */}
-                <View style={{ flex: 1, flexDirection: 'column' }}>
+                <SafeAreaView style={{ flex: 1, flexDirection: 'column' }}>
                     <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center' }}>
                         <TouchableOpacity
                             onPress={() => this.closeFilter()}
@@ -545,9 +545,9 @@ class Timeline extends React.Component {
                         />
 
                     </ScrollView>) : null}
-                </View>
+                </SafeAreaView>
             </Overlay>
-        </View>)
+        </SafeAreaView>)
     }
 }
 

@@ -6,12 +6,11 @@ import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
 import { FontAwesome, MaterialCommunityIcons, Ionicons, Feather, AntDesign, MaterialIcons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
-import Gallery from './Gallery'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
 import * as ImagePicker from 'expo-image-picker'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-
+import Toolbar from './Toolbar'
 import { Avatar, SearchBar, Button, } from 'react-native-elements'
 import ActivityPopup from '../ActivityPop/ActivityPopup'
 import { Video } from 'expo-av'
@@ -21,7 +20,6 @@ import DoubleTap from './DoubleTap'
 import VideoPlayer from 'expo-video-player'
 import { withNavigation } from 'react-navigation'
 import PlacesInput from 'react-native-places-input';
-import Toolbar from './Toolbar'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import SendTo from './SendTo'
 import TaggedList from './TaggedList'
@@ -1369,16 +1367,13 @@ return (
             </SafeAreaView>
                           </Overlay>  
         
-       {/*</View>
         
         
             
 
             
 
-            </View>
 
-             */}
 
             
       

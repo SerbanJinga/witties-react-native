@@ -250,16 +250,24 @@ class StreakVideoCamera extends Component{
 
 renderVideo = () => {
   return(
-    <Overlay isVisible={this.state.video !== ''} overlayStyle={{flex: 1, width: width, height: height}}>
+    <View>
+    <Overlay isVisible={this.state.video !== ''}>
     <View style={styles.container}>
  
- <Video source={{uri: this.state.video}} resizeMode="cover" style={styles.video} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
- <TouchableOpacity style={styles.button} onPress={() => this.pressVideo()}>
-   <Text style={{fontSize: 40}}>Send to</Text>
- </TouchableOpacity>
+ <Video source={{uri: this.state.video}} resizeMode="cover" style={{width: width, height: height}} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+      
+ <TouchableOpacity
+                onPress={() => this._closeVideoOverlay()}
+              style={{backgroundColor: 'transparent',position:'absolute',top:50,left:20}}>
+              <AntDesign
+                  name="close"
+                  style={{ color: "#fff", fontSize: 30}}
+              />
+            </TouchableOpacity> 
 </View>  
 
     </Overlay>
+    </View>
   )
 }
 

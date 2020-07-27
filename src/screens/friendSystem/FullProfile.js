@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native'
 import { ListItem, Button, Text, Avatar, Divider } from 'react-native-elements'
-import { Overlay } from 'react-native-elements'
 import * as Font from 'expo-font'
 import firebase from 'firebase'
 import { AntDesign, Entypo } from '@expo/vector-icons'
@@ -74,7 +73,7 @@ export default class FullProfile extends Component {
                         style: 'destructive'
                     }
                 ],
-                {cancelable: 'false'}
+                {cancelable: false}
             )        }
     }
 
