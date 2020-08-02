@@ -22,7 +22,6 @@ import { withNavigation } from 'react-navigation'
         notification: {},
         profilePicture: "",
         index: 1,
-        stories: props.navigation.state.params.stories
       }
 
     }
@@ -97,7 +96,7 @@ import { withNavigation } from 'react-navigation'
                       showsPagination={false}
                       index={1}>
                       <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                        <SearchUsers stories={this.state.stories} changeIndex={() => this.changeIndexTimeline()}/>
+                        <SearchUsers changeIndex={() => this.changeIndexTimeline()}/>
                       </SafeAreaView>
                     </Swiper>        
                     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>

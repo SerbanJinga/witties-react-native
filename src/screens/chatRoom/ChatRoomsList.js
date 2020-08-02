@@ -9,6 +9,7 @@ import { withNavigation } from 'react-navigation';
 import ActivityPopupChatroomSelect from '../ActivityPop/ActivityPopupChatroomSelect'
 import Room from './Room'
 import { AntDesign } from '@expo/vector-icons'
+import { last } from 'lodash'
 
 const { width, height } = Dimensions.get('window')
 let groupsIn = []
@@ -76,19 +77,38 @@ class ChatRoomsList extends Component {
     }
 
     _retrieveData = async () => {
-        console.log('se face cv aici')
-        try{
+    
+    const uid = firebase.auth().currentUser.uid
+        firebase.firestore().collection('users').where('uid', '==', uid).onSnapshot((doc) => {
+            let documentData = doc.docs.map(doc => doc.data().chatRoomsIn)
+            let usersChats = documentData[0]
+            arr = []
+            this.getChats(usersChats)
+        
+            console.log(usersChats , 'udpata0toaptaoptro')
+        })
+
+    }
+
+    getChats = async (usersChats) => {
+        usersChats.forEach(async chat => {
+            let query = await firebase.firestore().collection('messages').doc(chat).get()
+            
+            
+            let chatName = query.data().chatRoomName
+            let chatPicture = query.data().profilePicture
+            let chatId = query.data().roomId
+            let foo = {
+                chatName: chatName,
+                chatPicture: chatPicture,
+                roomId: chatId
+            }
+            arr.push(foo)
             this.setState({
-                loading: true
+                documentData: arr
             })
-        let query = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
-        let snapshot = await query.get()
-        let myData = snapshot.data().chatRoomsIn
-        console.log(myData)
-       myData.forEach(document => this._getDataFromId(document))
-        }catch(error){
-            console.log(error)
-        }
+            console.log(foo, 'se updateaza')
+        })
     }
     
     _retriveMore = async () => {
@@ -186,7 +206,7 @@ class ChatRoomsList extends Component {
         if (this.state.type !== 0) {
             return (
                 <SafeAreaView>
-                <ScrollView style={{flex: 1}} refreshControl={<RefreshControl tintColor="red" onRefresh={() => console.log('refresh aici.....')}/>}>
+                <ScrollView style={{flex: 1}}>
                 <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
     backgroundColor:"#fff",
     borderBottomColor: '#ecedef',
@@ -206,7 +226,7 @@ class ChatRoomsList extends Component {
                         renderItem={({ item, index }) => (
 
                             
-                            <Room profilePicture={item.profilePicture} roomId={item.roomId} chatRoomName={item.chatRoomName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId, profilePicture: item.profilePicture }) }/>
+                            <Room profilePicture={item.chatPicture} roomId={item.roomId} chatRoomName={item.chatName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatName, roomId: item.roomId, profilePicture: item.chatPicture }) }/>
                         )}
                         keyExtractor={(item, index) => String(index)}
                         ListHeaderComponent={this.renderHeader}

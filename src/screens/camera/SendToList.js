@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Text, View, StyleSheet, Dimensions, TouchableOpacity, FlatList, ScrollView } from 'react-native'
-import {SearchBar, Avatar, Divider} from 'react-native-elements'
+import {SearchBar, Avatar, Divider, ThemeConsumer} from 'react-native-elements'
 import { AntDesign } from '@expo/vector-icons'
 import firebase from 'firebase'
 import SendTo from './SendTo'
@@ -18,7 +18,8 @@ let friendArr = []
             imageUri: "",
             displayName: "",
             profilePicture: "",
-            friendsData: []
+            friendsData: [],
+            image: this.props.image
         }
     }
 
@@ -43,7 +44,7 @@ let friendArr = []
 
     componentDidMount = async () => {
         await this.retrieveMe()
-        
+        console.log('imagine', this.state.image)
         arr = []
         friendArr = []
         await this._retrieveData()
@@ -106,7 +107,7 @@ let friendArr = []
             this.setState({
                 imageUri: url
             })
-            this.upload()
+            this.upload(url)
         })
     }
 
@@ -138,8 +139,10 @@ let friendArr = []
         if(this.props.video){
             this.uploadVideo()
         }else{
+            // console.log(this.props.image)
             this.uploadPhoto()
         }
+        // console.log('ne decidem')
     }
 
     retrieveMe = async() => {
@@ -154,12 +157,12 @@ let friendArr = []
     }
 
 
-    upload = () => {
+    upload = (url) => {
         let foo = {
             mood: this.props.mood,
             text: this.props.text,
             activity: this.props.activity,
-            image: this.state.imageUri,
+            image: url,
             timestamp: Date.now(),
             hoursPosted: this.props.hoursPosted,
             location: this.props.location,
@@ -167,9 +170,26 @@ let friendArr = []
             taggedUsers: this.props.taggedUsers,
             albums: this.props.albums
         }
+
+        // console.log(foo)
+        // this.state.sendTo.forEach(chatRoom => {
+        //     firebase.firestore().collection('messages').doc(chatRoom).update({
+        //         messages: firebase.firestore.FieldValue.arrayUnion(foo)
+        //     })
+        // })
+
         this.state.sendTo.forEach(chatRoom => {
-            firebase.firestore().collection('messages').doc(chatRoom).update({
-                messages: firebase.firestore.FieldValue.arrayUnion(foo)
+            firebase.firestore().collection('messages').doc(chatRoom).collection('chats').add({
+                mood: this.props.mood,
+                text: this.props.text,
+                activity: this.props.activity,
+                image: url,
+                timestamp: Date.now(),
+                hoursPosted: this.props.hoursPosted,
+                location: this.props.location,
+                creatorId: this.props.creatorId,
+                taggedUsers: this.props.taggedUsers,
+                albums: this.props.albums
             })
         })
         this.props.close()
@@ -191,6 +211,82 @@ let friendArr = []
 
         this.setState({
             friendsData: friendArr
+        })
+    }
+
+
+
+    
+
+    uploadVideoToStory = async () => {
+        console.log(this.props.videoFile, 'vaojufafjaikfjafjk')
+        const timestamp = firebase.auth().currentUser.uid + "/" + Date.now()
+        const path = `videos/${timestamp}`
+        const response = await fetch(this.props.videoFile)
+        const file = await response.blob()
+
+        let upload = firebase.storage().ref(path).put(file)
+        upload.on("state_changed", snapshot => {}, err => {
+        },
+        async () => {
+            const url = await upload.snapshot.ref.getDownloadURL()
+            this.setState({imageUri: url})
+            console.log('dadakdalkdakd am ajuns', url)
+
+            this.uploadToStoryVideo(url)
+        })
+    }
+
+    uploadToStoryVideo = async (url) => {
+        console.log('se deschide ')
+        firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).collection('statuses').add({
+            mood: this.props.mood,
+            text: this.props.text,
+            activity: this.props.activity,
+            video: url,
+            timestamp: Date.now(),
+            hoursPosted: this.props.hoursPosted,
+            location: this.props.location,
+            creatorId: this.props.creatorId,
+            taggedUsers: this.props.taggedUsers,
+            albums: this.props.albums,
+            duration: this.props.duration
+    })
+    }
+
+    uploadPhotoToStory = async() => {
+        const timestamp = firebase.auth().currentUser + "/" + Date.now()
+        const path = `photos/statuses/${timestamp}`
+        const response = await fetch(this.props.image)
+
+        const file = await response.blob()
+        let upload = firebase.storage().ref(path).put(file)
+        this.props.close()
+        this.props.closeEvery()
+        //   this.props.navigation.navigate('Home')  
+        upload.on("state_changed", snapshot => {}, err => {
+            
+        }, async () => {
+            const url = await upload.snapshot.ref.getDownloadURL()
+            this.setState({
+                imageUri: url
+            })
+            this.uploadToStory(url)
+        })
+    }
+
+    uploadToStory = async (url) => {
+        firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).collection('statuses').add({
+                mood: this.props.mood,
+                text: this.props.text,
+                activity: this.props.activity,
+                image: url,
+                timestamp: Date.now(),
+                hoursPosted: this.props.hoursPosted,
+                location: this.props.location,
+                creatorId: this.props.creatorId,
+                taggedUsers: this.props.taggedUsers,
+                albums: this.props.albums
         })
     }
 
@@ -220,7 +316,7 @@ let friendArr = []
        </View>
 
        <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>My Story</Text>
-       <TouchableOpacity>
+       <TouchableOpacity onPress={() => this.props.image === '' ? this.uploadVideoToStory() : this.uploadPhotoToStory()}>
         
             <View style={{flex: 1, padding: 10}}>
                 <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>

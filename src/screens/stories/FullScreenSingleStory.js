@@ -158,106 +158,17 @@ getDisplayName = async() => {
     })
   }
 render(){
-    return(
-//         <TouchableOpacity style={{width: width, height: height, flex: 1}} onLongPress={() => this.openOverlay()}>
-//           <SafeAreaView style={{flex: 1}}>
-//           <ImageBackground
-//   style={[styles.flex, styles.destination]}
-//   source={{uri: this.props.image}}
-// >
-
-//     <Progress.Bar style={{marginLeft: 10, marginRight: 10}} progress={this.state.progress} indeterminate={false} width={width} height={2}/>
-
-// <TouchableOpacity onPress={() => this.openProfileDetails()}>
-//   <View style={[styles.row, { justifyContent: 'space-between' }]}>
-//     <View style={{ flex: 0 }}>
-//       <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
-//     </View>
-
-//     <View style={[styles.column, { flex: 2, paddingHorizontal: theme.sizes.padding / 2, marginTop: 10 }]}>
-//       <Text style={{ color: theme.colors.white, fontWeight: 'bold' }}>{this.state.displayName}</Text>
-//       <Text style={{ color: theme.colors.white }}>
-//         <Octicons
-//           name="smiley"
-//           size={theme.sizes.font * 0.8}
-//           color={theme.colors.white}
-//         />
-//         <Text> {this.props.mood}</Text>
-//         <TouchableOpacity onPress={() => this.props.close()}>
-//             <AntDesign name="arrowleft" size={20} color="white"/>
-//           </TouchableOpacity>
-//       </Text>
-//     </View>
-
-//   </View>
-//       <Overlay animationType="slide" fullScreen onBackdropPress={() => this.closeProfileDetails()} isVisible={this.state.profile} overlayStyle={{width: width, position: 'absolute', bottom: 0}}>
-//       <View style={{flex: 1}}>
-//                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
-//                     <TouchableOpacity onPress={() => this.closeProfileDetails()}>
-//                     <AntDesign
-//                         size={26}
-//                         name="down"
-//                         color="#b2b8c2"
-//                     />
-//                     </TouchableOpacity>
-//                     <Text style={{fontFamily: 'font1', fontSize: 20}}>{this.state.displayName}</Text>
-//                     <AntDesign
-//                         size={26}
-//                         name="bars"
-//                         color="#b2b8c2"
-//                     />
-//                 </View>
-//                 <View style={{flex: 0, alignItems: 'center', marginTop: 40}}>
-//                     <Avatar size={100} source={{uri: this.state.profilePicture}} rounded/>
-//                     <View style={{flex: 0, flexDirection: 'row', marginTop: 20}}>
-//                 <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.displayName}#{this.state.discriminator}</Text>
-//                 <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
-//                 <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.careScore}</Text>
-//                 </View>
-//                 <Button style={{marginTop: 40}} titleStyle={{fontFamily: 'font1'}} title="See Friendship" type="clear"/>
-
-//                 </View>
-//                 <Text style={{fontSize: 20, fontFamily: 'font1', marginTop: 20}}>Suggested Friends</Text>
-//             </View>      
-//       </Overlay>
-//   </TouchableOpacity>
-
-// </ImageBackground>   
-
-// <Overlay isVisible={this.state.reply} overlayStyle={{position: 'absolute', bottom: 0, width: width, height: 200}} onBackdropPress={() => this.closeOverlay()}>
-            
-
-//                 <KeyboardAvoidingView
-//       behavior={Platform.OS == "ios" ? "padding" : "height"}
-//       style={styles.container}
-//     >
-//       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-//         <View style={styles.inner}>
-//           <Text style={styles.header}>Header</Text>
-//           <Input 
-//                     label="Reply"
-//                     returnKeyType="next"
-//                     textContentType="name"
-//                     value={this.state.replyText}
-//                     onChangeText={replyText => this.setState({ replyText })}
-//                 />
-//           <View style={styles.btnContainer}>
-//             <Button title="Send" onPress={() => this.sendReply()}/>
-//           </View>
-//         </View>
-//       </TouchableWithoutFeedback>
-//     </KeyboardAvoidingView>
-//                 </Overlay> 
-//                 </SafeAreaView>
-// </TouchableOpacity>
-<View style={{flex: 1, width: width, height: height}}>
+ 
+return(
+<TouchableOpacity style={{flex: 1, width: width, height: height}} onPress={() => this.props.press()}>
 <Progress.Bar progress={this.props.startProgress === true ? this.state.progress: 0} indeterminate={false}/>
 <Image
                   source={{uri: this.props.image}}
                   style={{height: '100%', width: width}}
                 />
-      </View>
-    )
+      </TouchableOpacity>
+)
+    
 }
 }
 

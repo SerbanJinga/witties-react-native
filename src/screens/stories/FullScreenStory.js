@@ -36,6 +36,7 @@ import ViewPager from '@react-native-community/viewpager'
 import FullScreenSignleStory from "./FullScreenSingleStory";
 import FullScreenSignleStoryVideo from './FullScreenSingleStoryVideo'
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures'
+import { Video } from "expo-av";
 // import Swiper from 'react-native-p';
 let t
 
@@ -59,10 +60,13 @@ class FullScreenStorty extends React.Component {
       dynamicIndex: 0,
       index: 0,
       selectedIndex: 0,
-      progressStory: 0
+      progressStory: 0,
+      duration: 2000
 
 
     }
+
+    this.renderVideo = this.renderVideo.bind(this)
 
 
 
@@ -113,6 +117,7 @@ class FullScreenStorty extends React.Component {
 
 
   setSelectedIndex = event => {
+    
     const viewSize = event.nativeEvent.layoutMeasurement.width
     const contentOffset = event.nativeEvent.contentOffset.x
 
@@ -120,6 +125,34 @@ class FullScreenStorty extends React.Component {
     this.setState({ selectedIndex })
   }
 
+
+
+
+  renderVideo = (element, index) => {
+    clearInterval(t)
+    t = setInterval(() => {
+      if (this.state.selectedIndex === this.state.allStories.length - 1) {
+        this.props.navigation.navigate('Home')
+      }
+      this.setState(prev => ({ selectedIndex: prev.selectedIndex + 1 }),
+        () => {
+          this.scrollRef.current.scrollTo({
+            animated: true,
+            y: 0,
+            x: width * this.state.selectedIndex
+          })
+        })
+    }, element.duration + 150)
+
+    return(
+      <Video source={{uri: element.video}} volume={1.0} rate={1.0} isMuted={false} shouldPlay={index === this.state.selectedIndex ? true : false} style={{width: width, height: height}}/>
+
+    )
+  }
+
+  pressImage = () => {
+    clearInterval(t)
+  }
   render() {
     // const { selectedIndex } = this.state
 
@@ -127,8 +160,11 @@ class FullScreenStorty extends React.Component {
       // <View style={{height: "100%", width: "100%"}}>
       <ScrollView ref={this.scrollRef} horizontal pagingEnabled onMomentumScrollEnd={this.setSelectedIndex} style={{ height: height, width: width, flex: 1 }}>
         {this.state.allStories.map((element, index) => (
-          <FullScreenSignleStory key={element.timestamp} startProgress={index === this.state.selectedIndex ? true : false} image={element.image} />
 
+          (typeof element.video === 'undefined' ?  (          <FullScreenSignleStory press={() => this.pressImage()} key={element.timestamp} startProgress={index === this.state.selectedIndex ? true : false} image={element.image} />
+):(
+  this.renderVideo(element, index)
+))
         ))}
       </ScrollView>
 
@@ -260,3 +296,5 @@ const styles = StyleSheet.create({
 
 
 export default withNavigation(FullScreenStorty)
+
+            {/* <FullScreenSignleStoryVideo video={element.video} key={element.timestamp} duration={element.duration}/> */}

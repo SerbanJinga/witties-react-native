@@ -16,6 +16,7 @@ class Room extends Component {
             fontsLoaded: false,
             openChangeImage: false,
             cameraOverlay: false,
+            lastMessage: ""
         }
     }
 
@@ -26,6 +27,13 @@ class Room extends Component {
         })
         this.setState({
             fontsLoaded: true
+        })
+
+        firebase.firestore().collection('messages').doc(this.props.roomId).collection('chats').orderBy('timestamp', 'desc').onSnapshot((doc) => {
+          let lastMessage = doc.docs.map(doc => doc.data().msg)
+          this.setState({
+            lastMessage: lastMessage[0]
+          })
         })
     }
 
@@ -164,8 +172,10 @@ class Room extends Component {
                         <View style={{flex: 1, padding: 6}}>
                 <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
                     <Avatar containerStyle={{borderWidth: 3, borderColor: '#f6b93b'}} onPress={() => this.props.navigation.navigate('StreakVideoAvatar', { roomId: this.props.roomId})} size={48} rounded source={{uri: this.props.profilePicture}}/>
-                    <View style={{flex: 1, flexDirection: 'column',}}>
-                    <Text style={{marginLeft: 10, fontFamily: 'font1', fontSize: 18}}>{this.props.chatRoomName}</Text>
+                    <View style={{flex: 1, flexDirection: 'column', marginLeft: 10}}>
+                    
+                    <Text style={{ fontFamily: 'font1', fontSize: 18}}>{this.props.chatRoomName}</Text>
+                    <Text>{this.state.lastMessage}</Text>
                     </View>
                     <TouchableOpacity onPress={() => this.openCamera(this.props.roomId)}>
                     <AntDesign

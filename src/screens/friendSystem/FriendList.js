@@ -94,7 +94,7 @@ let roomArrId = []
         this.setState({
             nextOverlay: false
         })
-        this.props.navigation.goBack(null)
+        this.props.navigation.navigate('Home')
     }
 
     createChatRoom = () => {

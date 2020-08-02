@@ -116,64 +116,11 @@ getDisplayName = async() => {
   }
 render(){
     return(
- <View style={[styles.row, { justifyContent: 'space-between' }]}>
-      
-        <TouchableOpacity onPress={() => this.openOverlay()}>
- <Video source={{uri: this.props.video}} resizeMode="cover" style={{ width: width, height: height }} shouldPlay isMuted={true} rate={1.0} volume={1.0} isLooping={false}/>
- 
-
- 
-    <View style={[styles.row, { flex: 1, position: 'absolute', top: 0 }]}>
-    <View style={{flex: 0}}>
-      <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
-    </View>
-
     
-    <View style={[styles.column, { flex: 2, paddingHorizontal: theme.sizes.padding / 2, marginTop: 10 }]}>
-      <Text style={{ color: theme.colors.white, fontWeight: 'bold' }}>{this.state.displayName}</Text>
-      <Text style={{ color: theme.colors.white }}>
-        <Octicons
-          name="smiley"
-          size={theme.sizes.font * 0.8}
-          color={theme.colors.white}
-        />
-        <Text> {this.props.mood}</Text>
-        <TouchableOpacity onPress={() => this.props.close()}>
-            <AntDesign name="arrowleft" size={20} color="white"/>
-          </TouchableOpacity>
-      </Text>
-    </View>
-    </View>
-
-            
-    
-<Overlay isVisible={this.state.reply} overlayStyle={{position: 'absolute', bottom: 0, width: width, height: 200}} onBackdropPress={() => this.closeOverlay()}>
-            
-
-                <KeyboardAvoidingView
-      behavior={Platform.OS == "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inner}>
-          <Text style={styles.header}>Header</Text>
-          <Input 
-                    label="Reply"
-                    returnKeyType="next"
-                    textContentType="name"
-                    value={this.state.replyText}
-                    onChangeText={replyText => this.setState({ replyText })}
-                />
-          <View style={styles.btnContainer}>
-            <Button title="Send" onPress={() => this.sendReply()}/>
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-                </Overlay> 
-</TouchableOpacity>
-    </View>
-
+<View style={{flex: 1, width: width, height: height}}>
+<Progress.Bar progress={this.props.startProgress === true ? this.state.progress: 0} indeterminate={false}/>
+      <Video style={{width: width, height: '100%'}} source={{uri: this.props.video}} />
+      </View>
     )
 }
 }

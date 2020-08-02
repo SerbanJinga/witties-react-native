@@ -765,7 +765,6 @@ console.log('DATELE', this.props.data)
                 </Overlay>
             <StoriesPublic stories={this.props.stories}/>
                 
-                {/* <Timeline/> */}
             </View>)
             }else{
                 return (<View style={{flex: 1, width: width, height: height, alignItems: 'center', justifyContent: 'center'}}>

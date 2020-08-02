@@ -27,7 +27,8 @@ export default class LoadingScreen extends Component {
         
         firebase.auth().onAuthStateChanged(async user => {
             if(user){
-                await this.retrieveDataFromFriends()
+                this.props.navigation.navigate('Home')
+                // await this.retrieveDataFromFriends()
                 }else{
                 this.props.navigation.navigate('SignUp')
             }

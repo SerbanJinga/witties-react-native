@@ -23,15 +23,14 @@ export default class MessageComponent extends Component {
         }
     }
 
+    pad = (val) => {
+        return (val < 10) ? '0' + val : val
+    }
     
   _renderTimestamps = (timestamp) => {
-    let date = new Date(timestamp * 1000)
-    let hours = date.getHours()
-    let minutes = "0" + date.getMinutes()
-    let seconds = "0" + date.getSeconds()
-
-    let formattedTime = hours + ":" + minutes.substr(-2)
-    return formattedTime
+    let hours = new Date(timestamp).getHours()
+    let minutes = new Date(timestamp).getMinutes()
+    return this.pad(hours) + ':' + this.pad(minutes)
   } 
 
   _renderName = async () => {
