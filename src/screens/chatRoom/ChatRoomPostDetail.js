@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { StyleSheet, Image } from 'react-native'
+import { StyleSheet, Image, Dimensions } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { SharedElement } from 'react-native-shared-element'
+const { width, height } = Dimensions.get('screen')
 class ChatRoomPostDetail extends Component {
    
     constructor(props){
@@ -21,7 +22,7 @@ class ChatRoomPostDetail extends Component {
         return(
             // <View style={{flex: 1, alignItems: 'center', width: '100%', height: '100%'}}>
             <SharedElement id={this.state.timestamp} style={StyleSheet.absoluteFill}>
-                <Image source={{uri: this.state.image}} style={{width: '100%', height: '100%'}}/>
+                <Image source={{uri: this.state.image}} style={{width: width, height: height, resizeMode: 'contain'}}/>
             </SharedElement>
             // </View>
             )

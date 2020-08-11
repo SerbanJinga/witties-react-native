@@ -30,6 +30,7 @@ const { width, height } = Dimensions.get('window')
 const screenWidth = Dimensions.get('screen').width
 const screenHeight = Dimensions.get('screen').height
 
+import * as ImageManipulator from 'expo-image-manipulator'
 
 let lastTap = null
 //Tudor
@@ -271,6 +272,20 @@ class CameraScreen extends Component {
 
 
   }
+
+  _rotateAndFlip = async (uri) => {
+    const mainResult = await ImageManipulator.manipulateAsync(
+      uri, [{ rotate: 0 }, { flip: ImageManipulator.FlipType.Vertical }],
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+    )
+    this.setState({
+      pictureTaken: mainResult.uri
+    })
+
+
+    console.log(this.state.pictureTaken)
+  }
+
   //Tudor
   handleCaptureIn = () => {
     this.setState({ capturing: true })
@@ -288,7 +303,18 @@ class CameraScreen extends Component {
   handleShortCapture = async () => {
     console.log("picture")
     const photoData = await this.camera.takePictureAsync();
-    this.setState({ pictureTaken: photoData.uri, capturing: false, captures: [photoData, ...this.state.captures], showPhoto: true })
+    if(this.state.type === Camera.Constants.Type.front){
+      const result = await ImageManipulator.manipulateAsync(
+        photoData.uri, [{ rotate: 0 }, { flip: ImageManipulator.FlipType.Horizontal }],
+        { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+      )
+      this.setState({ pictureTaken: result.uri, capturing: false, captures: [result, ...this.state.captures], showPhoto: true })
+
+
+    }else{
+      this.setState({ pictureTaken: photoData.uri, capturing: false, captures: [photoData, ...this.state.captures], showPhoto: true })
+
+    }
   };
 
   handleLongCapture = async () => {

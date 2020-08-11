@@ -115,7 +115,7 @@ class SignUp extends Component {
         })
 
         console.log(this.state.displayName)
-        this.calculateDiscrim(this.state.displayName).then(this.props.navigation.navigate('Home'))
+        this.calculateDiscrim(this.state.displayName).then(this.props.navigation.navigate('ChooseProfilePicture'))
     }
 
 

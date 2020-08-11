@@ -378,7 +378,7 @@ export default class ActivityPopup extends React.Component {
             <View style={{ marginTop: 40, width: width * 0.8, height: height }}>{/*aici scriu tot*/}
 
                 <Input
-                    placeholder={"cum te simti azi " + this.state.nameOfUser + '?'}
+                    placeholder={"How are you feeling, " + this.state.nameOfUser + '?'}
                     placeholderTextColor="#B1B1B1"
                     returnKeyType="done"
                     textContentType="newPassword"

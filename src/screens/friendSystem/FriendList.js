@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, Button } from 'react-native'
+import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity } from 'react-native'
 import { Text, Divider, CheckBox, Input, Overlay, Avatar } from 'react-native-elements'
 import firebase from 'firebase'
-import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
+import { FlatList,  } from 'react-native-gesture-handler'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
@@ -12,6 +12,7 @@ const { width, height } = Dimensions.get('window')
 import { withNavigation } from 'react-navigation';
 import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
+import Toast, { DURATION } from 'react-native-easy-toast'
 
 
 let arr = []
@@ -84,7 +85,8 @@ let roomArrId = []
             usersParticipating: this.state.chatRoomIds,
             messages: [],
             roomId: uid,
-            chatRoomName: this.state.groupName
+            chatRoomName: this.state.groupName,
+            profilePicture: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Group_font_awesome.svg/480px-Group_font_awesome.svg.png"
         }).then(this.uploadToStorage(uid))
         this.state.chatRoomIds.forEach(id => {
             firebase.firestore().collection("users").doc(id).update({
@@ -98,7 +100,10 @@ let roomArrId = []
     }
 
     createChatRoom = () => {
-        
+        if(this.state.chatRoomIds.length === 1){
+            this.refs.error.show('You have not selected at least one friend!')
+            return
+        }
         this.setState({
             nextOverlay: true
         })
@@ -207,7 +212,7 @@ let roomArrId = []
     render(){
         return(
             <SafeAreaView style={{flex: 1, flexDirection: 'column'}}>
-                <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                <SafeAreaView style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20}}>
                 <TouchableOpacity
                         onPress={()=> this.props.close()}
                                 style={{
@@ -222,12 +227,14 @@ let roomArrId = []
                             />
                             </TouchableOpacity>
                             <TouchableOpacity onPress={this.createChatRoom}>
-                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 4}}>Next</Text>
+                            <Text style={{fontSize: 18, fontFamily: 'font1', marginLeft: 4, opacity: 20}}>Next</Text>
                             </TouchableOpacity>
-                </View>
+                </SafeAreaView>
                 
             
                 <View style={styles.container}>
+                {this.state.documentData.length === 0 ? <Text onPress={() => {this.props.close()
+                this.props.addFriends()}} style={{marginTop: 40, fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>You currently have no Friends. Add More!</Text> : 
                 <FlatList
                  data = {this.state.documentData}
                     renderItem={({item}) => (
@@ -239,8 +246,17 @@ let roomArrId = []
                 onEndReached={this.retrieveMore}
                 onEndReachedThreshold={0}
                 refreshing={this.state.refreshing}
-                />
+                />}
             </View>
+            <Toast 
+                        ref="error"
+                        style={{backgroundColor: '#282828'}}
+                        textStyle={{color: '#fff'}}
+                        position='bottom'
+                        opacity={0.8}
+                        fadeInDuration={750}
+                    /> 
+
             <Overlay overlayStyle={{width: width, height: height}} animationType="fade" isVisible={this.state.nextOverlay}>
                     <View style={{flex: 1, flexDirection: 'column'}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>

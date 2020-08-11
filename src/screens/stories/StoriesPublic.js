@@ -205,7 +205,7 @@ class StoriesPublic extends Component {
     if (this.state.fontsLoaded) {
       return (
         <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl tintColor="red" onRefresh={() => this.onRefresh()} refreshing={this.state.refreshing} />}>
-          <Text style={{ fontFamily: 'font1', fontSize: 24, margin: 10 }}>News</Text>
+          {/* <Text style={{ fontFamily: 'font1', fontSize: 24, margin: 10 }}>News</Text>
 
           <SafeAreaView style={styles.container} >
             {1 !== 0 ?
@@ -231,7 +231,7 @@ class StoriesPublic extends Component {
                 refreshing={this.state.refreshing}
               /> : <Text style={{ fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center' }}>You currently have no stories to see.</Text>
             }
-          </SafeAreaView>
+          </SafeAreaView> */}
 
           <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ fontFamily: 'font1', fontSize: 24, margin: 10 }}>Messages</Text>
@@ -239,12 +239,12 @@ class StoriesPublic extends Component {
           </View>
 
 
-          {/* <ChatRoomsList /> */}
+          <ChatRoomsList/>
           {/* <Button onPress={() => this.props.navigation.navigate('TestAnimation', {transition: 'bottomTransition'})} title="Navigate"/> */}
           {/* <StreakVideo/> */}
           <Overlay isVisible={this.state.chat} onBackdropPress={() => this.closeNewChatOverlay()} fullScreen animationType="slide">
             <SafeAreaView style={{ flex: 1 }}>
-              <FriendList close={() => this.closeNewChatOverlay()} />
+              <FriendList close={() => this.closeNewChatOverlay()} addFriends={() => this.props.openFriends()}/>
             </SafeAreaView>
           </Overlay>
         </ScrollView>

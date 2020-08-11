@@ -33,7 +33,8 @@ class ChatRoomsList extends Component {
             filteredData: [],
             filter: false,
             index: null,
-            filterBy: ""
+            filterBy: "",
+            type: 2
         }
         this.mama = this.mama.bind(this)
         this.tata = this.tata.bind(this)
@@ -205,7 +206,7 @@ class ChatRoomsList extends Component {
 
         if (this.state.type !== 0) {
             return (
-                <SafeAreaView>
+                <View>
                 <ScrollView style={{flex: 1}}>
                 <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
     backgroundColor:"#fff",
@@ -215,7 +216,8 @@ class ChatRoomsList extends Component {
     borderRightColor: '#ecedef',
     borderWidth: 1,
     borderRadius: 10,
-    margin: 10,
+    marginHorizontal: 10,
+    marginBottom: 10
 }}  inputContainerStyle={{backgroundColor: '#fff', height: 30}} 
     value={this.state.searchChats}
     onChangeText={this.searchChats}
@@ -236,7 +238,7 @@ class ChatRoomsList extends Component {
                         refreshing={this.state.refreshing}
                     />:  <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>You have no active chats.</Text>}
            </ScrollView>
-                </SafeAreaView>
+                </View>
             )
         } else {
             return (<View>

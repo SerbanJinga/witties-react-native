@@ -60,12 +60,12 @@ class ChatRoom extends Component {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [4, 3]
+            aspect: [9, 16],
         })
 
         if (!result.cancelled) {
 
-            this.props.navigation.navigate('SendPhoto', { photo: result.uri, width: result.width, height: result.height, chatRoomPhoto: this.state.profilePicture, chatRoomId: this.state.roomId })
+            this.props.navigation.navigate('SendPhoto', { photo: result.uri, width: result.width, height: result.height, chatRoomPhoto: this.state.profilePicture, chatRoomName: this.state.roomName, chatRoomId: this.state.roomId })
         }
     }
 
@@ -118,7 +118,33 @@ class ChatRoom extends Component {
             msg: msg,
             sender: firebase.auth().currentUser.uid
         })
+
+        this.state.userData.forEach(user => this.sendNotifications(user.tokens, user.displayName,this.state.roomName , newMessage.msg))
+        
     }
+
+    sendNotifications = async(token, uid, user, messageSent) => {
+        const message = {
+            to: token,
+            sound: 'default',
+            title: user,
+            body: uid + " : " +  messageSent,
+            data: {data: 'goes here'},
+            _displayInForeground: true
+        }
+
+        
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      });
+    }
+
     _renderTimestamps = (timestamp) => {
         let date = new Date(timestamp * 1000)
         let day = date.getDay()
@@ -134,7 +160,7 @@ class ChatRoom extends Component {
         userDataArray = []
         await this.retrieveData()
 
-        // await this.retrieveParticipants()
+        await this.retrieveParticipants()
 
     }
 
@@ -167,6 +193,7 @@ class ChatRoom extends Component {
         let userSnapshot = await userQuery.get()
         let userData = userSnapshot.data()
         userDataArray.push(userData)
+       userDataArray = userDataArray.filter(element => element.uid !== firebase.auth().currentUser.uid)
         this.setState({
             userData: userDataArray
         })

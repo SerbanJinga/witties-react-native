@@ -51,14 +51,9 @@ export default class MessageComponent extends Component {
         })
 
         await this._renderName()
-        console.log(this.state.sender)
-        console.log("-----------------------------------------")
-        console.log(this.state.date)
-        console.log("-----------------------------------------")
         let theDate = new Date(this.state.date + 3 * 3600000);
         let dateString = theDate.toGMTString();
         this.setState({ translatedDate: dateString })
-        console.log("Data este", dateString)
         if (this.state.sender == firebase.auth().currentUser.uid)
             this.setState({
                 marginLeft: 50,
@@ -77,13 +72,16 @@ export default class MessageComponent extends Component {
         return (
             // <View style={{flex: 1, wid}}
             <TouchableOpacity style={{width: width}}>
-            <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]}>
-                {/* <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]} */}
-                <Text style={{fontFamily: 'font1', lineHeight: 20}}>{this.state.displayName} a trimis: </Text>
-                
-                <Text style={{fontFamily: 'font1'}}>{this.state.msg}</Text>
 
-                <Text style={{fontFamily: 'font2', marginLeft: 20}}>{this._renderTimestamps(this.state.date)}</Text>
+            <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]}>
+                <View>
+                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', padding: 5}}>
+                <Text style={{fontFamily: 'font1', fontSize: 15}}>{firebase.auth().currentUser.uid === this.state.sender ? "me" :  this.state.displayName}</Text>
+                <Text style={{fontFamily: 'font1', marginLeft: 20}}>{this._renderTimestamps(this.state.date)}</Text>
+
+                </View>
+                <Text style={{fontFamily: 'font2'}}>{this.state.msg}</Text>
+</View>
         </View>
         </TouchableOpacity>
         )

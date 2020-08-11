@@ -8,6 +8,7 @@ import { Notifications } from 'expo'
 import CameraScreen from '../screens/camera/Camera'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { withNavigation } from 'react-navigation'
+import Timeline from './Timeline/Timeline'
 
  class Home extends Component {
 
@@ -100,7 +101,7 @@ import { withNavigation } from 'react-navigation'
                       </SafeAreaView>
                     </Swiper>        
                     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                      {/* <ActivityPopup/> */}
+                      <Timeline/>
                     </SafeAreaView>
        </Swiper>
 </View>

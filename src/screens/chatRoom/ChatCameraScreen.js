@@ -372,7 +372,7 @@ renderCamera = () => {
 openSendToVideo = async () => {
     let foo = {
         mood: "test mood",
-        text: "test text",
+        msg: "test text",
         taggedUsers: "test users",
         activity: "test activity",
         //AICI SCHIMB 
@@ -391,7 +391,7 @@ openSendToVideo = async () => {
 openSendTo = async () => {
     let foo = {
         mood: "test mood",
-        text: "test text",
+        msg: "test text",
         taggedUsers: "test users",
         activity: "test activity",
         //AICI SCHIMB 

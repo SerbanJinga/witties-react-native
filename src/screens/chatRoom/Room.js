@@ -16,9 +16,22 @@ class Room extends Component {
             fontsLoaded: false,
             openChangeImage: false,
             cameraOverlay: false,
-            lastMessage: ""
+            lastMessage: "",
+            hasStreakVideo: true
         }
     }
+
+    hasStreakVideoFunction = async() => {
+      let query = await firebase.firestore().collection('messages').doc(this.props.roomId).get()
+      let data = await query.data().streakVideo
+      if(typeof data === 'undefined'){
+        this.setState({
+          hasStreakVideo: false
+        })
+      }
+    }
+
+
 
     componentDidMount = async() =>{
         await Font.loadAsync({
@@ -29,10 +42,14 @@ class Room extends Component {
             fontsLoaded: true
         })
 
+        await this.hasStreakVideoFunction()
+
         firebase.firestore().collection('messages').doc(this.props.roomId).collection('chats').orderBy('timestamp', 'desc').onSnapshot((doc) => {
+          
           let lastMessage = doc.docs.map(doc => doc.data().msg)
+          
           this.setState({
-            lastMessage: lastMessage[0]
+            lastMessage: lastMessage[0].length <= 20 ? lastMessage[0] : lastMessage[0].slice(0, 60) + "..."
           })
         })
     }
@@ -171,7 +188,7 @@ class Room extends Component {
             <TouchableOpacity style={{padding: 0}} onPress={() => this.props.press()}>
                         <View style={{flex: 1, padding: 6}}>
                 <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
-                    <Avatar containerStyle={{borderWidth: 3, borderColor: '#f6b93b'}} onPress={() => this.props.navigation.navigate('StreakVideoAvatar', { roomId: this.props.roomId})} size={48} rounded source={{uri: this.props.profilePicture}}/>
+                    <Avatar containerStyle={{borderWidth: 3, borderColor: this.state.hasStreakVideo === true ?  '#f6b93b' : '#fff'}} onPress={() => this.props.navigation.navigate('StreakVideoAvatar', { roomId: this.props.roomId})} size={48} rounded source={{uri: this.props.profilePicture}}/>
                     <View style={{flex: 1, flexDirection: 'column', marginLeft: 10}}>
                     
                     <Text style={{ fontFamily: 'font1', fontSize: 18}}>{this.props.chatRoomName}</Text>

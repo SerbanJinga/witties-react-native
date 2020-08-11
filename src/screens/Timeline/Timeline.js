@@ -22,7 +22,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import * as theme from '../../styles/theme'
 import SwipeablePanel from 'rn-swipeable-panel';
 import Status from "../../components/Status"
-import { AntDesign } from '@expo/vector-icons'
+import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 const { width, height } = Dimensions.get('window')
 import ActivitySelect from '../ActivityPop/ActivitySelect'
 import firebase from 'firebase';
@@ -54,19 +54,37 @@ class Timeline extends React.Component {
             //Filtering
             albumOverlay: false,
             albumData: [],
-            activityOverlay:false,
-            activityData:[],
+            activityOverlay: false,
+            activityData: [],
             moodOverlay: false,
             moodData: [],
             peopleOverlay: false,
             peopleData: [],
             clearFilter: false,
+            userName: "",
+            albumOptions: false,
+            newAlbumText: '',
+            activitiesOptions: false,
+            newActivityText: '',
+            mood: ''
         }
         this.closeSwipablePanel = this.closeSwipablePanel.bind(this)
         this.renderOverlay = this.renderOverlay.bind(this)
         this.albumSelection = this.albumSelection.bind(this)
         this.peopleSelection = this.peopleSelection.bind(this)
         this.filterActivity = this.filterActivity.bind(this)
+    }
+
+    addActivities = () => {
+        this.setState({
+            activitiesOptions: true
+        })
+    }
+
+    closeAddActivities = () => {
+        this.setState({
+            activitiesOptions: false
+        })
     }
     componentDidMount() {
         console.log("De aici vine", this.state.displayName)
@@ -85,13 +103,20 @@ class Timeline extends React.Component {
             <Divider />
         </View>)
     }
+
+    filterByMood = async() => {
+        let initialQuery = await firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').where('mood', '==', this.state.mood).get()
+        let data = initialQuery.docs.map(doc => doc.data())
+        this.setState({ documentData: data, clearFilter: true, openFilter: false })
+
+    }
     //-------------------------------------------------Filtering------------------------------------------------------
-    search = (searchText) => {
+    search = async(searchText) => {
         this.setState({ searchText: searchText })
-        let filteredData = this.state.documentDataFriends.filter(function (item) {
-            return item.displayName.toLowerCase().includes(searchText)
-        })
-        this.setState({ filteredData: filteredData })
+        let query = await firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').where('text', '>=', searchText).get()
+        let documentData = query.docs.map(doc => doc.data())
+        console.log(documentData)
+        this.setState({ filteredData: documentData })
     }
 
 
@@ -111,11 +136,18 @@ class Timeline extends React.Component {
     //     })
     // }
     async filterAlbum() {
-        let initialQuery = await firebase.firestore().collection("users").where("uid", "==", firebase.auth().currentUser.uid)
-        let documentSnapshots = await initialQuery.get()
-        let documentData = documentSnapshots.docs.map(doc => doc.data())
-        let bagPl = documentData[0].albums
-        this.setState({ albumData: bagPl, albumOverlay: true })
+        // let initialQuery = await firebase.firestore().collection("users").where("uid", "==", firebase.auth().currentUser.uid)
+        // let documentSnapshots = await initialQuery.get()
+        // let documentData = documentSnapshots.docs.map(doc => doc.data())
+        // let bagPl = documentData[0].albums
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).onSnapshot((doc) => {
+            let documentData = doc.data().albums
+            this.setState({
+                albumData: documentData,
+                
+            })
+        })
+        this.setState({ albumOverlay: true })
     }
 
     async peopleSelection(ceva) {
@@ -147,7 +179,7 @@ class Timeline extends React.Component {
 
     }
     async filterPeople() {
-        arr=[]
+        arr = []
         let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
         let documentSnapshots = await initialQuery.get()
         let documentData = await documentSnapshots.data().friends
@@ -156,7 +188,7 @@ class Timeline extends React.Component {
     }
 
     retrievePeople = async (uid) => {
-        
+
         let initialQuery = await firebase.firestore().collection("users").doc(uid)
         let documentSnapshots = await initialQuery.get()
         let documentData = documentSnapshots.data()
@@ -170,17 +202,24 @@ class Timeline extends React.Component {
         })
     }
     retrieveActivities = async () => {
-        
+
         let initialQuery = await firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid)
         let documentSnapshots = await initialQuery.get()
         let documentData = documentSnapshots.data().customActivities
-       // arr.push(documentData)
+        // arr.push(documentData)
         // arr.sort((a, b) => {
         //     return a.displayName > b.displayName
         // })
-        console.log(documentData)
+
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).onSnapshot((doc) => {
+            let documentData = doc.data().customActivities
+            this.setState({
+                activityData: documentData,
+                
+            })
+        })     
         this.setState({
-            activityData: documentData, activityOverlay: true,
+            activityOverlay: true,
             // clearFilter:true,openFilter:false,
         })
     }
@@ -223,7 +262,7 @@ class Timeline extends React.Component {
         console.log("array ul de albume trb sa fie egal cu", sos)
         this.setState({ documentData: sos, clearFilter: true, openFilter: false })
 
-        
+
     }
 
 
@@ -250,16 +289,40 @@ class Timeline extends React.Component {
     openFilter = () => {
         this.setState({
             openFilter: true,
-            peopleOverlay:false,
-            activityOverlay:false,
-            albumOverlay:false,
-            moodOverlay:false,
+            peopleOverlay: false,
+            activityOverlay: false,
+            albumOverlay: false,
+            moodOverlay: false,
         })
     }
 
     closeFilter = () => {
         this.setState({
             openFilter: false
+        })
+    }
+
+    openAlbumOptionsOverlay = () => {
+        this.setState({
+            albumOptions: true
+        })
+    }
+
+    closeAlbumOptionsOverlay = () => {
+        this.setState({
+            albumOptions: false
+        })
+    }
+
+    createNewAlbum = async() => {
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            albums: firebase.firestore.FieldValue.arrayUnion(this.state.newAlbumText)
+        })
+    }
+
+    createNewActivity = async() => {
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            customActivities: firebase.firestore.FieldValue.arrayUnion(this.state.newActivityText)
         })
     }
 
@@ -272,6 +335,12 @@ class Timeline extends React.Component {
         for (let i = 0; i < idMap.length; i++) {
             documentData[i].id = idMap[i]
         }
+
+        let query = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+        let data = await query.data().displayName
+        this.setState({
+            userName: data
+        })
         this.setState({ documentData: documentData })
     }
 
@@ -300,17 +369,36 @@ class Timeline extends React.Component {
                 this.retrieveData()
                 this.setState({ clearFilter: false })
             }} /> : null}
-            <Overlay isVisible={this.state.showAct}
+            <Overlay fullScreen isVisible={this.state.showAct}
 
 
                 onBackdropPress={() => { this.setState({ showAct: false }) }}
                 // showCloseButton
-                overlayStyle={{ position: "absolute", bottom: 0, width: width, top: 40 }}
-                animationType='fade'
+                // overlayStyle={{ position: "absolute", bottom: 0, width: width, top: 40 }}
+                animationType='slide'
                 transparent
 
             >
-                <ActivityPopup papa={this.closeSwipablePanel} />
+
+                <SafeAreaView style={{ flex: 1 }}>
+                    <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                        <TouchableOpacity onPress={() => this.setState({ showAct: false })}>
+                            <AntDesign
+                                size={26}
+                                name="down"
+                                color="#b2b8c2"
+                            />
+                        </TouchableOpacity>
+                        <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Add Post</Text>
+                        <AntDesign
+                            size={26}
+                            name="bars"
+                            color="#b2b8c2"
+                        />
+                    </View>
+
+                    <ActivityPopup name={this.state.userName} papa={this.closeSwipablePanel} />
+                </SafeAreaView>
             </Overlay>
 
             <Overlay isVisible={this.state.showOverlay}
@@ -334,7 +422,7 @@ class Timeline extends React.Component {
                     // decelerationRate={0}
 
 
-                    data={this.state.documentData}
+                    data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                     renderItem={({ item, index }) => (
 
                         <TimelinePost
@@ -348,7 +436,7 @@ class Timeline extends React.Component {
                             showOverlay={this.renderOverlay}
                             id={item.id}
 
-                        // press={() => this.onPress(item)}
+                            press={() => this.props.navigation.navigate('TimelinePostDetail', { imageUri: item.image })}
 
                         />
 
@@ -371,15 +459,15 @@ class Timeline extends React.Component {
 
             </View>
             <TouchableOpacity style={{
-                flex: 1,
+                // flex: 1,
                 position: 'absolute',
                 alignItems: "center",
+                justifyContent: 'center',
                 right: 30,
                 bottom: 30,
-                opacity: (this.state.showAct) ? 0 : 1,
                 borderRadius: 60
             }} onPress={() => { this.setState({ showAct: true }) }}>
-                <Ionicons size={60} name={"ios-add"} style={[{ color: theme.colors.white, backgroundColor: theme.colors.blue, paddingHorizontal: 15, }]} />
+                <MaterialIcons name="add-circle" size={60} color={theme.colors.blue} />
             </TouchableOpacity>
             <Overlay isVisible={this.state.openFilter} fullScreen animationType="slide">
                 {/* zr */}
@@ -400,151 +488,312 @@ class Timeline extends React.Component {
                         </TouchableOpacity>
                         <Text style={{ fontSize: 18, fontFamily: 'font1', marginLeft: 4 }}>Filter Search</Text>
                     </View>
-                    <TouchableOpacity onPress={() => this.filterAlbum()} style={{ marginBottom: 10, marginTop: 20 }}>
+                    <TouchableOpacity onPress={async () => await this.filterAlbum()} style={{ marginBottom: 10, marginTop: 20 }}>
                         <Text style={{ fontFamily: 'font1', fontSize: 14 }}>Album</Text>
                     </TouchableOpacity>
-                    {(this.state.albumOverlay) ? (<ScrollView>
-                        <FlatList
-                            data={this.state.albumData}
-                            renderItem={({ item }) => (
+
+                    <Overlay animationType="slide" isVisible={this.state.albumOverlay} fullScreen>
+                        <SafeAreaView style={{ flex: 1 }}>
+                            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                                <TouchableOpacity onPress={() => this.setState({ albumOverlay: false })}>
+                                    <AntDesign
+                                        size={26}
+                                        name="down"
+                                        color="#b2b8c2"
+                                    />
+                                </TouchableOpacity>
+                                <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Albums</Text>
+                                <TouchableOpacity onPress={() => this.openAlbumOptionsOverlay()}>
+                                    <AntDesign
+                                        size={26}
+                                        name="plus"
+                                        color="#b2b8c2"
+                                    />
+                                </TouchableOpacity>
+
+                            </View>
+
+                            <Overlay fullScreen animationType="slide" onBackdropPress={() => this.closeAlbumOptionsOverlay()} isVisible={this.state.albumOptions}>
+                                <SafeAreaView style={{ flex: 1 }}>
+                                    <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                                        <TouchableOpacity onPress={() => this.closeAlbumOptionsOverlay()}>
+                                            <AntDesign
+                                                size={26}
+                                                name="down"
+                                                color="#b2b8c2"
+                                            />
+                                        </TouchableOpacity>
+                                        <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Add Albums</Text>
+                                        <TouchableOpacity onPress={() => this.openAlbumOptionsOverlay()}>
+                                            <AntDesign
+                                                size={26}
+                                                name="plus"
+                                                color="#b2b8c2"
+                                            />
+                                        </TouchableOpacity>
+
+                                    </View>
+
+                                    <Input
+                                        placeholder="Add Album..."
+                                        placeholderTextColor="#B1B1B1"
+                                        returnKeyType="done"
+                                        containerStyle={{ marginBottom: 0, paddingBottom: 0 }}
+                                        value={this.state.newAlbumText}
+                                        onChangeText={newAlbumText => this.setState({ newAlbumText })}
+                                    />
+
+                                    <TouchableOpacity style={{alignSelf: 'center'}} onPress={() => this.createNewAlbum()}>
+                                        <Text style={{fontFamily: 'font1', color: theme.colors.blue, fontSize: 16}}>Add Album</Text>
+                                    </TouchableOpacity>
+                                </SafeAreaView>
+
+                            </Overlay>
+                            <FlatList
+                                data={this.state.albumData}
+                                renderItem={({ item }) => (
 
 
-                                <ActivitySelect mama={this.albumSelection} name={item}/>
-                            )}
-                            keyExtractor={(item, index) => String(index)}
+                                    <ActivitySelect mama={this.albumSelection} name={item} />
+                                )}
+                                keyExtractor={(item, index) => String(index)}
 
-                            onEndReached={this.retrieveMore}
-                            onEndReachedThreshold={0}
-                            refreshing={this.state.refreshing}
-                        />
+                                onEndReached={this.retrieveMore}
+                                onEndReachedThreshold={0}
+                                refreshing={this.state.refreshing}
+                            />
 
-                    </ScrollView>) : null}
+                        </SafeAreaView>
+                    </Overlay>
+
                     <Divider />
-                    <TouchableOpacity onPress={() => this.setState({moodOverlay:true})} style={{ marginVertical: 10 }}>
+                    <TouchableOpacity onPress={() => this.setState({ moodOverlay: true })} style={{ marginVertical: 10 }}>
                         <Text style={{ fontFamily: 'font1', fontSize: 14 }}>Mood</Text>
                     </TouchableOpacity>
-                    {(this.state.moodOverlay) ? (<View><View style={styles.moodView}>
-                        <Button
-                            title=" Happy"
-                            type="clear"
-                            icon={<Icon name={'emoticon'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'happy', rightIconEmoticon: 'emoticon', rightIconSize: 28, gap2: 0 }) }}
+                    <Overlay fullScreen animationType="slide" isVisible={this.state.moodOverlay}>
+                        <SafeAreaView style={{ flex: 1 }}>
+                            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                                <TouchableOpacity onPress={() => this.setState({ moodOverlay: false })}>
+                                    <AntDesign
+                                        size={26}
+                                        name="down"
+                                        color="#b2b8c2"
+                                    />
+                                </TouchableOpacity>
+                                <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Mood</Text>
+                                <AntDesign
+                                    size={26}
+                                    name="bars"
+                                    color="#b2b8c2"
+                                />
+                            </View>
 
-                        />
-                        <Button
-                            title=" Angry"
-                            type="clear"
-                            icon={<Icon name={'emoticon-angry'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'angry', rightIconEmoticon: 'emoticon-angry', rightIconSize: 28, gap2: 0 }) }}
+                            <View style={styles.moodView}>
+                                <Button
+                                    title=" Happy"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'happy', rightIconEmoticon: 'emoticon', rightIconSize: 28, gap2: 0 })
+                                    this.filterByMood() }}
 
-                        />
-                    </View>
+                                />
+                                <Button
+                                    title=" Angry"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon-angry'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'angry', rightIconEmoticon: 'emoticon-angry', rightIconSize: 28, gap2: 0 })
+                                    this.filterByMood() }}
 
-                    <View style={styles.moodView}>
-                        <Button
-                            title=" Cool"
-                            type="clear"
-                            icon={<Icon name={'emoticon-cool'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'cool', rightIconEmoticon: 'emoticon-cool', rightIconSize: 28, gap2: 0 }) }}
+                                />
+                            </View>
 
-                        />
-                        <Button
-                            title=" Sad"
-                            type="clear"
-                            icon={<Icon name={'emoticon-cry'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'sad', rightIconEmoticon: 'emoticon-cry', rightIconSize: 28, gap2: 0 }) }}
+                            <View style={styles.moodView}>
+                                <Button
+                                    title=" Cool"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon-cool'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'cool', rightIconEmoticon: 'emoticon-cool', rightIconSize: 28, gap2: 0 })
+                                    this.filterByMood() }}
 
-                        />
-                    </View>
+                                />
+                                <Button
+                                    title=" Sad"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon-cry'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'sad', rightIconEmoticon: 'emoticon-cry', rightIconSize: 28, gap2: 0 })
+                                    this.filterByMood() }}
 
-                    <View style={styles.moodView}>
-                        <Button
-                            title=" Dead"
-                            type="clear"
-                            icon={<Icon name={'emoticon-dead'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'dead', rightIconEmoticon: 'emoticon-dead', rightIconSize: 28, gap2: 0 }) }}
+                                />
+                            </View>
 
-                        />
-                        <Button
-                            title=" Excited"
-                            type="clear"
-                            icon={<Icon name={'emoticon-excited'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'excited', rightIconEmoticon: 'emoticon-excited', rightIconSize: 28, gap2: 0 }) }}
+                            <View style={styles.moodView}>
+                                <Button
+                                    title=" Dead"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon-dead'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'dead', rightIconEmoticon: 'emoticon-dead', rightIconSize: 28, gap2: 0 }) 
+                                    this.filterByMood()}}
 
-                        />
-                    </View>
+                                />
+                                <Button
+                                    title=" Excited"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon-excited'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'excited', rightIconEmoticon: 'emoticon-excited', rightIconSize: 28, gap2: 0 })
+                                    this.filterByMood() }}
 
-                    <View style={styles.moodView}>
-                        <Button
-                            title=" Flirty"
-                            type="clear"
-                            icon={<Icon name={'emoticon-kiss'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'flirty', rightIconEmoticon: 'emoticon-kiss', rightIconSize: 28, gap2: 0 }) }}
+                                />
+                            </View>
 
-                        />
-                        <Button
-                            title=" Ok"
-                            type="clear"
-                            icon={<Icon name={'emoticon-neutral'} size={28} />}
-                            containerStyle={styles.bigButton}
-                            onPress={() => { this.setState({ mood: 'ok', rightIconEmoticon: 'emoticon-neutral', rightIconSize: 28, gap2: 0 }) }}
+                            <View style={styles.moodView}>
+                                <Button
+                                    title=" Flirty"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon-kiss'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'flirty', rightIconEmoticon: 'emoticon-kiss', rightIconSize: 28, gap2: 0 })
+                                    this.filterByMood() }}
 
-                        />
-                    </View></View>) : null}
+                                />
+                                <Button
+                                    title=" Ok"
+                                    type="clear"
+                                    icon={<Icon name={'emoticon-neutral'} size={28} />}
+                                    containerStyle={styles.bigButton}
+                                    onPress={() => { this.setState({ mood: 'ok', rightIconEmoticon: 'emoticon-neutral', rightIconSize: 28, gap2: 0 })
+                                    this.filterByMood() }}
+
+                                />
+                            </View>
+                        </SafeAreaView>
+                    </Overlay>
                     <Divider />
 
                     <TouchableOpacity onPress={() => this.retrieveActivities()} style={{ marginVertical: 10 }}>
                         <Text style={{ fontFamily: 'font1', fontSize: 14 }}>Activity</Text>
                     </TouchableOpacity>
-                    {(this.state.activityOverlay) ? (<ScrollView>
-                        <FlatList
-                            data={this.state.activityData}
-                            renderItem={({ item }) => (
+                    <Overlay fullScreen animationType="slide" isVisible={this.state.activityOverlay}>
+                        <SafeAreaView style={{ flex: 1 }}>
+                            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                                <TouchableOpacity onPress={() => this.setState({ activityOverlay: false })}>
+                                    <AntDesign
+                                        size={26}
+                                        name="down"
+                                        color="#b2b8c2"
+                                    />
+                                </TouchableOpacity>
+                                <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Activities</Text>
+                                <TouchableOpacity onPress={() => this.addActivities()}>
+                                <AntDesign
+                                    size={26}
+                                    name="plus"
+                                    color="#b2b8c2"
+                                />
+                                </TouchableOpacity>
+                            </View>
+
+                            <Overlay isVisible={this.state.activitiesOptions} fullScreen animationType='slide'>
+                            <SafeAreaView style={{flex: 1}}>
+                            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                                <TouchableOpacity onPress={() => this.closeAddActivities()}>
+                                    <AntDesign
+                                        size={26}
+                                        name="down"
+                                        color="#b2b8c2"
+                                    />
+                                </TouchableOpacity>
+                                <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Add Activity</Text>
+                                <TouchableOpacity onPress={() => this.addActivities()}>
+                                <AntDesign
+                                    size={26}
+                                    name="plus"
+                                    color="#b2b8c2"
+                                />
+                                </TouchableOpacity>
+                            </View>
+
+                            <Input
+                                        placeholder="Add Activity..."
+                                        placeholderTextColor="#B1B1B1"
+                                        returnKeyType="done"
+                                        containerStyle={{ marginBottom: 0, paddingBottom: 0 }}
+                                        value={this.state.newActivityText}
+                                        onChangeText={newActivityText => this.setState({ newActivityText })}
+                                    />
+                                     <TouchableOpacity style={{alignSelf: 'center'}} onPress={() => this.createNewActivity()}>
+                                        <Text style={{fontFamily: 'font1', color: theme.colors.blue, fontSize: 16}}>Add Activity</Text>
+                                    </TouchableOpacity>
+                            </SafeAreaView>
+                            </Overlay>
+
+                            <ScrollView>
+                                <FlatList
+                                    data={this.state.activityData}
+                                    renderItem={({ item }) => (
 
 
-                                <ActivitySelect mama={this.filterActivity} name={item}/>
-                            )}
-                            keyExtractor={(item, index) => String(index)}
+                                        <ActivitySelect mama={this.filterActivity} name={item} />
+                                    )}
+                                    keyExtractor={(item, index) => String(index)}
 
-                            onEndReached={this.retrieveMore}
-                            onEndReachedThreshold={0}
-                            refreshing={this.state.refreshing}
-                        />
+                                    onEndReached={this.retrieveMore}
+                                    onEndReachedThreshold={0}
+                                    refreshing={this.state.refreshing}
+                                />
 
-                    </ScrollView>) : null}
+                            </ScrollView>
+                        </SafeAreaView>
+                    </Overlay>
                     <Divider />
 
                     {/* <TouchableOpacity onPress={() => this.filterLocation()} style={{ marginVertical: 10 }}>
                         <Text style={{ fontFamily: 'font1', fontSize: 14 }}>Location</Text>
                     </TouchableOpacity> */}
-                    <Divider />
 
                     <TouchableOpacity style={{ marginVertical: 10 }} onPress={() => { this.filterPeople() }}>
                         <Text style={{ fontFamily: 'font1', fontSize: 14 }}>People</Text>
                     </TouchableOpacity>
-                    {(this.state.peopleOverlay) ? (<ScrollView>
-                        <FlatList
-                            data={this.state.peopleData}
-                            renderItem={({ item }) => (
+                    <Overlay fullScreen animationType="slide" isVisible={this.state.peopleOverlay}>
+                        <SafeAreaView style={{ flex: 1 }}>
+                            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                                <TouchableOpacity onPress={() => this.setState({ peopleOverlay: false })}>
+                                    <AntDesign
+                                        size={26}
+                                        name="down"
+                                        color="#b2b8c2"
+                                    />
+                                </TouchableOpacity>
+                                <Text style={{ fontFamily: 'font1', fontSize: 20 }}>People</Text>
+                                <AntDesign
+                                    size={26}
+                                    name="bars"
+                                    color="#b2b8c2"
+                                />
+                            </View>
+                            <ScrollView>
+                                <FlatList
+                                    data={this.state.peopleData}
+                                    renderItem={({ item }) => (
 
 
-                                <ActivitySelect mama={this.peopleSelection} name={item.displayName} otherData={item.uid}/>
-                            )}
-                            keyExtractor={(item, index) => String(index)}
+                                        <ActivitySelect mama={this.peopleSelection} name={item.displayName} otherData={item.uid} />
+                                    )}
+                                    keyExtractor={(item, index) => String(index)}
 
-                            onEndReached={this.retrieveMore}
-                            onEndReachedThreshold={0}
-                            refreshing={this.state.refreshing}
-                        />
+                                    onEndReached={this.retrieveMore}
+                                    onEndReachedThreshold={0}
+                                    refreshing={this.state.refreshing}
+                                />
 
-                    </ScrollView>) : null}
+                            </ScrollView>
+                        </SafeAreaView>
+                    </Overlay>
                 </SafeAreaView>
             </Overlay>
         </SafeAreaView>)

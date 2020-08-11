@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { View, TouchableOpacity, Dimensions } from 'react-native'
-import { Input, Avatar } from 'react-native-elements'
+import { Input, Avatar, Text } from 'react-native-elements'
 import { Video } from 'expo-av'
-import { AntDesign } from '@expo/vector-icons'
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons'
 import { withNavigation } from 'react-navigation'
 import { SafeAreaView } from 'react-native-safe-area-context'
 const { width, height } = Dimensions.get('window')
@@ -67,60 +67,51 @@ class SendVideo extends Component{
 
     render(){
         return(
-            <SafeAreaView style={{flex: 1}}>
-            <View style={{flex: 1}}>
-            <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center'}}>
-                <TouchableOpacity
-                    onPress={() => this.props.navigation.goBack(null)}
-                  style={{
-                    backgroundColor: 'transparent',
-                 }}>
-              <AntDesign
-                color="#fff"
-                  name="arrowleft"
-                  style={{fontSize: 24, fontWeight: "bold", shadowColor: '#000', elevation: 4, shadowOffset: {width: 2, height: 2}, shadowOpacity: 0.6,
-                  shadowRadius: 3.84,
-}}
-              />
-                          </TouchableOpacity> 
-                          {/* <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 0}}>{this.state.roomName}</Text> */}
+            <SafeAreaView style={{flex: 1, backgroundColor: '#000'}}>
+            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center', backgroundColor: '#000' }}>
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.goBack(null)}
+                            style={{
+                                backgroundColor: 'transparent',
+                                // margin: 4,
+                                // marginRight: 10,
+                            }}>
+                            <AntDesign
+                                name="arrowleft"
+                                style={{ fontSize: 24, fontWeight: "bold" }}
+                                color="#fff"
+                            />
+                        </TouchableOpacity>
+                        <Text style={{ fontSize: 20, fontFamily: "font1", paddingTop: 0, color: '#fff' }}>Sending To {this.state.roomName}</Text>
 
-                    <Avatar onPress={() => console.log('dda')} rounded source={{uri: this.state.chatRoomDisplayPhoto}} containerStyle={{marginLeft: 20}}/>
-                    
-                
-                </View>
-            <Video resizeMode="cover" shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping source={{uri: this.state.uri}} style={{width: width, height: height}}/>
+                        <Avatar onPress={() => console.log('da')} rounded source={{ uri: this.state.chatRoomDisplayPhoto }} />
 
-            <View style={{flex: 0, backgroundColor: '#000', flexDirection: 'row', justifyContent: 'space-around', padding: 10, alignItems: 'center',  bottom: 0, position: 'absolute'}}>
-                
-                <Input
+
+                    </View>
+            <Video resizeMode="contain" shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping source={{uri: this.state.uri}} style={{width: width, height: height / 1.2}}/>
+            <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 0, alignItems: 'center', backgroundColor: '#000', position: 'absolute', bottom: 20}}>
+               
+               <Input
                     
                     placeholderTextColor="#B1B1B1"
                     returnKeyType="done"
-                
-                    containerStyle={{bottom:0}}
-                    inputContainerStyle={{ paddingHorizontal: 10, borderWidth: 1, borderColor: "#b2b8c2",borderRadius: 20, height: 44, backgroundColor: '#fff'}}
+                        placeholder="Add a caption..."
+                    containerStyle={{bottom:0, width: width / 1.2}}
+                    inputContainerStyle={{ paddingHorizontal: 10, borderWidth: 1, borderColor: "#b2b8c2",borderRadius: 20, height: 40, backgroundColor: '#fff'}}
                     value={this.state.currentMessage}
                     onChangeText={currentMessage => this.setState({ currentMessage: currentMessage })}
                     renderErrorMessage={false}
-                />
-                <TouchableOpacity
-                    onPress={() => this.uploadVideo()}
-                  style={{
-                    backgroundColor: 'transparent',
-                 }}>
-              <AntDesign
-                color="#0984e3"
-                  name="arrowright"
-                  style={{fontSize: 34, fontWeight: "bold", shadowColor: '#000', elevation: 4, shadowOffset: {width: 2, height: 2}, shadowOpacity: 0.6,
-                  shadowRadius: 3.84,
-}}
-              />
-                          </TouchableOpacity> 
+                /> 
                     
-                
-                </View>
-                </View>
+
+                      <TouchableOpacity
+                    onPress={() => this.uploadVideo()}
+                 >
+                    <MaterialCommunityIcons name="send-circle" size={48} color="#0984e3"/>
+
+                          </TouchableOpacity> 
+                          
+               </View>
 
             </SafeAreaView>
         )

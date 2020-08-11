@@ -70,7 +70,6 @@ let addedMe = []
 
     _copyToClipboard = () => {
         let string = this.state.displayName + "#" + this.state.discriminator
-        console.log(string)
         Clipboard.setString(string)
         this.refs.copyToClipboard.show("Copied!")
     }
@@ -102,7 +101,6 @@ let addedMe = []
             currentUser: documentData[0]
         })
 
-        console.log(this.state.currentUser)
     }
   
      
@@ -110,7 +108,6 @@ let addedMe = []
         arr = []
         addedMe = []
         
-console.log('DATELE', this.props.data)
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf'),
             font2: require('../../../assets/SourceSansPro-Regular.ttf')
@@ -123,12 +120,17 @@ console.log('DATELE', this.props.data)
         await this.addedMe()
     }
 
-    search = (searchText) => {
+    search = async (searchText) => {
         this.setState({searchText: searchText})
-        let filteredData = this.state.documentData.filter(function(item){
-            return item.displayName.toLowerCase().includes(searchText)
+        // let filteredData = this.state.documentData.filter(function(item){
+            // return item.displayName.toLowerCase().includes(searchText)
+        // })
+        // this.setState({filteredData: filteredData})
+        let query = await firebase.firestore().collection('users').where('displayName', '>=', searchText).get()
+        let documentData = query.docs.map(doc => doc.data())
+        this.setState({
+            filteredData: documentData
         })
-        this.setState({filteredData: filteredData})
     }
     renderHeader = () => {
         try{
@@ -162,7 +164,6 @@ console.log('DATELE', this.props.data)
 
     retrieveData = async() => {
         arr = []
-        console.log('merge JKFALFKLAGKLA FKALGLA G')
         let documentT;
         const func = firebase.functions().httpsCallable('friendSystem')
         try{
@@ -173,9 +174,7 @@ console.log('DATELE', this.props.data)
          
         await func().then(async res => {
              documentT = await res.data.documentData
-             console.log('-------------------------')
-             console.log(documentT)
-             console.log('-------------------------  ')
+        
             await documentT.forEach(async element => {
                 await this._getUserFromUid(element)
             })
@@ -210,8 +209,7 @@ console.log('DATELE', this.props.data)
         let initialQuery = await firebase.firestore().collection('users').doc(uid).get()
         let data = await initialQuery.data()
         addedMe.push(data)
-        console.log('adlafjakfjkalfjalkdal')
-        console.log(addedMe)
+       
         this.setState({
             addedMe: addedMe
         })
@@ -245,7 +243,6 @@ console.log('DATELE', this.props.data)
         this.sendNotification(documentData[0], uid)
     }
     _sendRequest = async(uid) => {
-        console.log('se trimite')
         // this.state.friendRequsts.push(uid)
         await this.getToken(uid)
         firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
@@ -433,7 +430,7 @@ console.log('DATELE', this.props.data)
             <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5, marginRight: 'auto'}}>Witties</Text>
 
 
-
+{/* 
             <TouchableOpacity
                     onPress={()=> this.props.navigation.navigate('Timeline')}
                   style={{
@@ -445,7 +442,7 @@ console.log('DATELE', this.props.data)
                   name="history"
                   style={{fontSize: 26, fontWeight: "bold"}}  
               />
-            </TouchableOpacity>   
+            </TouchableOpacity>    */}
 
 
 
@@ -763,7 +760,7 @@ console.log('DATELE', this.props.data)
                 </Overlay>
                 </Overlay>
                 </Overlay>
-            <StoriesPublic stories={this.props.stories}/>
+            <StoriesPublic stories={this.props.stories} openFriends={() => this._onPressSearch()}/>
                 
             </View>)
             }else{

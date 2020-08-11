@@ -96,7 +96,7 @@ export default class TimelinePost extends Component {
                     this.props.showOverlay(this.props.id)
                 }}
                 onPressIn={() => { console.log("Press In") }}
-            // onPress={() => this.props.press()}
+            onPress={() => this.props.press()}
             >
                
                 <ImageBackground
@@ -107,7 +107,7 @@ export default class TimelinePost extends Component {
                     {this._renderTimestamps(this.props.timestamp)}
                     <View style={[styles.column, { justifyContent: 'center' }]}>
                         <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
-
+{/* 
                         <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
                         <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
                             <Octicons
@@ -116,7 +116,7 @@ export default class TimelinePost extends Component {
                                 color={theme.colors.white}
                             />
                             <Text> {this.props.text}</Text>
-                        </Text>
+                        </Text> */}
 
 
                     </View>

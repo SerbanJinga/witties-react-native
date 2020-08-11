@@ -27,7 +27,10 @@ import SendVideo from './src/screens/chatRoom/SendVideo';
 import Timeline from './src/screens/Timeline/Timeline';
 import StreakVideoAvatar from './src/screens/chatRoom/StreakVideoAvatar';
 import Map from './src/screens/map/Map';
+import ChooseProfilePicture from './src/screens/login/ChooseProfilePicture'
+import TimelinePostDetail from './src/screens/Timeline/TimelinePostDetail'
 require('firebase/firestore');
+
 
 console.disableYellowBox=true;
 YellowBox.ignoreWarnings(['Setting a timer']);
@@ -136,7 +139,9 @@ const navigator = createStackNavigator(
     SendVideo: SendVideo,
     Timeline: Timeline,
     StreakVideoAvatar: StreakVideoAvatar,
-    Map: Map
+    ChooseProfilePicture: ChooseProfilePicture,
+    Map: Map,
+    TimelinePostDetail: TimelinePostDetail
   },{
     initialRouteName: 'Auth',
     headerMode: null,

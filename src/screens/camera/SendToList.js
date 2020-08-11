@@ -315,7 +315,7 @@ let friendArr = []
        </View>
        </View>
 
-       <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>My Story</Text>
+       {/* <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>My Story</Text>
        <TouchableOpacity onPress={() => this.props.image === '' ? this.uploadVideoToStory() : this.uploadPhotoToStory()}>
         
             <View style={{flex: 1, padding: 10}}>
@@ -330,7 +330,7 @@ let friendArr = []
             </View>
             
 
-             </TouchableOpacity> 
+             </TouchableOpacity>  */}
              <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>My Chats</Text>
   
 
