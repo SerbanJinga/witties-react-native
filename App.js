@@ -29,6 +29,7 @@ import StreakVideoAvatar from './src/screens/chatRoom/StreakVideoAvatar';
 import Map from './src/screens/map/Map';
 import ChooseProfilePicture from './src/screens/login/ChooseProfilePicture'
 import TimelinePostDetail from './src/screens/Timeline/TimelinePostDetail'
+import TutorialSlider from './src/screens/login/TutorialSlider'
 require('firebase/firestore');
 
 
@@ -141,7 +142,8 @@ const navigator = createStackNavigator(
     StreakVideoAvatar: StreakVideoAvatar,
     ChooseProfilePicture: ChooseProfilePicture,
     Map: Map,
-    TimelinePostDetail: TimelinePostDetail
+    TimelinePostDetail: TimelinePostDetail,
+    TutorialSlider: TutorialSlider
   },{
     initialRouteName: 'Auth',
     headerMode: null,
