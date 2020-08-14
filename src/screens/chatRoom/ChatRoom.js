@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Text, Input, Button, Icon, Divider, Avatar, Overlay } from 'react-native-elements'
-import { Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions, FlatList, Keyboard, TouchableWithoutFeedback, ScrollView, TouchableOpacity, RefreshControl } from 'react-native'
+import { Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions, FlatList, Keyboard, TouchableWithoutFeedback, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native'
 import MessageComponent from '../chatRoom/MessageComponent'
 import firebase from 'firebase'
 import { MaterialIcons, Feather, AntDesign } from '@expo/vector-icons'
@@ -363,6 +363,32 @@ class ChatRoom extends Component {
         )
     }
 
+    exitGroup = () => {
+        Alert.alert(
+            `Discard picture?`,
+            "You can not turn back.",
+            [
+              {
+                text: "Cancel",
+                onPress: () => console.log('nimic '),
+                style: 'cancel'
+              },
+              {
+                text: "Discard",
+                onPress: () => this.da(),
+                style: 'destructive'
+              }
+            ],
+            { cancelable: false }
+          )
+    }
+     da = async() => {
+         await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+             chatRoomsIn: firebase.firestore.FieldValue.arrayRemove(this.state.roomId)
+         }).then(this.props.navigation.goBack(null))
+
+        }
+
     refresh = () => {
         
         this.setState({
@@ -435,9 +461,9 @@ class ChatRoom extends Component {
                                 <Button titleStyle={{ fontFamily: 'font1', fontSize: 15, margin: 10 }} onPress={() => this.props.navigation.navigate('FriendList')} type="clear" title="Add" />
                             </View>
                             {this.renderParticipants()}
-                            <Text style={{ fontFamily: 'font1', fontSize: 20, padding: 10 }}>Daily Streak</Text>
-
-                            {this.renderStreakVideo()}
+                            <TouchableOpacity onPress={() => this.exitGroup()}>
+                            <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center', color: 'red'}}>Exit Group</Text>
+                            </TouchableOpacity>
                             {/* </ScrollView> */}
                         </SafeAreaView>
                         <Overlay animationType='fade' onBackdropPress={() => this._closeChatSettings()} isVisible={this.state.chatSettings} overlayStyle={{ width: width, borderRadius: 10, position: 'absolute', bottom: 0 }}>

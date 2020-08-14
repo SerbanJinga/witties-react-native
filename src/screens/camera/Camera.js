@@ -257,16 +257,27 @@ class CameraScreen extends Component {
   }
 
   pickImage = async () => {
+    console.log('A intrat in pick image')
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3]
+      aspect: [9, 16]
     })
     if (!result.cancelled) {
-      this.setState({
-        pictureTaken: result.uri,
-        showPhoto: true
-      })
+      if (result.type === 'image') {
+        console.log('A intrat in image overlay')
+        this.setState({
+          pictureTaken: result.uri,
+          capturing: false,
+          captures: [result, ...this.state.captures],
+          showPhoto: true,
+        })
+      } else {
+        console.log('A intrat in video overlay ipotetic', result)
+        
+        let videores = {uri:result.uri}
+        this.setState({ capturing: false, captures: [videores, ...this.state.captures] });
+      }
     }
 
 
@@ -303,7 +314,7 @@ class CameraScreen extends Component {
   handleShortCapture = async () => {
     console.log("picture")
     const photoData = await this.camera.takePictureAsync();
-    if(this.state.type === Camera.Constants.Type.front){
+    if (this.state.type === Camera.Constants.Type.front) {
       const result = await ImageManipulator.manipulateAsync(
         photoData.uri, [{ rotate: 0 }, { flip: ImageManipulator.FlipType.Horizontal }],
         { compress: 1, format: ImageManipulator.SaveFormat.PNG }
@@ -311,7 +322,7 @@ class CameraScreen extends Component {
       this.setState({ pictureTaken: result.uri, capturing: false, captures: [result, ...this.state.captures], showPhoto: true })
 
 
-    }else{
+    } else {
       this.setState({ pictureTaken: photoData.uri, capturing: false, captures: [photoData, ...this.state.captures], showPhoto: true })
 
     }
@@ -319,6 +330,7 @@ class CameraScreen extends Component {
 
   handleLongCapture = async () => {
     const videoData = await this.camera.recordAsync();
+    console.log(videoData, ' asta chiar ma intereseazaaaaa')
     this.setState({ capturing: false, captures: [videoData, ...this.state.captures] });
     console.log("video, duration is", (finalPress - firstPress), 's')
     this.setState({

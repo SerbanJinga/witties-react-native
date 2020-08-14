@@ -19,7 +19,7 @@ import {
     Image
 
 } from 'react-native';
-
+import Geocoder from 'react-native-geocoding'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -65,14 +65,33 @@ export default class Map extends React.Component {
             //misc
             mode: 'pic', //"pic"/"future"
             futureStatuses: [],
-            myUsername: ""
+            myUsername: "",
+            street: ""
 
         }
         // this.closeSwipablePanel = this.closeSwipablePanel.bind(this)    
     }
+
+    getLocationFromCoords = async (lat, long) => {
+        // const location = await Location.getCurrentPositionAsync({})
+        const result = await Location.reverseGeocodeAsync({
+            latitude: lat,
+            longitude: long
+        })
+        let street
+        result.find(mata => {
+            street = mata.street
+        })
+        
+        this.setState({
+            street: street
+        })
+
+        console.log(street)
+    }
+
     async componentDidMount() {
         arr = []
-
         this.findCurrentLocationAsync()
         if (typeof this.props.users === 'undefined') {
             console.log("iau toate postarile de la public")
@@ -103,6 +122,7 @@ export default class Map extends React.Component {
         let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
         let documentSnapshots = await initialQuery.get()
         let documentData = await documentSnapshots.data().friends
+        documentData.push(firebase.auth().currentUser.uid)
         documentData.forEach(async element => await this.retrieveImageFromOneUser(element))
         // this.setState({ users: arr })
         // this.setState({ peopleData: sos, clearFilter: true,openFilter:false })
@@ -167,13 +187,14 @@ export default class Map extends React.Component {
     }
 
     sendNotificationToUser = async (user, timp) => {
+        this.getLocationFromCoords(this.state.futureLocationCoords.lat, this.state.futureLocationCoords.long)
         let query = await firebase.firestore().collection('users').doc(user).get()
         let token = await query.data().tokens
         const message = {
             to: token,
             sound: 'default',
             title: this.state.currentUserName + ' changed their location',
-            body:  this.toHours(timp - Date.now()) + ' near Bucuresti' ,
+            body:  this.toHours(timp - Date.now()) + ' near ' + this.state.street ,
             data: {data: 'goes here'},
             _displayInForeground: true
         }
@@ -315,7 +336,7 @@ export default class Map extends React.Component {
                   scrollEnabled
                   showsHorizontalScrollIndicator={false}
                   scrollEventThrottle={16}
-                  data={this.state.users}
+                  data={this.state.users.length > 1 ? this.state.users.slice(0, -1) : this.state.users}
                   snapToAlignment='center'
                   style={{shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, overflow: 'visible'}}
                 renderItem={({ item, index }) => (

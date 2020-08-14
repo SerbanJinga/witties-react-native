@@ -45,7 +45,9 @@ class Room extends Component {
         await this.hasStreakVideoFunction()
 
         firebase.firestore().collection('messages').doc(this.props.roomId).collection('chats').orderBy('timestamp', 'desc').onSnapshot((doc) => {
-          
+          if(doc.empty){
+            return
+          }
           let lastMessage = doc.docs.map(doc => doc.data().msg)
           
           this.setState({

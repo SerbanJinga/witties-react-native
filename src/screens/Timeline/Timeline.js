@@ -365,10 +365,12 @@ class Timeline extends React.Component {
 
 
             </View>
-            {(this.state.clearFilter) ? <Button title='Clear Filters' onPress={() => {
-                this.retrieveData()
-                this.setState({ clearFilter: false })
-            }} /> : null}
+            {(this.state.clearFilter) ?
+            <TouchableOpacity onPress={() => {this.retrieveData()
+            this.setState({ clearFilter: false })}}>
+                <Text style={{fontFamily: 'font1', fontSize: 20, margin: 4, alignSelf: 'center', color: theme.colors.blue}}>Clear Filters</Text>
+            </TouchableOpacity>
+              : null}
             <Overlay fullScreen isVisible={this.state.showAct}
 
 
