@@ -21,6 +21,8 @@ import SwipeablePanel from "rn-swipeable-panel";
 import VideoComponent from './VideoComponent'
 import StreakVideo from './StreakVideo'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import FriendList from '../friendSystem/FriendList'
+import AddParticipants from './AddParticipants'
 
 let arrDocumentData = []
 let globalLastVisible = ""
@@ -51,6 +53,7 @@ class ChatRoom extends Component {
             lastVisible: 0,
             extraMessages: [],
             updateInMata:false,
+            addParticipants: false
         }
 
 
@@ -425,6 +428,18 @@ class ChatRoom extends Component {
             this.setState({lastVisible:data[0].timestamp})
         }, 500)
     }
+    openAddParticipants = () => {
+        this.setState({
+            addParticipants: true
+        })
+    }
+
+    
+    closeAddParticipants = () => {
+        this.setState({
+            addParticipants: false
+        })
+    }
 
     render() {
         return (
@@ -458,8 +473,14 @@ class ChatRoom extends Component {
                             </View>
                             <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Text style={{ fontFamily: 'font1', fontSize: 20, padding: 10 }}>Participants</Text>
-                                <Button titleStyle={{ fontFamily: 'font1', fontSize: 15, margin: 10 }} onPress={() => this.props.navigation.navigate('FriendList')} type="clear" title="Add" />
+                                <Button titleStyle={{ fontFamily: 'font1', fontSize: 15, margin: 10 }} onPress={() => this.openAddParticipants()} type="clear" title="Add" />
                             </View>
+                            <Overlay isVisible={this.state.addParticipants} fullScreen animationType='slide'>
+                                <SafeAreaView style={{flex: 1}}>
+                                    {/* <FriendList close={() => this.closeAddParticipants()}/> */}
+                                    <AddParticipants close={() => this.closeAddParticipants()} roomId={this.state.roomId}/>
+                                </SafeAreaView>
+                            </Overlay>
                             {this.renderParticipants()}
                             <TouchableOpacity onPress={() => this.exitGroup()}>
                             <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center', color: 'red'}}>Exit Group</Text>

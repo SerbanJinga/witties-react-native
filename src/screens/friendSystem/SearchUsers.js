@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, ScrollView, Clipboard, Alert, SectionList, RefreshControl } from 'react-native'
-import { Text, SearchBar, Button, Avatar, Overlay, Input, Divider, Tooltip } from 'react-native-elements'
+import { Text, SearchBar, Button, Avatar, Overlay, Input, Divider, Tooltip, CheckBox } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker'
 import firebase from 'firebase'
 import { FlatList } from 'react-native-gesture-handler'
@@ -19,7 +19,7 @@ import StoriesPublic from '../stories/StoriesPublic'
 import UserProfile from '../UserProfile'
 import AllFriends from './AllFriends'
 import AllChatsComponent from '../AllChatsComponent'
-
+import AsyncStorage from '@react-native-community/async-storage';
 const { width, height } = Dimensions.get('window')
 const heightS = Dimensions.get('screen').height
 const widthS = Dimensions.get('screen').width
@@ -57,7 +57,49 @@ let addedMe = []
             careScore: 0,
             profileDetails: false,
             optionMenu: false,
-            // items: props.navigation.state.params.roomId
+            // items: props.navigation.state.params.roomId,
+            //tudor
+            set_recieveMapNotification: false,
+            set_showMapFriends: false,
+            set_chatNotifications: false,
+        }
+    }
+
+    storeData = async (key, value) => {
+        try {
+            await AsyncStorage.setItem(key, value);
+        } catch (error) {
+            // Error saving data
+        }
+    }
+
+    setInitialSettings = async () => {
+        if (await this.getData('set_recieveMapNotification') == 'false')
+            this.setState({ set_recieveMapNotification: false })
+        else
+            this.setState({ set_recieveMapNotification: true })
+
+        if (await this.getData('set_showMapFriends') == 'false')
+            this.setState({ set_showMapFriends: false })
+        else
+            this.setState({ set_showMapFriends: true })
+
+        if (await this.getData('set_chatNotifications') == 'false')
+            this.setState({ set_chatNotifications: false })
+        else
+            this.setState({ set_chatNotifications: true })
+}
+
+    getData = async (key) => {
+        try {
+            const value = await AsyncStorage.getItem(key);
+            if (value !== null) {
+                // We have data!!
+                console.log(key, ':', value);
+                return value;
+            }
+        } catch (error) {
+            // Error retrieving data
         }
     }
 
@@ -644,32 +686,79 @@ let addedMe = []
                     opacity={0.8}
                     fadeInDuration={750}
                 />
-                  <Overlay animationType="slide" isVisible={this.state.settings} fullScreen overlayStyle={{width: width}}>
-                    <SafeAreaView style={{flex: 1, flexDirection: 'column', top: 10}}>
-                        <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
-                        <TouchableOpacity onPress={() => this._closeSettings()}>
-                    <AntDesign
-                        size={26}
-                        name="down"
-                        color="#b2b8c2"
-                    />
-                    </TouchableOpacity>
-                    <Text style={{fontFamily: 'font1', fontSize: 20}}>Settings</Text>
-                    <TouchableOpacity onPress={() => this._closeSettings()}>
-                    <AntDesign
-                        size={26}
-                        name="bars"
-                        color="#b2b8c2"
-                    />
-                    </TouchableOpacity>
-                        </View>
-                        <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
-                        <Text style={{fontFamily: 'font1', fontSize: 20, margin: 10}}>Profile Settings</Text>
-                        <Divider/>
-                        
-                        </View>
-                    </SafeAreaView>
-                </Overlay>
+                  <Overlay animationType="slide" isVisible={this.state.settings} fullScreen overlayStyle={{ width: width }}>
+                            <SafeAreaView style={{ flex: 1, flexDirection: 'column', top: 10 }}>
+                                <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <TouchableOpacity onPress={() => this._closeSettings()}>
+                                        <AntDesign
+                                            size={26}
+                                            name="down"
+                                            color="#b2b8c2"
+                                        />
+                                    </TouchableOpacity>
+                                    <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Settings</Text>
+                                    <TouchableOpacity onPress={() => {this.storeData('set_recieveMapNotification', this.state.set_recieveMapNotification.toString())
+                                        this.storeData('set_showMapFriends', this.state.set_showMapFriends.toString())
+                                        this.storeData('set_chatNotifications', this.state.set_chatNotifications.toString())
+                                        this._closeSettings()}}>
+                                        <AntDesign
+                                            size={26}
+                                            name="check"
+                                            color="#b2b8c2"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={{ flex: 1, flexDirection: 'column', marginTop: 20 }}>
+                                    <Text style={{ fontFamily: 'font1', fontSize: 20, margin: 10 }}>Profile Settings</Text>
+                                    <Divider />
+                                    {/*Aici lucreaza tudor */}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+
+                                        <Text style={{ fontFamily: 'font1', fontSize: 16, margin: 10 }}>Recieve Map Updates</Text>
+                                        <CheckBox
+
+                                            onPress={() => {
+                                                this.state.set_recieveMapNotification ? this.setState({ set_recieveMapNotification: false }) :
+                                                    this.setState({ set_recieveMapNotification: true })
+
+                                            }}
+                                            containerStyle={{ backgroundColor: 'transparent', borderWidth: 0 }}
+                                            checked={Boolean(this.state.set_recieveMapNotification)} />
+                                    </View>
+
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+
+                                        <Text style={{ fontFamily: 'font1', fontSize: 16, margin: 10 }}>Show Map Friends Bar</Text>
+                                        <CheckBox
+
+                                            onPress={() => {
+                                                this.state.set_showMapFriends ? this.setState({ set_showMapFriends: false }) :
+                                                    this.setState({ set_showMapFriends: true })
+
+                                            }}
+                                            containerStyle={{ backgroundColor: 'transparent', borderWidth: 0 }}
+                                            checked={Boolean(this.state.set_showMapFriends)} />
+                                    </View>
+
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'font1', fontSize: 16, margin: 10 }}>Show Chat Notifications</Text>
+                                        <CheckBox
+
+                                            onPress={() => {
+                                                this.state.set_chatNotifications ? this.setState({ set_chatNotifications: false }) :
+                                                    this.setState({ set_chatNotifications: true })
+
+                                            }}
+                                            containerStyle={{ backgroundColor: 'transparent', borderWidth: 0 }}
+                                            checked={Boolean(this.state.set_chatNotifications)} />
+                                    </View>
+                       
+                                    
+
+                                    {/*Aici lucreaza tudor */}
+                                </View>
+                            </SafeAreaView>
+                        </Overlay>
                 
                 <Overlay animationType="slide" isVisible={this.state.profileDetails} fullScreen>
                 <ScrollView style={{flex: 1}}>

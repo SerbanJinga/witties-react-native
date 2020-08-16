@@ -17,7 +17,8 @@ class Room extends Component {
             openChangeImage: false,
             cameraOverlay: false,
             lastMessage: "",
-            hasStreakVideo: true
+            hasStreakVideo: true,
+            sentStreakVideo: false
         }
     }
 
@@ -42,6 +43,7 @@ class Room extends Component {
             fontsLoaded: true
         })
 
+        await this.sentStreakVideo()
         await this.hasStreakVideoFunction()
 
         firebase.firestore().collection('messages').doc(this.props.roomId).collection('chats').orderBy('timestamp', 'desc').onSnapshot((doc) => {

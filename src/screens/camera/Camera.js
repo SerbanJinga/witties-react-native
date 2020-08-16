@@ -80,7 +80,8 @@ class CameraScreen extends Component {
       PressTime: 0,
       capturing: false,
       captures: [],
-      duration: 0
+      duration: 0,
+      flipVideo: false
     }
     this.selectAlbum = this.selectAlbum.bind(this)
 
@@ -329,7 +330,16 @@ class CameraScreen extends Component {
   };
 
   handleLongCapture = async () => {
+    //tudor
+    if (this.state.type === Camera.Constants.Type.front) {
+      this.setState({ flipVideo: true })
+      console.log(' FLIP', this.state.flipVideo)
+    } else {
+      this.setState({ flipVideo: false })
+      console.log(' FLIP', this.state.flipVideo)
+    }
     const videoData = await this.camera.recordAsync();
+    videoData.shouldFlip = this.state.flipVideo
     console.log(videoData, ' asta chiar ma intereseazaaaaa')
     this.setState({ capturing: false, captures: [videoData, ...this.state.captures] });
     console.log("video, duration is", (finalPress - firstPress), 's')
@@ -398,6 +408,7 @@ class CameraScreen extends Component {
               </TouchableOpacity>
 
               <TouchableOpacity
+              onPress={() => this.props.salut()}
                 style={{
                   alignSelf: 'flex-end',
                   alignItems: 'center',
@@ -1052,8 +1063,7 @@ class CameraScreen extends Component {
     console.log('---------------------------------')
     return (<View>
       <Overlay isVisible={true}>
-        <Video source={{ uri: this.state.captures[0].uri }} resizeMode="cover" style={{ width: width, height: screenHeight }} shouldPlay isMuted={true} rate={1.0} volume={1.0} isLooping />
-
+      <Video source={{ uri: this.state.captures[0].uri }} resizeMode="cover" style={{ transform: [{ scaleX: this.state.flipVideo ? -1 : 1 },{scaleY:1}], width: width, height: screenHeight }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping />
 
 
 

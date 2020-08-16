@@ -468,7 +468,7 @@ class Timeline extends React.Component {
                 right: 30,
                 bottom: 30,
                 borderRadius: 60
-            }} onPress={() => { this.setState({ showAct: true }) }}>
+            }} onPress={() => this.props.salut()}>
                 <MaterialIcons name="add-circle" size={60} color={theme.colors.blue} />
             </TouchableOpacity>
             <Overlay isVisible={this.state.openFilter} fullScreen animationType="slide">

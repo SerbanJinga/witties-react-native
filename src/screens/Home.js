@@ -10,104 +10,116 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { withNavigation } from 'react-navigation'
 import Timeline from './Timeline/Timeline'
 
- class Home extends Component {
+class Home extends Component {
 
 
 
-  constructor(props){
-      super(props)
-      this.state = {
-        displayName: '',
-        discriminator: '',
-        expoPushToken: '',
-        notification: {},
-        profilePicture: "",
-        index: 1,
-      }
-
+  constructor(props) {
+    super(props)
+    this.state = {
+      displayName: '',
+      discriminator: '',
+      expoPushToken: '',
+      notification: {},
+      profilePicture: "",
+      index: 1,
     }
 
-    changeIndexTimeline = () => {
-      this.setState({
-        index: 2
-      })
+    this.changeIndexTimeline = this.changeIndexTimeline.bind(this)
+    this.changeIndexToCamera = this.changeIndexToCamera.bind(this)
+    this.changeIndexToMain = this.changeIndexToMain.bind(this)
+
+  }
+
+  changeIndexTimeline = () => {
+
+    this.swiper.scrollTo(2)
+  }
+  changeIndexToCamera = () => {
+
+    this.swiper.scrollTo(0)
+  }
+
+  changeIndexToMain = () => {
+
+    this.swiper.scrollTo(1)
+  }
+
+
+
+
+  componentDidMount = async () => {
+    arr = []
+    finalArr = []
+    await this._getToken()
+    await this._getProfilePicture()
+    console.log('basioapfafap')
+
+    console.log(this.state.stories)
+  }
+
+
+
+
+
+
+  _getProfilePicture = async () => {
+    let initialQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
+    let documents = await initialQuery.get()
+    let documentData = documents.data().profilePicture
+    this.setState({
+      profilePicture: documentData
+    })
+
+  }
+
+  _getToken = async () => {
+    let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+    if (status !== 'granted') {
+      console.log('n a mers')
     }
 
-    
-
-    componentDidMount = async() => {
-      arr = []
-      finalArr = []
-      await this._getToken()
-      await this._getProfilePicture()
-      console.log('basioapfafap')
-
-      console.log(this.state.stories)
-    }
+    let token = await Notifications.getExpoPushTokenAsync()
 
 
-  
+    firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
+      tokens: token
+    })
+  }
 
 
 
-    _getProfilePicture = async() => {
-      let initialQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
-      let documents = await initialQuery.get()
-      let documentData = documents.data().profilePicture
-      this.setState({
-        profilePicture: documentData
-      })
-
-    }
-
-    _getToken = async() => {
-      let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-      if(status !== 'granted'){
-        console.log('n a mers')
-      }
-
-      let token = await Notifications.getExpoPushTokenAsync()
 
 
-      firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
-        tokens: token
-      })
-    } 
 
-   
 
-    
+  render() {
+    return (
 
-    
+      <View style={{ flex: 1 }}>
+        <Swiper
+          ref={(swiper) => { this.swiper = swiper; }}
+          onIndexChanged={(index) => { console.log(index) }}
+          loop={false}
+          showsPagination={false}
+          index={this.state.index}>
+          <View style={{ flex: 1 }}>
+            <CameraScreen salut={this.changeIndexToMain} />
+          </View>
 
-    render(){
-        return(
 
-         <View style={{flex: 1}}>
-          <Swiper
-                  loop={false}
-                  showsPagination={false}
-                  index={this.state.index}>
-                    <View style={{flex: 1}}>
-                      <CameraScreen/>
-                    </View>
-                    <Swiper
-                      horizontal={false}
-                      loop={false}
-                      showsPagination={false}
-                      index={1}>
-                      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                        <SearchUsers changeIndex={() => this.changeIndexTimeline()}/>
-                      </SafeAreaView>
-                    </Swiper>        
-                    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                      <Timeline/>
-                    </SafeAreaView>
-       </Swiper>
-</View>
-          )
+          <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+            <SearchUsers changeIndex={() => this.changeIndexTimeline()} />
+          </SafeAreaView>
 
-    }
+          <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+            <Timeline salut={this.changeIndexToCamera} />
+          </SafeAreaView>
+        </Swiper>
+      </View>
+    )
+
+  }
 }
 
 export default withNavigation(Home)
