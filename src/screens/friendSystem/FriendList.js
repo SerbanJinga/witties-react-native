@@ -192,7 +192,10 @@ let roomArrId = []
             messages: [],
             profilePicture: profilePicture,
             roomId: roomId,
-            usersParticipating: twoUserArr
+            otherUser: uid,
+            usersParticipating: twoUserArr,
+            userWhoCreated: firebase.auth().currentUser.uid,
+            twoUserChat: true
         })
         firebase.firestore().collection("users").doc(uid).update({
             chatRoomsIn: firebase.firestore.FieldValue.arrayUnion(roomId)

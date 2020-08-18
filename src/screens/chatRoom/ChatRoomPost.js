@@ -78,7 +78,7 @@ const { height, width } = Dimensions.get('window')
                         <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
                     </SharedElement>
 
-                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
+                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.props.creatorId !== firebase.auth().currentUser.uid ? this.state.displayName : "me"}</Text>
                         <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
                             <Octicons
                                 name="smiley"

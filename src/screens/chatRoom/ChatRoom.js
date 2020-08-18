@@ -52,7 +52,7 @@ class ChatRoom extends Component {
             finishedReloading: false,
             lastVisible: 0,
             extraMessages: [],
-            updateInMata:false,
+            updateInMata: false,
             addParticipants: false
         }
 
@@ -122,30 +122,30 @@ class ChatRoom extends Component {
             sender: firebase.auth().currentUser.uid
         })
 
-        this.state.userData.forEach(user => this.sendNotifications(user.tokens, user.displayName,this.state.roomName , newMessage.msg))
-        
+        this.state.userData.forEach(user => this.sendNotifications(user.tokens, user.displayName, this.state.roomName, newMessage.msg))
+
     }
 
-    sendNotifications = async(token, uid, user, messageSent) => {
+    sendNotifications = async (token, uid, user, messageSent) => {
         const message = {
             to: token,
             sound: 'default',
             title: user,
-            body: uid + " : " +  messageSent,
-            data: {data: 'goes here'},
+            body: uid + " : " + messageSent,
+            data: { data: 'goes here' },
             _displayInForeground: true
         }
 
-        
-    const response = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(message),
-      });
+
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        });
     }
 
     _renderTimestamps = (timestamp) => {
@@ -189,14 +189,14 @@ class ChatRoom extends Component {
         console.log(this.state.roomId)
         console.log('<=========================================>')
 
-        initialData.forEach(user => this.retrieveParticipantDetail(user))
+        initialData.forEach(async user => await this.retrieveParticipantDetail(user))
     }
     retrieveParticipantDetail = async (uid) => {
         let userQuery = firebase.firestore().collection('users').doc(uid)
         let userSnapshot = await userQuery.get()
         let userData = userSnapshot.data()
         userDataArray.push(userData)
-       userDataArray = userDataArray.filter(element => element.uid !== firebase.auth().currentUser.uid)
+        userDataArray = userDataArray.filter(element => element.uid !== firebase.auth().currentUser.uid)
         this.setState({
             userData: userDataArray
         })
@@ -209,17 +209,17 @@ class ChatRoom extends Component {
 
     retrieveData = async () => {
         let query = await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').get()
-        if(query.empty) { return }
+        if (query.empty) { return }
 
         firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp').limitToLast(26).get().then((docs => {
-     
+
             docs.forEach((doc) => { arrDocumentData.push(doc.data()) })
 
 
             // let tata = docs.map(doc => doc.id)
             // console.log(tata)
             // this.reloadData(arrDocumentData)
-            
+
             console.log(arrDocumentData[0].timestamp)
             this.setState({ finishedReloading: true, lastVisible: arrDocumentData[0].timestamp, messages: arrDocumentData })
         }))
@@ -227,21 +227,22 @@ class ChatRoom extends Component {
         firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp', 'desc').limit(1).onSnapshot((doc) => {
             if (this.state.finishedReloading) {
                 let documentData = doc.docs.map(doc => doc.data())
-                if (documentData[0].sender !== firebase.auth().currentUser.uid){
+                if (documentData[0].sender !== firebase.auth().currentUser.uid) {
                     this.setState({
                         messages: [...this.state.messages, documentData[0]]
-                    })            }
-            // let valll = this.state.messages.concat(arrDocumentData)
-            
+                    })
+                }
 
-        }})
+
+            }
+        })
 
 
     }
 
 
     reloadData = (docs) => {
-        console.log('s-a transmis ft bine')        
+        console.log('s-a transmis ft bine')
         this.setState({
             messages: docs
         })
@@ -276,7 +277,7 @@ class ChatRoom extends Component {
             <FlatList
                 data={this.state.userData}
                 renderItem={({ item }) => (
-                    <ChatParticipant displayName={item.displayName} profilePicture={item.profilePicture} discriminator={item.discriminator} mood={item.status.mood} />
+                    <ChatParticipant displayName={item.displayName} profilePicture={item.profilePicture} discriminator={item.discriminator} />
                 )}
                 keyExtractor={(item, index) => String(index)}
             />
@@ -368,37 +369,37 @@ class ChatRoom extends Component {
 
     exitGroup = () => {
         Alert.alert(
-            `Discard picture?`,
+            `Exit Group?`,
             "You can not turn back.",
             [
-              {
-                text: "Cancel",
-                onPress: () => console.log('nimic '),
-                style: 'cancel'
-              },
-              {
-                text: "Discard",
-                onPress: () => this.da(),
-                style: 'destructive'
-              }
+                {
+                    text: "Cancel",
+                    onPress: () => console.log('nimic '),
+                    style: 'cancel'
+                },
+                {
+                    text: "Exit",
+                    onPress: () => this.da(),
+                    style: 'destructive'
+                }
             ],
             { cancelable: false }
-          )
+        )
     }
-     da = async() => {
-         await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
-             chatRoomsIn: firebase.firestore.FieldValue.arrayRemove(this.state.roomId)
-         }).then(this.props.navigation.goBack(null))
+    da = async () => {
+        await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            chatRoomsIn: firebase.firestore.FieldValue.arrayRemove(this.state.roomId)
+        }).then(this.props.navigation.goBack(null))
 
-        }
+    }
 
     refresh = () => {
-        
+
         this.setState({
             refreshing: true
         })
         setTimeout(async () => {
-            
+
             console.log(this.state.lastVisible)
             let additionalQuery = await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').where('timestamp', '<', this.state.lastVisible).orderBy('timestamp', 'desc').limit(20).get()
             let data = additionalQuery.docs.map(doc => doc.data())
@@ -424,8 +425,8 @@ class ChatRoom extends Component {
                 refreshing: false,
                 messages: data
             })
-            
-            this.setState({lastVisible:data[0].timestamp})
+
+            this.setState({ lastVisible: data[0].timestamp })
         }, 500)
     }
     openAddParticipants = () => {
@@ -434,7 +435,7 @@ class ChatRoom extends Component {
         })
     }
 
-    
+
     closeAddParticipants = () => {
         this.setState({
             addParticipants: false
@@ -476,14 +477,14 @@ class ChatRoom extends Component {
                                 <Button titleStyle={{ fontFamily: 'font1', fontSize: 15, margin: 10 }} onPress={() => this.openAddParticipants()} type="clear" title="Add" />
                             </View>
                             <Overlay isVisible={this.state.addParticipants} fullScreen animationType='slide'>
-                                <SafeAreaView style={{flex: 1}}>
+                                <SafeAreaView style={{ flex: 1 }}>
                                     {/* <FriendList close={() => this.closeAddParticipants()}/> */}
-                                    <AddParticipants close={() => this.closeAddParticipants()} roomId={this.state.roomId}/>
+                                    <AddParticipants close={() => this.closeAddParticipants()} roomId={this.state.roomId} />
                                 </SafeAreaView>
                             </Overlay>
                             {this.renderParticipants()}
                             <TouchableOpacity onPress={() => this.exitGroup()}>
-                            <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center', color: 'red'}}>Exit Group</Text>
+                                <Text style={{ fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center', color: 'red' }}>Exit Group</Text>
                             </TouchableOpacity>
                             {/* </ScrollView> */}
                         </SafeAreaView>
@@ -567,11 +568,11 @@ class ChatRoom extends Component {
                             {/* <ScrollView> */}
 
                             <FlatList
-                                refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={() => this.refresh()}/>}
+                                refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={() => this.refresh()} />}
                                 // initialNumToRender={this.state.messages.length / 2}
                                 nestedScrollEnabled={true}
                                 scrollEnabled={true}
-                                onEndReached={()=>{console.log('end ricid')}}
+                                onEndReached={() => { console.log('end ricid') }}
                                 onEndReachedThreshold={0.5}
                                 // initialScrollIndex={this.state.messages.length - 1}
                                 // onScrollToIndexFailed={() => console.log('failed')}

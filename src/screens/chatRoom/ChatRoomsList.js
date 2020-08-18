@@ -92,24 +92,37 @@ class ChatRoomsList extends Component {
     }
 
     getChats = async (usersChats) => {
+        // arr = []
+
         usersChats.forEach(async chat => {
-            let query = await firebase.firestore().collection('messages').doc(chat).get()
+             firebase.firestore().collection('messages').doc(chat).onSnapshot(async doc => {
+                // arr = []
             
             
-            let chatName = query.data().chatRoomName
-            let chatPicture = query.data().profilePicture
-            let chatId = query.data().roomId
+            let chatName = doc.data().chatRoomName
+            let chatPicture = doc.data().profilePicture
+            let chatId = doc.data().roomId
+            let chatCreator = doc.data().userWhoCreated
+            let twoUserChat = doc.data().twoUserChat
+            if(chatCreator !== firebase.auth().currentUser.uid && twoUserChat === true){
+                let otherQuery = await firebase.firestore().collection('users').doc(doc.data().userWhoCreated).get()
+                let displayName = await otherQuery.data().displayName
+                chatName = displayName
+                // console.log('asta merge')
+            }
             let foo = {
                 chatName: chatName,
                 chatPicture: chatPicture,
                 roomId: chatId
             }
+            // arr = []
             arr.push(foo)
             this.setState({
                 documentData: arr
             })
             console.log(foo, 'se updateaza')
         })
+    })
     }
     
     _retriveMore = async () => {

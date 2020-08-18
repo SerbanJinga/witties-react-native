@@ -22,7 +22,6 @@ export default class ChatParticipant extends Component {
                     <Avatar size={40} rounded source={{uri: this.props.profilePicture}}/>
                     <View style={{flex: 1, flexDirection: 'column',}}>
                     <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.props.displayName}#{this.props.discriminator}</Text>
-                    <Text style={{fontFamily: 'font2', marginLeft: 4}}>{this.props.mood}</Text>
                     </View>
 
                 </View>
