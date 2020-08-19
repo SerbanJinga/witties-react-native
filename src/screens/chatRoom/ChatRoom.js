@@ -121,8 +121,10 @@ class ChatRoom extends Component {
             msg: msg,
             sender: firebase.auth().currentUser.uid
         })
-
-        this.state.userData.forEach(user => this.sendNotifications(user.tokens, user.displayName, this.state.roomName, newMessage.msg))
+        let temp = this.state.userData
+        // userDataArray = userDataArray.filter(element => element.uid !== firebase.auth().currentUser.uid)
+        temp = temp.filter(element => element.uid !== firebase.auth().currentUser.uid)
+        temp.forEach(user => this.sendNotifications(user.tokens, user.displayName, this.state.roomName, newMessage.msg))
 
     }
 
@@ -196,7 +198,7 @@ class ChatRoom extends Component {
         let userSnapshot = await userQuery.get()
         let userData = userSnapshot.data()
         userDataArray.push(userData)
-        userDataArray = userDataArray.filter(element => element.uid !== firebase.auth().currentUser.uid)
+        // userDataArray = userDataArray.filter(element => element.uid !== firebase.auth().currentUser.uid)
         this.setState({
             userData: userDataArray
         })
@@ -503,21 +505,26 @@ class ChatRoom extends Component {
                                     </TouchableOpacity>
                                 </View>
                                 <Divider style={{ marginTop: 10 }} />
-                                <TouchableOpacity style={{ padding: 10 }}>
+                                <TouchableOpacity style={{ padding: 10 }} onPress={() => {
+                                    this._closeChatSettings()
+                                    this.openAddParticipants()
+                                }}>
                                     <Text style={{ fontFamily: 'font1', fontSize: 18 }}>Add Participant</Text>
                                 </TouchableOpacity>
                                 <Divider style={{ marginTop: 0 }} />
 
-                                <TouchableOpacity style={{ padding: 10, paddingBottom: 20 }}>
+                                <TouchableOpacity style={{ padding: 10, paddingBottom: 20 }} onPress={() => {
+                                    this.changePhoto()
+                                }}>
                                     <Text style={{ fontFamily: 'font1', fontSize: 18 }}>Change Group Photo</Text>
                                 </TouchableOpacity>
                                 <Divider style={{ marginTop: 0 }} />
-                                <TouchableOpacity style={{ padding: 10 }}>
+                                <TouchableOpacity style={{ padding: 10 }} onPress={() => this.exitGroup()}>
                                     <Text style={{ fontFamily: 'font1', fontSize: 18, color: 'red' }}>Exit Group</Text>
                                 </TouchableOpacity>
                                 <Divider style={{ marginTop: 0 }} />
 
-                                <TouchableOpacity style={{ padding: 10 }}>
+                                <TouchableOpacity style={{ padding: 10 }} onPress={() => this._closeChatSettings()}>
                                     <Text style={{ fontFamily: 'font1', fontSize: 18, color: '#b2b8c2', alignSelf: 'center' }}>Done</Text>
                                 </TouchableOpacity>
                             </SafeAreaView>

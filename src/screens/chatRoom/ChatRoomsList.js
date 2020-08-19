@@ -42,19 +42,31 @@ class ChatRoomsList extends Component {
     }
 
 
-    searchChats = (searchChats) => {
+    searchChats = async(searchChats) => {
         this.setState({searchChats: searchChats})
-        let filteredData = this.state.documentData.filter(function(item){
-            return item.chatRoomName.includes(searchChats)
+        // let filteredData = this.state.documentData.filter(function(item){
+        //     return item.chatRoomName.includes(searchChats)
+        // })
+        // this.setState({filteredData: filteredData})
+        console.log('se schimba...')
+        let data = this.state.documentData
+        let filteredData = data.filter(item => item.chatName.includes(searchChats))
+        this.setState({
+            filteredData: filteredData
         })
-        this.setState({filteredData: filteredData})
-      }
+
+        // this.setState({
+            // filteredData: data
+        // })
+    }
+      
+
     componentDidMount = async () => {
         groupsIn = []
         arr = []
         grupuri = []
-        await this._retrieveData()
-       
+        // await this._retrieveData()
+       await this._retrieveChats()
 
     }
 
@@ -77,6 +89,32 @@ class ChatRoomsList extends Component {
         console.log(this.state.gruperino)
     }
 
+    _retrieveChats = async () => {
+        firebase.firestore().collection('messages').where('usersParticipating', 'array-contains', firebase.auth().currentUser.uid).onSnapshot((doc) => {
+            arr = []
+            let documentData = doc.docs.map(doc => doc.data())
+            documentData.forEach(async document => {
+                let foo = {
+                    chatName: document.chatRoomName,
+                    chatPicture: document.profilePicture,
+                    roomId: document.roomId
+                }
+                if(document.userWhoCreated !== firebase.auth().currentUser.uid && document.twoUserChat === true){
+                    let otherQuery = await firebase.firestore().collection('users').doc(document.userWhoCreated).get()
+                    let displayName = await otherQuery.data().displayName
+                    foo.chatName = displayName
+                }
+                arr.push(foo)
+                console.log(arr)
+            
+                this.setState({
+                    documentData: arr
+                })
+            })
+            
+        })
+    }
+
     _retrieveData = async () => {
     
     const uid = firebase.auth().currentUser.uid
@@ -95,13 +133,13 @@ class ChatRoomsList extends Component {
         // arr = []
 
         usersChats.forEach(async chat => {
-             firebase.firestore().collection('messages').doc(chat).onSnapshot(async doc => {
+            arr = [] 
+            firebase.firestore().collection('messages').doc(chat).onSnapshot(async doc => {
                 // arr = []
-            
             
             let chatName = doc.data().chatRoomName
             let chatPicture = doc.data().profilePicture
-            let chatId = doc.data().roomId
+            let chatId = await doc.data().roomId
             let chatCreator = doc.data().userWhoCreated
             let twoUserChat = doc.data().twoUserChat
             if(chatCreator !== firebase.auth().currentUser.uid && twoUserChat === true){
@@ -116,13 +154,23 @@ class ChatRoomsList extends Component {
                 roomId: chatId
             }
             // arr = []
+       
             arr.push(foo)
+            console.log(arr)
             this.setState({
                 documentData: arr
-            })
+            })         
+            for(let i = 0; i < this.state.documentData.length; i++){
+                if (arr[i].roomId === chatId){
+                    const index = arr.indexOf(i)
+                    arr.splice(index, 1)
+                }
+            }
+            // this.componentDidMount()
             console.log(foo, 'se updateaza')
         })
     })
+   
     }
     
     _retriveMore = async () => {
@@ -244,7 +292,7 @@ class ChatRoomsList extends Component {
                             <Room profilePicture={item.chatPicture} roomId={item.roomId} chatRoomName={item.chatName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatName, roomId: item.roomId, profilePicture: item.chatPicture }) }/>
                         )}
                         keyExtractor={(item, index) => String(index)}
-                        ListHeaderComponent={this.renderHeader}
+                        // ListHeaderComponent={this.renderHeader}
                         ListFooterComponent={this.renderFooter}
                         onEndReached={this.retrieveMore}
                         onEndReachedThreshold={0}

@@ -177,6 +177,30 @@ class CameraScreen extends Component {
     })
   }
 
+  askPermissionAgain = () => {
+    Alert.alert(
+      `You need to give permission.`,
+      "",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log('nimic '),
+          style: 'cancel'
+        },
+        {
+          text: "Give permission",
+          onPress: () => this.givePermission(),
+          style: 'destructive'
+        }
+      ],
+      { cancelable: false }
+    )
+  }
+
+  givePermission = async () => {
+    await Permissions.askAsync(Permissions.CAMERA, Permissions.AUDIO_RECORDING).then(this.componentDidMount())
+
+  }
   componentDidMount = async () => {
     await Permissions.askAsync(Permissions.CAMERA, Permissions.AUDIO_RECORDING)
     await Font.loadAsync({
@@ -187,11 +211,7 @@ class CameraScreen extends Component {
 
     })
 
-
-    await this.camera.getSupportedRatiosAsync().then(res => {
-      console.log('arrrrrrr', res)
-    })
-    await this._getProfilePicture()
+    
     const { status } = await Camera.requestPermissionsAsync()
     this.setState({ hasPermission: status })
     if (this.state.hasPermission === null) {
@@ -275,8 +295,8 @@ class CameraScreen extends Component {
         })
       } else {
         console.log('A intrat in video overlay ipotetic', result)
-        
-        let videores = {uri:result.uri}
+
+        let videores = { uri: result.uri }
         this.setState({ capturing: false, captures: [videores, ...this.state.captures] });
       }
     }
@@ -368,7 +388,7 @@ class CameraScreen extends Component {
           <Camera mirror={false} ratio="2:1" style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
 
             <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={() => this.openSettings()}
                 activeOpacity={0.8}
                 style={{
@@ -380,7 +400,7 @@ class CameraScreen extends Component {
                   name="settings"
                   style={{ color: "#fff", fontSize: 30 }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity
                 style={{
                   alignSelf: 'flex-end',
@@ -394,7 +414,7 @@ class CameraScreen extends Component {
                 />
               </TouchableOpacity>
 
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   alignSelf: 'flex-end',
                   alignItems: 'center',
@@ -405,10 +425,10 @@ class CameraScreen extends Component {
                   name={this.state.locationIcon}
                   style={{ color: "#fff", fontSize: 30 }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               <TouchableOpacity
-              onPress={() => this.props.salut()}
+                onPress={() => this.props.salut()}
                 style={{
                   alignSelf: 'flex-end',
                   alignItems: 'center',
@@ -1063,7 +1083,7 @@ class CameraScreen extends Component {
     console.log('---------------------------------')
     return (<View>
       <Overlay isVisible={true}>
-      <Video source={{ uri: this.state.captures[0].uri }} resizeMode="cover" style={{ transform: [{ scaleX: this.state.flipVideo ? -1 : 1 },{scaleY:1}], width: width, height: screenHeight }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping />
+        <Video source={{ uri: this.state.captures[0].uri }} resizeMode="cover" style={{ transform: [{ scaleX: this.state.flipVideo ? -1 : 1 }, { scaleY: 1 }], width: width, height: screenHeight }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping />
 
 
 
@@ -1478,8 +1498,13 @@ class CameraScreen extends Component {
       }
 
     } else {
-      return (
-        <ActivityIndicator size="large" />
+      return (<View style={{marginVertical:300}}>
+        
+          <TouchableOpacity onPress={() => { this.askPermissionAgain() }} >
+          <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center',color:'#0984e3'}}>You need to give permissions to camera!</Text>
+            </TouchableOpacity>
+        
+        </View>
       )
     }
   }

@@ -43,13 +43,14 @@ class Room extends Component {
             fontsLoaded: true
         })
 
-        await this.sentStreakVideo()
+        // await this.sentStreakVideo()
         await this.hasStreakVideoFunction()
 
         firebase.firestore().collection('messages').doc(this.props.roomId).collection('chats').orderBy('timestamp', 'desc').onSnapshot((doc) => {
           if(doc.empty){
             return
           }
+          // lastMessage = ""
           let lastMessage = doc.docs.map(doc => doc.data().msg)
           
           this.setState({

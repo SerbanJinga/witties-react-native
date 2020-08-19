@@ -30,6 +30,9 @@ import Map from './src/screens/map/Map';
 import ChooseProfilePicture from './src/screens/login/ChooseProfilePicture'
 import TimelinePostDetail from './src/screens/Timeline/TimelinePostDetail'
 import TutorialSlider from './src/screens/login/TutorialSlider'
+import SeeAllFriends from './src/screens/friendSystem/SeeAllFriends'
+import SeeAllChats from './src/screens/friendSystem/SeeAllChats'
+
 require('firebase/firestore');
 
 
@@ -143,7 +146,9 @@ const navigator = createStackNavigator(
     ChooseProfilePicture: ChooseProfilePicture,
     Map: Map,
     TimelinePostDetail: TimelinePostDetail,
-    TutorialSlider: TutorialSlider
+    TutorialSlider: TutorialSlider,
+    SeeAllFriends: SeeAllFriends,
+    SeeAllChats: SeeAllChats
   },{
     initialRouteName: 'Auth',
     headerMode: null,

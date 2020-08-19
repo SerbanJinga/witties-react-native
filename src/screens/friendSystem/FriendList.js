@@ -94,9 +94,10 @@ let roomArrId = []
             })
         })
         this.setState({
-            nextOverlay: false
+            nextOverlay: false,
         })
-        this.props.navigation.navigate('Home')
+        // this.props.navigation.navigate('Home')
+        this.props.close()
     }
 
     createChatRoom = () => {
@@ -241,7 +242,7 @@ let roomArrId = []
                 <FlatList
                  data = {this.state.documentData}
                     renderItem={({item}) => (
-                        <Friend press={() => this.press(item.uid, item.profilePicture, item.displayName)} discriminator={item.discriminator} mama={this.addUserToChatRoom} tata={this.removeUserFromChatRoom} profilePicture={item.profilePicture} displayName={item.displayName} uid={item.uid} />
+                        <Friend press={() => this.state.chatRoomIds.length > 1 ? console.log('da') : this.press(item.uid, item.profilePicture, item.displayName)} discriminator={item.discriminator} mama={this.addUserToChatRoom} tata={this.removeUserFromChatRoom} profilePicture={item.profilePicture} displayName={item.displayName} uid={item.uid} />
                     )}   
                 keyExtractor={(item, index) => String(index)}
                 ListHeaderComponent={this.renderHeader}
@@ -260,8 +261,8 @@ let roomArrId = []
                         fadeInDuration={750}
                     /> 
 
-            <Overlay overlayStyle={{width: width, height: height}} animationType="fade" isVisible={this.state.nextOverlay}>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
+            <Overlay fullScreen animationType="fade" isVisible={this.state.nextOverlay}>
+                    <SafeAreaView style={{flex: 1, flexDirection: 'column'}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <TouchableOpacity
                         onPress={()=> this.closeOverlay()}
@@ -299,7 +300,7 @@ let roomArrId = []
                         <Divider/>
                         </View>
                         </View>
-                    </View>
+                    </SafeAreaView>
             </Overlay>
             </SafeAreaView>
         )

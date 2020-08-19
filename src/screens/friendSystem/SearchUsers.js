@@ -420,9 +420,33 @@ let addedMe = []
 
 
     _deletePicture = () => {
-        alert("ai ales")
+        Alert.alert(
+            `Delete your profile picture?.`,
+            "",
+            [
+              {
+                text: "Cancel",
+                onPress: () => console.log('nimic '),
+                style: 'cancel'
+              },
+              {
+                text: "Delete",
+                onPress: () => this.delete(),
+                style: 'destructive'
+              }
+            ],
+            { cancelable: false }
+          )
     }
 
+    delete = async() => {
+        
+        await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            profilePicture: ''
+        }).then(this.setState({
+            imageUri: ""
+        }))
+    }
     
     _pickImage = async() => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -795,7 +819,6 @@ let addedMe = []
                    <Entypo name="dot-single" style={{marginTop: 4, marginHorizontal: 4}}/>
                    <Text style={{fontFamily: "font1", fontSize: 15}}>{this.state.careScore}</Text>
                    </View>
-                   <Button onPress={()=> this.addToStory()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add to story"/>
    
                    </View>
                    <View style={{flex: 1, flexDirection: 'column', marginTop: 20}}>
@@ -803,13 +826,18 @@ let addedMe = []
                    
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                   <Text style={{fontFamily: 'font1', fontSize: 15, margin: 10}}>Friends</Text>
-                  <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
+                  <Button onPress={()=> {this.closeProfileDetails() 
+                  this._onCloseAvatar()
+                  this._onPressSearch()}} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
                 </View>
                 <View style={{height: 80}}>
                     <AllFriends press={() => this._onCloseAvatar()}/>
                 </View>
-                   
+                   <TouchableOpacity  onPress={() =>{ this.closeProfileDetails() 
+                   this._onCloseAvatar() 
+                   this.props.navigation.navigate('SeeAllFriends')}}>
                 <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>See All</Text>
+                </TouchableOpacity>
                 <Divider style={{width: width, marginTop: 20}}/>
                 
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -820,8 +848,11 @@ let addedMe = []
                     {/* <AllFriends/> */}
                 <AllChatsComponent/>
                 </View>
+                <TouchableOpacity onPress={() => { this.closeProfileDetails()
+                this._onCloseAvatar()
+                this.props.navigation.navigate('SeeAllChats')}}>
                 <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center'}}>See All</Text>
- 
+                </TouchableOpacity>
                    </View>
 
                    

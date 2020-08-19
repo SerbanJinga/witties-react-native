@@ -202,36 +202,10 @@ class StoriesPublic extends Component {
 
 
   render() {
-    if (this.state.fontsLoaded) {
+    // if (this.state.fontsLoaded) {
       return (
         <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl tintColor="red" onRefresh={() => this.onRefresh()} refreshing={this.state.refreshing} />}>
-          {/* <Text style={{ fontFamily: 'font1', fontSize: 24, margin: 10 }}>News</Text>
-
-          <SafeAreaView style={styles.container} >
-            {1 !== 0 ?
-              <FlatList
-                horizontal
-                scrollEnabled
-                showsHorizontalScrollIndicator={false}
-                scrollEventThrottle={16}
-                snapToAlignment='center'
-                style={[styles.shadow, { overflow: 'visible' }]}
-                data={this.state.documentData}
-                renderItem={({ item, index }) => (
-                  <View key={index}>
-                    {(typeof (item.video) == 'undefined') ?
-                      <Status activity={item.activity} mood={item.mood} text={item.text} creatorId={item.creatorId} timestamp={item.timestamp} image={item.image} press={() => this.onPress(item)} />
-                      : <Text>da</Text>}
-                  </View>
-                )}
-                keyExtractor={(item, index) => String(index)}
-                ListHeaderComponent={this.renderHeader}
-                onEndReached={this.retrieveMore}
-                onEndReachedThreshold={0}
-                refreshing={this.state.refreshing}
-              /> : <Text style={{ fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center' }}>You currently have no stories to see.</Text>
-            }
-          </SafeAreaView> */}
+    
 
           <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ fontFamily: 'font1', fontSize: 24, margin: 10 }}>Messages</Text>
@@ -249,9 +223,9 @@ class StoriesPublic extends Component {
           </Overlay>
         </ScrollView>
       )
-    } else {
-      return (<ActivityIndicator size="large" />)
-    }
+    // } else {
+      // return (<ActivityIndicator size="large" />)
+    // }
   }
 }
 
