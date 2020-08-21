@@ -303,23 +303,16 @@ export default class Map extends React.Component {
             text = JSON.stringify(this.state.location)
 
         return (<View style={{ flex: 1 }}>
-            <SafeAreaView style={{position:'absolute', top:40, left:10,zIndex:4}}>
-                <Button onPress={()=> this.props.navigation.navigate('Home')} title="" type='clear' icon={<AntDesign name={'close'} size={18} />} containerStyle={{
+            <Button title="" type='clear' icon={<MaterialIcons name={'my-location'} size={28} />} containerStyle={{
+                    position:'absolute',
+                    right:10,
+                    
+                    bottom:100,
+                    zIndex:1,
                     borderRadius: 30,
+                    
                     backgroundColor: '#f5f6fa',
-                    }}/>
-            </SafeAreaView>
-            <View style={{ flex: 1, flexDirection: "row-reverse", justifyContent: 'space-between', position: "absolute", bottom: 30, right: 15, left: 15, zIndex: 1, height: 60}}>
-                {/* <Button title="" type='clear' icon={<MaterialCommunityIcons name={'timetable'} size={28} />} containerStyle={{
-                    borderRadius: 30, marginHorizontal: 5, backgroundColor: '#f5f6fa',
-                }}
-                    onPress={() => { this.state.mode === 'pic' ? this.setState({ mode: 'future' }) : this.setState({ mode: 'pic' }) }}
-                /> */}
-                <Button title="" type='clear' icon={<MaterialIcons name={'my-location'} size={28} />} containerStyle={{
-                    borderRadius: 30,
-                    marginHorizontal: 5,
-                    backgroundColor: '#f5f6fa',
-                    height: 45
+                    height: 45,
                 }} onPress={() => {
                     this.setState({ animating: true })
                     this.map.animateToRegion({
@@ -330,6 +323,19 @@ export default class Map extends React.Component {
                     }, 1000)
                     console.log(this.state.location, "te")
                 }} />
+            <SafeAreaView style={{position:'absolute', top:40, left:10,zIndex:4}}>
+                <Button onPress={()=> this.props.navigation.navigate('Home')} title="" type='clear' icon={<AntDesign name={'close'} size={18} />} containerStyle={{
+                    borderRadius: 30,
+                    backgroundColor: '#f5f6fa',
+                    }}/>
+            </SafeAreaView>
+            <View style={{ flex: 1, flexDirection: "row-reverse", justifyContent: 'space-between', position: "absolute", bottom: 15, right: 15, left: 15, zIndex: 1, height: 60}}>
+                {/* <Button title="" type='clear' icon={<MaterialCommunityIcons name={'timetable'} size={28} />} containerStyle={{
+                    borderRadius: 30, marginHorizontal: 5, backgroundColor: '#f5f6fa',
+                }}
+                    onPress={() => { this.state.mode === 'pic' ? this.setState({ mode: 'future' }) : this.setState({ mode: 'pic' }) }}
+                /> */}
+                
                 <FlatList
                     pagingEnabled
                   horizontal

@@ -1,15 +1,13 @@
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, Text, Image, ActivityIndicator } from 'react-native'
 import * as theme from '../../styles/theme'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Octicons from 'react-native-vector-icons/Octicons'
 import firebase from 'firebase'
-import * as Font from 'expo-font'
 import { Video } from 'expo-av'
 import { Overlay } from 'react-native-elements'
 const { height, width } = Dimensions.get('window')
-
-export default class VideoComponent extends Component {
+import { withNavigation } from 'react-navigation'
+class VideoComponent extends Component {
 
     constructor(props){
         super(props)
@@ -69,14 +67,15 @@ export default class VideoComponent extends Component {
     }
 
     render(){
+        const { navigation } = this.props
         return(
 
 
  <TouchableOpacity
                 activeOpacity={0.8}
                 style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10}}
-                onPress={() => console.log('m-ai apasat')}
-                onLongPress={() => this.openOnLongPress()}>
+                onPress={() => navigation.push('ChatRoomPostDetail', { video: this.props.video, timestamp: this.props.timestamp })}
+                >
                 <View
                     style={[styles.flex, styles.shadow]}
                     imageStyle={{ borderRadius: theme.sizes.radius }}
@@ -93,14 +92,12 @@ export default class VideoComponent extends Component {
                                 size={theme.sizes.font * 0.8}
                                 color={theme.colors.white}
                             />
-                            <Text> {this.props.text}</Text>
+                            <Text>{this.props.msg}</Text>
                         </Text>
                         </View>
                         </Video>
                 </View>
-            <Overlay onBackdropPress={() => this.closeOnLongPress()} isVisible={this.state.overlay} overlayStyle={{position: 'absolute', bottom: 0, width: width}}>
-                <Text>like video </Text>
-            </Overlay>
+           
             </TouchableOpacity>
             )
     }
@@ -228,3 +225,4 @@ const styles = StyleSheet.create({
         borderColor: theme.colors.active,
     }
 });
+export default withNavigation(VideoComponent)

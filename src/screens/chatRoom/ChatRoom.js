@@ -449,7 +449,7 @@ class ChatRoom extends Component {
             <SafeAreaView style={{ flex: 1 }}>
 
                 <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"} style={styles.container}>
-                    <Overlay overlayStyle={{ width: width, height: height }} isVisible={this.state.changeChatOverlay} animationType="slide">
+                    <Overlay fullScreen isVisible={this.state.changeChatOverlay} animationType="slide">
                         <SafeAreaView style={{ flex: 1 }}>
                             {/* <ScrollView style={{flex: 1}}> */}
                             <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -596,12 +596,12 @@ class ChatRoom extends Component {
                                                     postedFor={item.hoursPosted}
                                                     activity={item.activity}
                                                     mood={item.mood}
-                                                    text={item.text}
+                                                    msg={item.msg}
                                                     creatorId={item.creatorId}
                                                     timestamp={item.timestamp}
                                                     image={item.image}
                                                 /> :
-                                                <VideoComponent timestamp={item.timestamp} item={item} video={item.video} creatorId={item.creatorId} text={item.text} />
+                                                <VideoComponent timestamp={item.timestamp} item={item} video={item.video} creatorId={item.creatorId} msg={item.msg} />
                                         }
 
                                         {/* <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> */}

@@ -5,10 +5,12 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Octicons from 'react-native-vector-icons/Octicons'
 import firebase from 'firebase'
 import * as Font from 'expo-font'
-import { withNavigation } from 'react-navigation'
-import { SharedElement } from 'react-native-shared-element'
+import TimelineOverlay from './TimelineOverlay'
 const { height, width } = Dimensions.get('window')
- class ChatRoomPost extends Component {
+const screenHeight = Dimensions.get('screen').height
+const screenWidth = Dimensions.get('screen').width
+import * as VideoThumbnails from 'expo-video-thumbnails'
+export default class TimelineVideoPost extends Component {
 
     constructor(props) {
         super(props)
@@ -18,82 +20,121 @@ const { height, width } = Dimensions.get('window')
             fontsLoaded: false,
             marginLeft: 0,
             marginRight: 0,
+            showOptions: false,
+            imageShown: ""
         }
     }
 
-    _renderTimestamps = (timestamp) => {
-        let date = new Date(timestamp * 1000)
-        let hours = date.getHours()
-        let minutes = "0" + date.getMinutes()
-        let seconds = "0" + date.getSeconds()
-
-        let formattedTime = hours + ":" + minutes.substr(-2) + ':' + seconds.substr(-2)
-        return formattedTime
-    }
-
-    getData = async (uid) => {
-        await firebase.firestore().collection('users').doc(uid).get().then(res => {
-            let displayName = res.data().displayName
-            let profilePicture = res.data().profilePicture
-            this.setState({ displayName: displayName, profilePicture: profilePicture })
+    generateThumbanil = async () => {
+        const video = this.props.video
+        const { uri } = await VideoThumbnails.getThumbnailAsync(video)
+        this.setState({
+            imageShown: uri
         })
-
-    }
-    componentDidMount = async () => {
-        console.log(this.props.creatorId,"ar trebui sa fie egal cu ",firebase.auth().currentUser.uid)
-        console.log("-----------------------------------------")
-        console.log(this.state.date)
-        console.log("-----------------------------------------")
-        await this.getData(this.props.creatorId)
-
-        this.setState({ fontsLoaded: true })
-        // if (this.props.creatorId == firebase.auth().currentUser.uid)
-        //     this.setState({
-        //         marginLeft: 50,
-        //         marginRight: 0
-        //     })
-        // else
-        //     this.setState({
-        //         marginLeft: 0,
-        //         marginRight: 50
-        //     })
     }
 
+
+
+    _renderTimestamps = (timestamp) => {
+        let date = new Date(timestamp)
+        let day = date.getDate()
+        let month = date.getMonth() + 1
+        switch (month) {
+            case 1: month = 'Jan'
+                break;
+            case 2: month = 'Feb'
+                break;
+            case 3: month = 'Mar'
+                break;
+            case 4: month = 'Apr'
+                break;
+            case 5: month = 'May'
+                break;
+            case 6: month = 'Jun'
+                break;
+            case 7: month = 'Jul'
+                break;
+            case 8: month = 'Aug'
+                break;
+            case 9: month = 'Sep'
+                break;
+            case 10: month = 'Oct'
+                break;
+            case 11: month = 'Nov'
+                break;
+            case 12: month = 'Dec'
+                break;
+        }
+
+        //let year = date.getUTCFullYear()
+
+        return (<View style={{
+            position: 'absolute', top: 5, left: 5, width: 30, height: 30,
+            backgroundColor: 'white', justifyContent: "center", alignItems: "center",
+            borderRadius: 5,
+        }}>
+            <Text style={{ fontSize: 8 }}>{day}</Text>
+            <Text style={{ fontSize: 8 }}>{month}</Text>
+        </View>)
+
+
+    }
+
+    // getData = async (uid) => {
+    //     await firebase.firestore().collection('users').doc(uid).get().then(res => {
+    //         let displayName = res.data().displayName
+    //         let profilePicture = res.data().profilePicture
+    //         this.setState({ displayName: displayName, profilePicture: profilePicture })
+    //     })
+    //}
+    componentDidMount = async() => {
+        // console.log(this.props.creatorId,"ar trebui sa fie egal cu ",firebase.auth().currentUser.uid)
+        // console.log("-----------------------------------------")
+        // console.log(this.state.date)
+        // console.log("-----------------------------------------")
+        // await this.getData(this.props.creatorId)
+
+        await this.generateThumbanil()
+    }
+/*  */
     render() {
-        const { navigation } = this.props
 
         return (
             <TouchableOpacity
-                activeOpacity={0.8} 
-                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10 }}
-                onPress={() => navigation.push('ChatRoomPostDetail', { image: this.props.image, timestamp: this.props.timestamp })}>
-                 <ImageBackground
-                    style={[styles.flex, styles.destination, styles.shadow]}
-                    imageStyle={{ borderRadius: theme.sizes.radius }}
-                    source={{ uri: this.props.image }}
+                activeOpacity={0.8}
+                style={{}}
+                onLongPress={() => {
+                    console.log("Saluttt")
+                    this.props.showOverlay(this.props.id)
+                }}
+                onPressIn={() => { console.log("Press In") }}
+            onPress={() => this.props.press()}
+            >
+               
+                <ImageBackground
+                    style={[styles.flex, styles.destination]}
+                    imageStyle={{ borderColor: 'black', borderWidth: 1 }}
+                    source={{ uri: this.state.imageShown }}
                 >
+                    {this._renderTimestamps(this.props.timestamp)}
                     <View style={[styles.column, { justifyContent: 'center' }]}>
-                    <SharedElement id={this.props.image}>
-
                         <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
-                    </SharedElement>
-
-                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.props.creatorId !== firebase.auth().currentUser.uid ? this.state.displayName : "me"}</Text>
+{/* 
+                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
                         <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
                             <Octicons
                                 name="smiley"
                                 size={theme.sizes.font * 0.8}
                                 color={theme.colors.white}
                             />
-                            <Text> {this.props.msg}</Text>
-                        </Text>
+                            <Text> {this.props.text}</Text>
+                        </Text> */}
 
 
                     </View>
                 </ImageBackground>
-               
 
-            </TouchableOpacity>
+            </TouchableOpacity >
 
 
         )
@@ -128,11 +169,11 @@ const styles = StyleSheet.create({
         paddingBottom: 30,
     },
     destination: {
-        width: width - (theme.sizes.padding * 7),
+        width: width / 3,
         height: width * 0.5,
-        marginHorizontal: theme.sizes.margin / 4,
-        paddingHorizontal: theme.sizes.padding / 4,
-        paddingVertical: theme.sizes.padding * 0.66,
+        // marginHorizontal: theme.sizes.margin / 4,
+        // paddingHorizontal: theme.sizes.padding / 4,
+        // paddingVertical: theme.sizes.padding * 0.66,
         borderRadius: theme.sizes.radius,
     },
     destinationInfo: {
@@ -229,4 +270,3 @@ const styles = StyleSheet.create({
 //<Text>Mood: {this.props.mood}</Text>
 //<Text>Text: {this.props.text}</Text>
 //<Text>Cine a pus story: {this.props.creatorId}</Text>
-export default withNavigation(ChatRoomPost)

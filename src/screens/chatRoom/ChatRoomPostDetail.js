@@ -1,15 +1,17 @@
 import React, { Component } from 'react'
-import { StyleSheet, Image, Dimensions } from 'react-native'
+import { View, Image, Dimensions } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { SharedElement } from 'react-native-shared-element'
 const { width, height } = Dimensions.get('screen')
+import {Video} from 'expo-av'
 class ChatRoomPostDetail extends Component {
    
     constructor(props){
         super(props)
         this.state = {
             image: props.navigation.state.params.image,
-            timestamp: props.navigation.state.params.timestamp
+            timestamp: props.navigation.state.params.timestamp,
+            video: props.navigation.state.params.video
 
         }
     }
@@ -19,21 +21,21 @@ class ChatRoomPostDetail extends Component {
     }
 
     render(){
-        return(
-            // <View style={{flex: 1, alignItems: 'center', width: '100%', height: '100%'}}>
-            <SharedElement id={this.state.timestamp} style={StyleSheet.absoluteFill}>
-                <Image source={{uri: this.state.image}} style={{width: width, height: height, resizeMode: 'contain'}}/>
-            </SharedElement>
-            // </View>
-            )
-    }
+        if(typeof this.state.video === 'undefined'){
+            return (
+                
+                <View style={{ flex: 1 }}>
+                    <Image source={{ uri: this.state.image }} style={{width: width, height: height}} />
+                </View>
+            )}else { return(<View style={{flex: 1}}>
+                    <Video source={{uri: this.state.video}} resizeMode="cover" style={{width: width, height: height}} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+                </View>)
+            }
+        }
 }
 
 
-ChatRoomPostDetail.sharedElements = (navigation, otherNavigation, showing) => {
-    const item = navigation.getParam('timestamp');
-    return [item];
-  };
+
 
 
 export default withNavigation(ChatRoomPostDetail)

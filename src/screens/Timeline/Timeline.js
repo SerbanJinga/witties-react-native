@@ -29,6 +29,7 @@ import firebase from 'firebase';
 import { divide } from "react-native-reanimated";
 const screenHeight = Dimensions.get('screen').height;
 import TimelinePost from './TimelinePost'
+import TimelineVideoPost from './TimelineVideoPost'
 import TimelineOverlay from "./TimelineOverlay";
 import { indexOf } from "lodash";
 import { withNavigation } from "react-navigation";
@@ -328,16 +329,17 @@ class Timeline extends React.Component {
 
     //---------------------------------------------------Data retrival------------------------------------
     async retrieveData() {
-        let initialQuery = await firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc")
-        let documentSnapshots = await initialQuery.get()
-        let documentData = documentSnapshots.docs.map(document => document.data())
-        let idMap = documentSnapshots.docs.map(document => document.id)
-        for (let i = 0; i < idMap.length; i++) {
-            documentData[i].id = idMap[i]
-        }
 
-        let query = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
-        let data = await query.data().displayName
+        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").onSnapshot((doc) => {
+            let data = doc.docs.map(doc => doc.data())
+            let idMap = doc.docs.map(doc => doc.id)
+            for(let i = 0; i < idMap.length; i++){
+                data[i].id = idMap[i]
+            }
+            this.setState({
+                documentData: data
+            })
+        })
         this.setState({
             userName: data
         })
@@ -426,7 +428,8 @@ class Timeline extends React.Component {
 
                     data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                     renderItem={({ item, index }) => (
-
+                       <View key={index}>
+                        {typeof (item.video) === 'undefined' ? 
                         <TimelinePost
                             postedFor={item.hoursPosted}
                             activity={item.activity}
@@ -440,8 +443,21 @@ class Timeline extends React.Component {
 
                             press={() => this.props.navigation.navigate('TimelinePostDetail', { imageUri: item.image })}
 
-                        />
+                        />: <TimelineVideoPost
+                            postedFor={item.hoursPosted}
+                            activity={item.activity}
+                            mood={item.mood}
+                            text={item.text}
+                            creatorId={item.creatorId}
+                            timestamp={item.timestamp}
+                            video={item.video}
+                            showOverlay={this.renderOverlay}
+                            id={item.id}
 
+                            press={() => this.props.navigation.navigate('TimelinePostDetail', { videoUri: item.video })}
+
+                        />}
+                        </View>
                     )}
                     keyExtractor={(item, index) => String(index)}
                     ListHeaderComponent={<View style={{ height: 150 }}></View>}

@@ -32,6 +32,7 @@ import TimelinePostDetail from './src/screens/Timeline/TimelinePostDetail'
 import TutorialSlider from './src/screens/login/TutorialSlider'
 import SeeAllFriends from './src/screens/friendSystem/SeeAllFriends'
 import SeeAllChats from './src/screens/friendSystem/SeeAllChats'
+import VideoComponent from './src/screens/chatRoom/VideoComponent'
 
 require('firebase/firestore');
 
@@ -148,7 +149,8 @@ const navigator = createStackNavigator(
     TimelinePostDetail: TimelinePostDetail,
     TutorialSlider: TutorialSlider,
     SeeAllFriends: SeeAllFriends,
-    SeeAllChats: SeeAllChats
+    SeeAllChats: SeeAllChats,
+    VideoComponent: VideoComponent
   },{
     initialRouteName: 'Auth',
     headerMode: null,

@@ -211,7 +211,7 @@ class CameraScreen extends Component {
 
     })
 
-    
+
     const { status } = await Camera.requestPermissionsAsync()
     this.setState({ hasPermission: status })
     if (this.state.hasPermission === null) {
@@ -656,52 +656,54 @@ class CameraScreen extends Component {
             </View>
 
 
-            <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end', margin: 0 }}>
-              <TouchableOpacity style={{ marginBottom: 20 }}>
+            <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 30, left: 0, right: 0, alignContent: 'center', alignItems: 'center' }}>
+              {/* <TouchableOpacity style={{ marginBottom: 20 }}>
                 <MaterialCommunityIcons
                   name="format-text"
                   style={{ color: "#fff", fontSize: 30 }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openMoodOverlay()}>
+              <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openMoodOverlay()}>
                 <MaterialCommunityIcons
                   name={this.state.moodIcon}
                   style={{ color: '#fff', fontSize: 30 }}
                 />
               </TouchableOpacity>
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openActivityOverlay()}>
+              <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openActivityOverlay()}>
                 <MaterialCommunityIcons name="basketball" style={{ color: '#fff', fontSize: 30 }} />
               </TouchableOpacity>
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openTagFriends()}>
+              {/* <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openTagFriends()}>
                 <Ionicons
                   name="md-pricetags"
                   style={{ color: '#fff', fontSize: 30 }}
                 />
-              </TouchableOpacity>
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openLocationOverlay()}>
+              </TouchableOpacity> */}
+              {/* <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openLocationOverlay()}>
                 <MaterialIcons name="location-on" style={{ color: '#fff', fontSize: 30 }} />
 
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this._pressPublic()}>
+              {/* <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this._pressPublic()}>
                 <MaterialCommunityIcons name={this.state.publicIcon} style={{ color: '#fff', fontSize: 30 }} />
 
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
 
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openTimeOverlay()}>
+              {/* <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openTimeOverlay()}>
                 <Ionicons name="ios-time" style={{ color: '#fff', fontSize: 30 }} />
 
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.sendImage()}>
-                <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
 
-              </TouchableOpacity>
 
-              <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => this.openAlbumOverlay()}>
+              <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openAlbumOverlay()}>
                 <Ionicons name="ios-albums" style={{ color: '#fff', fontSize: 30 }} />
+
+              </TouchableOpacity>
+
+              <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.sendImage()}>
+                <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
 
               </TouchableOpacity>
 
@@ -1097,15 +1099,16 @@ class CameraScreen extends Component {
           />
         </TouchableOpacity>
 
-
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, right: 20 }}>
+        <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 50, left: 20, right: 0, alignContent: 'center', alignItems: 'center',zIndex:2 }}>
+          
+        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, right: 20 }}>
           <MaterialCommunityIcons
             name="format-text"
             style={{ color: "#fff", fontSize: 30 }}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 100, right: 20 }}
+        <TouchableOpacity style={{ marginRight: width / 4.6 }}
           onPress={() => this.openMoodOverlay()}>
           <MaterialCommunityIcons
             name={this.state.moodIcon}
@@ -1113,41 +1116,44 @@ class CameraScreen extends Component {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 150, right: 20 }} onPress={() => this.openActivityOverlay()}>
+        <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openActivityOverlay()}>
           <MaterialCommunityIcons name="basketball" style={{ color: '#fff', fontSize: 30 }} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 200, right: 20 }} onPress={() => this.openTagFriends()}>
+        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 200, right: 20 }} onPress={() => this.openTagFriends()}>
           <Ionicons
             name="md-pricetags"
             style={{ color: '#fff', fontSize: 30 }}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 250, right: 20 }} onPress={() => this.openLocationOverlay()}>
+        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 250, right: 20 }} onPress={() => this.openLocationOverlay()}>
           <MaterialIcons name="location-on" style={{ color: '#fff', fontSize: 30 }} />
 
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 300, right: 20 }} onPress={() => this._pressPublic()}>
+        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 300, right: 20 }} onPress={() => this._pressPublic()}>
           <MaterialCommunityIcons name={this.state.publicIcon} style={{ color: '#fff', fontSize: 30 }} />
 
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 350, right: 20 }} onPress={() => this.openTimeOverlay()}>
+        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 350, right: 20 }} onPress={() => this.openTimeOverlay()}>
           <Ionicons name="ios-time" style={{ color: '#fff', fontSize: 30 }} />
 
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 400, right: 20 }} onPress={() => this.sendImage()}>
-          <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
-
-        </TouchableOpacity>
-
-        <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 450, right: 20 }} onPress={() => this.openAlbumOverlay()}>
+        <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openAlbumOverlay()}>
           <Ionicons name="ios-albums" style={{ color: '#fff', fontSize: 30 }} />
 
         </TouchableOpacity>
+
+        <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.sendImage()}>
+          <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
+
+        </TouchableOpacity>
+        
+        </View>
+
 
         <Overlay isVisible={this.state.moodOverlay} fullScreen animationType="slide">
           <SafeAreaView style={{ flex: 1 }}>
@@ -1498,13 +1504,13 @@ class CameraScreen extends Component {
       }
 
     } else {
-      return (<View style={{marginVertical:300}}>
-        
-          <TouchableOpacity onPress={() => { this.askPermissionAgain() }} >
-          <Text style={{fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center',color:'#0984e3'}}>You need to give permissions to camera!</Text>
-            </TouchableOpacity>
-        
-        </View>
+      return (<View style={{ marginVertical: 300 }}>
+
+        <TouchableOpacity onPress={() => { this.askPermissionAgain() }} >
+          <Text style={{ fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center', color: '#0984e3' }}>You need to give permissions to camera!</Text>
+        </TouchableOpacity>
+
+      </View>
       )
     }
   }
