@@ -18,11 +18,17 @@ class StreakVideoAvatar extends Component {
     }
 
     retrieveData = async () => {
-        let query = await firebase.firestore().collection('messages').doc(this.state.roomId).get()
-        let data = await query.data().streakVideo
+        // let query = await firebase.firestore().collection('messages').doc(this.state.roomId).get()
+        // let data = await query.data().streakVideo
+        // this.setState({
+            // documentData: data
+        // })
+        let query = await firebase.firestore().collection('streak-video').doc(this.state.roomId).collection('videos').orderBy('timestamp', 'desc').get()
+        let data =  query.docs.map(doc => doc.data())
         this.setState({
             documentData: data
         })
+        console.log(data)
     }
 
     componentDidMount = async () => {

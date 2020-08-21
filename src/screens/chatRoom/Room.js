@@ -18,7 +18,8 @@ class Room extends Component {
             cameraOverlay: false,
             lastMessage: "",
             hasStreakVideo: true,
-            sentStreakVideo: false
+            sentStreakVideo: false,
+            canPress: true
         }
     }
 
@@ -32,9 +33,32 @@ class Room extends Component {
       }
     }
 
+    canPressFunction = async () => {
+      firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').where('creatorId', '==', firebase.auth().currentUser.uid).onSnapshot((doc) => {
+       doc.docChanges().forEach((change) => {
+         if(change.type === 'removed'){
+          if(!doc.empty){
+            this.setState({
+              canPress: false
+            })
+          }else{
+            this.setState({
+              canPress: true
+            })
+          }
+        }else if(change.type === 'added'){
+          this.setState({
+            canPress: false
+          })
+        }
+       })
+      })
+    }
+
 
 
     componentDidMount = async() =>{
+      this.canPressFunction()
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf'),
             font2 : require('../../../assets/SourceSansPro-Light.ttf')
@@ -199,7 +223,7 @@ class Room extends Component {
                     <Text style={{ fontFamily: 'font1', fontSize: 18}}>{this.props.chatRoomName}</Text>
                     <Text>{this.state.lastMessage}</Text>
                     </View>
-                    <TouchableOpacity onPress={() => this.openCamera(this.props.roomId)}>
+                    <TouchableOpacity onPress={() => this.state.canPress ? this.openCamera(this.props.roomId) : console.log('nu mai poti acum')}>
                     <AntDesign
                         color="#D4AF37"
                         name="camera"

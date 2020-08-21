@@ -83,7 +83,8 @@ class StreakVideoCamera extends Component {
       duration: 0,
       flipVideo: false,
       streakVideoDuration: 6,
-      timeElapsed: 0
+      timeElapsed: 0,
+      roomId: props.navigation.state.params.roomId
     }
     this.selectAlbum = this.selectAlbum.bind(this)
     this.handleCaptureOut = this.handleCaptureOut.bind(this)
@@ -577,14 +578,30 @@ class StreakVideoCamera extends Component {
       timePostedOverlay: false
     })
   }
+  sendImage = async () => {
+    this._pressOverlay()
+      const path = `photos/${this.state.roomId}/${firebase.auth().currentUser.uid}`
+        const response = await fetch(this.state.captures[0].uri)
+        const file = await response.blob()
+        
+            
+        
+        let upload = firebase.storage().ref(path).put(file)
+        upload.on("state_changed", snapshot => { }, err => {
+            console.log(err)
+        },
+            async () => {
+                const url = await upload.snapshot.ref.getDownloadURL()
+                this.sendImageFunction(url)
+              })
+  }
 
-  sendImage = () => {
-    let foo = {
-
-
-    }
-    this.setState({
-      sendToOverlay: true
+  sendImageFunction = (url) => {
+    firebase.firestore().collection('streak-video').doc(this.state.roomId).collection('videos').add({
+      creatorId: firebase.auth().currentUser.uid,
+      video: url,
+      timestamp: Date.now(),
+      timeDue: Date.now() + 86400000
     })
   }
 
