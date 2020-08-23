@@ -33,6 +33,8 @@ import TutorialSlider from './src/screens/login/TutorialSlider'
 import SeeAllFriends from './src/screens/friendSystem/SeeAllFriends'
 import SeeAllChats from './src/screens/friendSystem/SeeAllChats'
 import VideoComponent from './src/screens/chatRoom/VideoComponent'
+import AsyncStorage from '@react-native-community/async-storage';
+import { user } from 'firebase-functions/lib/providers/auth';
 
 require('firebase/firestore');
 
@@ -51,6 +53,11 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore()
 export const database = db;
+
+
+
+
+
 // <=============== END FIREBASE ===================>
 
 let SlideFromRight = (index, position, width) => {

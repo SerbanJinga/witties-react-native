@@ -7,6 +7,9 @@ import { Video } from 'expo-av'
 import { Overlay } from 'react-native-elements'
 const { height, width } = Dimensions.get('window')
 import { withNavigation } from 'react-navigation'
+import * as VideoThumbnails from 'expo-video-thumbnails';
+import { SharedElement } from 'react-native-shared-element'
+import { userSettings } from '../LoadingScreen'
 class VideoComponent extends Component {
 
     constructor(props){
@@ -17,7 +20,8 @@ class VideoComponent extends Component {
             marginLeft: 0,
             marginRight: 0,
             displayName: "",
-            profilePicture: ""
+            profilePicture: "",
+            imageUri: ""
         }
     }
 
@@ -29,13 +33,20 @@ class VideoComponent extends Component {
         })
 
     }
+    retrieveThumbnailFromVideo = async() => {
+        const { uri } = await VideoThumbnails.getThumbnailAsync(this.state.video)
+        this.setState({
+            imageUri: uri
+        })
+    }
     componentDidMount = async () => {
         console.log(this.props.creatorId,"ar trebui sa fie egal cu ",firebase.auth().currentUser.uid)
         console.log("-----------------------------------------")
         console.log(this.state.date)
         console.log("-----------------------------------------")
-        await this.getData(this.props.creatorId)
+        await this.retrieveThumbnailFromVideo()
 
+        await this.getData(this.props.creatorId)
         this.setState({ fontsLoaded: true })
         // if (this.props.creatorId == firebase.auth().currentUser.uid)
         //     this.setState({
@@ -72,32 +83,35 @@ class VideoComponent extends Component {
 
 
  <TouchableOpacity
-                activeOpacity={0.8}
-                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10}}
-                onPress={() => navigation.push('ChatRoomPostDetail', { video: this.props.video, timestamp: this.props.timestamp })}
-                >
-                <View
-                    style={[styles.flex, styles.shadow]}
+                activeOpacity={0.8} 
+                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10 }}
+                onPress={() => navigation.push('ChatRoomPostDetail', { video: this.props.video, timestamp: this.props.timestamp })}>
+                 <ImageBackground
+                    style={[styles.flex, styles.destination, styles.shadow]}
                     imageStyle={{ borderRadius: theme.sizes.radius }}
-                    
+                    source={{ uri: this.state.imageUri }}
                 >
-                    <Video source={{uri: this.state.video}} resizeMode="cover" style={styles.destination} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping>
-                    <View style={{zIndex: 1, flex: 0, margin: 10, flexDirection: 'column'}}>
-                    <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
-                    <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
+                    <View style={[styles.column, { justifyContent: 'center' }]}>
+                    <SharedElement id={this.props.image}>
 
+                        <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
+                    </SharedElement>
+
+                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.props.creatorId !== firebase.auth().currentUser.uid ? this.state.displayName : "me"}</Text>
                         <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
                             <Octicons
                                 name="smiley"
                                 size={theme.sizes.font * 0.8}
                                 color={theme.colors.white}
                             />
-                            <Text>{this.props.msg}</Text>
+                            <Text> {this.props.msg}</Text>
                         </Text>
-                        </View>
-                        </Video>
-                </View>
-           
+
+
+                    </View>
+                </ImageBackground>
+               
+
             </TouchableOpacity>
             )
     }

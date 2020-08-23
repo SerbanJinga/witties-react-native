@@ -4,8 +4,10 @@ import firebase from 'firebase'
 import * as theme from '../styles/theme'
 const { width, height } = Dimensions.get('window');
 import * as Font from 'expo-font'
+import AsyncStorage from '@react-native-community/async-storage';
 let arr = []
 
+let settings 
 export default class LoadingScreen extends Component {
 
     constructor(props){
@@ -16,18 +18,34 @@ export default class LoadingScreen extends Component {
         }
     }
 
+    asyncStorage = async() => {
+       
+AsyncStorage.getItem("alreadyLaunched").then(value => {
+    if(value == null){
+         AsyncStorage.setItem('alreadyLaunched', "true");
+  AsyncStorage.multiSet(['set_chatNotifications',"false"],['set_showMapFriends',"false"],['set_recieveMapNotification',"false"])
+    }  
+    })
+    
+ AsyncStorage.multiGet(['set_chatNotifications','set_showMapFriends','set_recieveMapNotification']).then(value => {
+    settings = value
+})
+        }
+
      componentDidMount =  async() => {
          arr = []
+// /         console.log(userSettings)
 
         await Font.loadAsync({
             font1: require('../../assets/SourceSansPro-Black.ttf')
         })
-      
+        await this.asyncStorage()
+
         
         
         firebase.auth().onAuthStateChanged(async user => {
             if(user){
-                this.props.navigation.navigate('Home')
+                this.props.navigation.navigate('Home',  { settings: settings})
                 // await this.retrieveDataFromFriends()
                 }else{
                 this.props.navigation.navigate('SignUp')
@@ -71,3 +89,5 @@ const styles = StyleSheet.create({
         flex: 1,
     }
 })
+
+

@@ -23,6 +23,7 @@ class Home extends Component {
       notification: {},
       profilePicture: "",
       index: 1,
+      settings: props.navigation.state.params.settings
     }
 
     this.changeIndexTimeline = this.changeIndexTimeline.bind(this)
@@ -53,9 +54,8 @@ class Home extends Component {
     finalArr = []
     await this._getToken()
     await this._getProfilePicture()
-    console.log('basioapfafap')
-
-    console.log(this.state.stories)
+    console.log('mergi tati MKAGJAK KAGJAKGJAK')
+    console.log(this.state.settings)
   }
 
 
