@@ -74,12 +74,24 @@ class Room extends Component {
           if(doc.empty){
             return
           }
-          // lastMessage = ""
-          let lastMessage = doc.docs.map(doc => doc.data().msg)
           
+          // lastMessage = ""
+          // let lastMessage = doc.docs.map(doc => if(doc.data().image) doc.data().msg)
+
+            let lastMessage = doc.docs.map(doc => doc.data())
+            console.log(lastMessage[0], 'ULTIMU MESAJ')
+            if(typeof lastMessage[0].image !== 'undefined'){
+              this.setState({
+                lastMessage: 'Somebody sent an image!'
+              })
+            }else if(typeof lastMessage[0].video !== 'undefined'){
+              this.setState({
+                lastMessage: 'Somebody sent a video!'
+              })
+            }else if(typeof lastMessage[0].image === 'undefined' && typeof lastMessage[0].video === 'undefined'){
           this.setState({
-            lastMessage: lastMessage[0].length <= 20 ? lastMessage[0] : lastMessage[0].slice(0, 60) + "..."
-          })
+            lastMessage: lastMessage[0].msg.length <= 20 ? lastMessage[0].msg : lastMessage[0].msg.slice(0, 60) + "..."
+          })}
         })
     }
 

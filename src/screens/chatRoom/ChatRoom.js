@@ -112,7 +112,9 @@ class ChatRoom extends Component {
         aru.push(newMessage)
         this.setState({ message: aru })
 
-
+        firebase.firestore().collection('messages').doc(this.state.roomId).update({
+            lastUpdated: Date.now()
+        })
 
         //seteaza in baza de date
         firebase.firestore().collection("messages").doc(this.state.roomId).collection('chats').add({

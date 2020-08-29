@@ -2,6 +2,10 @@
   "expo": {
     "name": "witties-react-native",
     "slug": "witties-react-native",
+    "android": {
+      "package": "com.h44x.witties",
+      "versionCode": 1
+    },
     "platforms": [
       "ios",
       "android",
@@ -22,7 +26,9 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+        "bundleIdentifier": "com.h44x.witties",
+        "buildNumber": "1.0.0"
     },
     "description": ""
   }

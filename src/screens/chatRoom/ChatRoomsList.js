@@ -90,8 +90,9 @@ class ChatRoomsList extends Component {
     }
 
     _retrieveChats = async () => {
-        firebase.firestore().collection('messages').where('usersParticipating', 'array-contains', firebase.auth().currentUser.uid).onSnapshot((doc) => {
+        firebase.firestore().collection('messages').where('usersParticipating', 'array-contains', firebase.auth().currentUser.uid).orderBy('lastUpdated', 'desc').onSnapshot((doc) => {
             arr = []
+            
             let documentData = doc.docs.map(doc => doc.data())
             documentData.forEach(async document => {
                 let foo = {

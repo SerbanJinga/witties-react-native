@@ -337,6 +337,7 @@ export default class Map extends React.Component {
                 /> */}
                 
                 <FlatList
+                extraData={false}
                     pagingEnabled
                   horizontal
                   scrollEnabled
