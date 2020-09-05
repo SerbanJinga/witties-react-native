@@ -34,8 +34,25 @@ class SendToList extends Component {
 
     _retrieveDataFromChatRoomId = async (document) => {
         let initialQuery = await firebase.firestore().collection('messages').doc(document).get()
-        let documentData = await initialQuery.data()
-        arr.push(documentData)
+        let chatRoomName = await initialQuery.data().chatRoomName
+        let profilePicture = await initialQuery.data().profilePicture
+        let roomId = await initialQuery.data().roomId
+        let userWhoCreated = await initialQuery.data().userWhoCreated
+        let twoUserChat = await initialQuery.data().twoUserChat
+
+        let foo = {
+            chatRoomName: chatRoomName,
+            profilePicture: profilePicture,
+            roomId:  roomId
+        }
+
+        if(userWhoCreated !== firebase.auth().currentUser.uid && twoUserChat === true){
+            let otherQuery = await firebase.firestore().collection('users').doc(userWhoCreated).get()
+            let displayName = await otherQuery.data().displayName
+            foo.chatRoomName = displayName
+        }
+
+        arr.push(foo)
         this.setState({
             documentData: arr
         })
@@ -122,7 +139,11 @@ class SendToList extends Component {
 
     sendPost = (url) => {
 
+
         this.state.sendTo.forEach(chatRoom => {
+            firebase.firestore().collection('messages').doc(chatRoom).update({
+                lastUpdated: Date.now()
+            })
             firebase.firestore().collection('messages').doc(chatRoom).collection('chats').add({
                 mood: this.props.mood,
                 msg: this.props.text,
@@ -219,7 +240,12 @@ class SendToList extends Component {
             //     })
             // })
 
+
             this.state.sendTo.forEach(chatRoom => {
+                
+            firebase.firestore().collection('messages').doc(chatRoom).update({
+                lastUpdated: Date.now()
+            })
                 firebase.firestore().collection('messages').doc(chatRoom).collection('chats').add({
                     mood: this.props.mood,
                     msg: this.props.text,
@@ -395,7 +421,7 @@ class SendToList extends Component {
                     <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center' }}>
                         <Avatar size={40} rounded source={{ uri: this.state.profilePicture }} />
                         <View style={{ flex: 1, flexDirection: 'column', }}>
-                            <Text style={{ marginLeft: 4, fontFamily: 'font1' }}>{this.state.displayName}</Text>
+                            <Text style={{ marginLeft: 4, fontFamily: 'font1' }}>Save to Timeline</Text>
                         </View>
                         <CheckBox
                             onPress={() => {
@@ -436,7 +462,7 @@ class SendToList extends Component {
                 />
                 <Text style={{ fontFamily: 'font1', fontSize: 24, margin: 10 }}>All Friends</Text>
 
-                <FlatList
+                {/* <FlatList
                     data={this.state.friendsData}
                     renderItem={({ item }) => (
                         <SendTo isUser={true} displayName={item.displayName} profilePicture={item.profilePicture} mama={this.mama} tata={this.tata} id={item.uid} />
@@ -447,7 +473,7 @@ class SendToList extends Component {
                 //    onEndReachedThreshold={0}
                 //    refreshing={this.state.refreshing}
                 //    onRefresh={this.handleRefresh}
-                />
+                /> */}
             </ScrollView>
 
 

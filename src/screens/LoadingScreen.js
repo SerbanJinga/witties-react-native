@@ -18,34 +18,35 @@ export default class LoadingScreen extends Component {
         }
     }
 
-    asyncStorage = async() => {
-       
-AsyncStorage.getItem("alreadyLaunched").then(value => {
-    if(value == null){
-         AsyncStorage.setItem('alreadyLaunched', "true");
-  AsyncStorage.multiSet(['set_chatNotifications',"false"],['set_showMapFriends',"false"],['set_recieveMapNotification',"false"])
-    }  
-    })
-    
- AsyncStorage.multiGet(['set_chatNotifications','set_showMapFriends','set_recieveMapNotification']).then(value => {
-    settings = value
-})
+    setUpSettingsFirebase = async() => {
+        let query = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+        if(typeof query.data().userSettings !== 'undefined') {
+            return
         }
 
+        let foo = {
+            'receive_map_notifications': true,
+            'receive_chat_notifications': true,
+        }
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            userSettings: foo
+        })
+    }
+
+  
      componentDidMount =  async() => {
          arr = []
-// /         console.log(userSettings)
 
         await Font.loadAsync({
             font1: require('../../assets/SourceSansPro-Black.ttf')
         })
-        await this.asyncStorage()
 
-        
+            
         
         firebase.auth().onAuthStateChanged(async user => {
             if(user){
-                this.props.navigation.navigate('Home',  { settings: settings})
+                await this.setUpSettingsFirebase().then(
+                this.props.navigation.navigate('Home'))
                 // await this.retrieveDataFromFriends()
                 }else{
                 this.props.navigation.navigate('SignUp')
@@ -76,7 +77,6 @@ AsyncStorage.getItem("alreadyLaunched").then(value => {
     render(){
         return(
             <View style={styles.container}>
-                <ActivityIndicator size="large" color={theme.colors.blue}/>
              </View>
         )
     }

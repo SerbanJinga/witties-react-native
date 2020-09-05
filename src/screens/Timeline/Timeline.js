@@ -105,14 +105,14 @@ class Timeline extends React.Component {
         </View>)
     }
 
-    filterByMood = async() => {
+    filterByMood = async () => {
         let initialQuery = await firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').where('mood', '==', this.state.mood).get()
         let data = initialQuery.docs.map(doc => doc.data())
         this.setState({ documentData: data, clearFilter: true, openFilter: false })
 
     }
     //-------------------------------------------------Filtering------------------------------------------------------
-    search = async(searchText) => {
+    search = async (searchText) => {
         this.setState({ searchText: searchText })
         let query = await firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').where('text', '>=', searchText).get()
         let documentData = query.docs.map(doc => doc.data())
@@ -145,7 +145,7 @@ class Timeline extends React.Component {
             let documentData = doc.data().albums
             this.setState({
                 albumData: documentData,
-                
+
             })
         })
         this.setState({ albumOverlay: true })
@@ -216,9 +216,9 @@ class Timeline extends React.Component {
             let documentData = doc.data().customActivities
             this.setState({
                 activityData: documentData,
-                
+
             })
-        })     
+        })
         this.setState({
             activityOverlay: true,
             // clearFilter:true,openFilter:false,
@@ -315,13 +315,13 @@ class Timeline extends React.Component {
         })
     }
 
-    createNewAlbum = async() => {
+    createNewAlbum = async () => {
         firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
             albums: firebase.firestore.FieldValue.arrayUnion(this.state.newAlbumText)
         })
     }
 
-    createNewActivity = async() => {
+    createNewActivity = async () => {
         firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
             customActivities: firebase.firestore.FieldValue.arrayUnion(this.state.newActivityText)
         })
@@ -333,7 +333,7 @@ class Timeline extends React.Component {
         firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").onSnapshot((doc) => {
             let data = doc.docs.map(doc => doc.data())
             let idMap = doc.docs.map(doc => doc.id)
-            for(let i = 0; i < idMap.length; i++){
+            for (let i = 0; i < idMap.length; i++) {
                 data[i].id = idMap[i]
             }
             this.setState({
@@ -368,11 +368,13 @@ class Timeline extends React.Component {
 
             </View>
             {(this.state.clearFilter) ?
-            <TouchableOpacity onPress={() => {this.retrieveData()
-            this.setState({ clearFilter: false })}}>
-                <Text style={{fontFamily: 'font1', fontSize: 20, margin: 4, alignSelf: 'center', color: theme.colors.blue}}>Clear Filters</Text>
-            </TouchableOpacity>
-              : null}
+                <TouchableOpacity onPress={() => {
+                    this.retrieveData()
+                    this.setState({ clearFilter: false })
+                }}>
+                    <Text style={{ fontFamily: 'font1', fontSize: 20, margin: 4, alignSelf: 'center', color: theme.colors.blue }}>Clear Filters</Text>
+                </TouchableOpacity>
+                : null}
             <Overlay fullScreen isVisible={this.state.showAct}
 
 
@@ -426,48 +428,52 @@ class Timeline extends React.Component {
                     // decelerationRate={0}
 
 
-                    data = {this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
+                    data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                     renderItem={({ item, index }) => (
-                       <View key={index}>
-                        {typeof (item.video) === 'undefined' ? 
-                        <TimelinePost
-                            postedFor={item.hoursPosted}
-                            activity={item.activity}
-                            mood={item.mood}
-                            text={item.text}
-                            creatorId={item.creatorId}
-                            timestamp={item.timestamp}
-                            image={item.image}
-                            showOverlay={this.renderOverlay}
-                            id={item.id}
+                        <View key={index}>
+                            {typeof (item.video) === 'undefined' ?
+                                <TimelinePost
+                                    postedFor={item.hoursPosted}
+                                    activity={item.activity}
+                                    mood={item.mood}
+                                    text={item.text}
+                                    creatorId={item.creatorId}
+                                    timestamp={item.timestamp}
+                                    image={item.image}
+                                    showOverlay={this.renderOverlay}
+                                    id={item.id}
 
-                            press={() => this.props.navigation.navigate('TimelinePostDetail', { imageUri: item.image })}
+                                    press={() => this.props.navigation.navigate('TimelinePostDetail', { imageUri: item.image })}
 
-                        />: <TimelineVideoPost
-                            postedFor={item.hoursPosted}
-                            activity={item.activity}
-                            mood={item.mood}
-                            text={item.text}
-                            creatorId={item.creatorId}
-                            timestamp={item.timestamp}
-                            video={item.video}
-                            showOverlay={this.renderOverlay}
-                            id={item.id}
+                                /> : <TimelineVideoPost
+                                    postedFor={item.hoursPosted}
+                                    activity={item.activity}
+                                    mood={item.mood}
+                                    text={item.text}
+                                    creatorId={item.creatorId}
+                                    timestamp={item.timestamp}
+                                    video={item.video}
+                                    showOverlay={this.renderOverlay}
+                                    id={item.id}
 
-                            press={() => this.props.navigation.navigate('TimelinePostDetail', { videoUri: item.video })}
+                                    press={() => this.props.navigation.navigate('TimelinePostDetail', { videoUri: item.video })}
 
-                        />}
+                                />}
                         </View>
                     )}
                     keyExtractor={(item, index) => String(index)}
                     ListHeaderComponent={<View style={{ height: 150 }}></View>}
                     // ListFooterComponent={}
                     // ItemSeparatorComponent={(item) => (<Text>{item.date}</Text>)}
+                    ref={ref => this.flatList = ref}
+                    onContentSizeChange={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
+                    onLayout={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
                     onEndReached={this.retrieveMore}
                     onEndReachedThreshold={1}
                     columnWrapperStyle={{ flexDirection: "row-reverse" }}
                     refreshing={this.state.refreshing}
                     inverted
+                    windowSize={21}
                     numColumns={3}
 
 
@@ -561,8 +567,8 @@ class Timeline extends React.Component {
                                         onChangeText={newAlbumText => this.setState({ newAlbumText })}
                                     />
 
-                                    <TouchableOpacity style={{alignSelf: 'center'}} onPress={() => this.createNewAlbum()}>
-                                        <Text style={{fontFamily: 'font1', color: theme.colors.blue, fontSize: 16}}>Add Album</Text>
+                                    <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => this.createNewAlbum()}>
+                                        <Text style={{ fontFamily: 'font1', color: theme.colors.blue, fontSize: 16 }}>Add Album</Text>
                                     </TouchableOpacity>
                                 </SafeAreaView>
 
@@ -612,8 +618,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'happy', rightIconEmoticon: 'emoticon', rightIconSize: 28, gap2: 0 })
-                                    this.filterByMood() }}
+                                    onPress={() => {
+                                        this.setState({ mood: 'happy', rightIconEmoticon: 'emoticon', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                                 <Button
@@ -621,8 +629,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon-angry'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'angry', rightIconEmoticon: 'emoticon-angry', rightIconSize: 28, gap2: 0 })
-                                    this.filterByMood() }}
+                                    onPress={() => {
+                                        this.setState({ mood: 'angry', rightIconEmoticon: 'emoticon-angry', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                             </View>
@@ -633,8 +643,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon-cool'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'cool', rightIconEmoticon: 'emoticon-cool', rightIconSize: 28, gap2: 0 })
-                                    this.filterByMood() }}
+                                    onPress={() => {
+                                        this.setState({ mood: 'cool', rightIconEmoticon: 'emoticon-cool', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                                 <Button
@@ -642,8 +654,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon-cry'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'sad', rightIconEmoticon: 'emoticon-cry', rightIconSize: 28, gap2: 0 })
-                                    this.filterByMood() }}
+                                    onPress={() => {
+                                        this.setState({ mood: 'sad', rightIconEmoticon: 'emoticon-cry', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                             </View>
@@ -654,8 +668,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon-dead'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'dead', rightIconEmoticon: 'emoticon-dead', rightIconSize: 28, gap2: 0 }) 
-                                    this.filterByMood()}}
+                                    onPress={() => {
+                                        this.setState({ mood: 'dead', rightIconEmoticon: 'emoticon-dead', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                                 <Button
@@ -663,8 +679,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon-excited'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'excited', rightIconEmoticon: 'emoticon-excited', rightIconSize: 28, gap2: 0 })
-                                    this.filterByMood() }}
+                                    onPress={() => {
+                                        this.setState({ mood: 'excited', rightIconEmoticon: 'emoticon-excited', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                             </View>
@@ -675,8 +693,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon-kiss'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'flirty', rightIconEmoticon: 'emoticon-kiss', rightIconSize: 28, gap2: 0 })
-                                    this.filterByMood() }}
+                                    onPress={() => {
+                                        this.setState({ mood: 'flirty', rightIconEmoticon: 'emoticon-kiss', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                                 <Button
@@ -684,8 +704,10 @@ class Timeline extends React.Component {
                                     type="clear"
                                     icon={<Icon name={'emoticon-neutral'} size={28} />}
                                     containerStyle={styles.bigButton}
-                                    onPress={() => { this.setState({ mood: 'ok', rightIconEmoticon: 'emoticon-neutral', rightIconSize: 28, gap2: 0 })
-                                    this.filterByMood() }}
+                                    onPress={() => {
+                                        this.setState({ mood: 'ok', rightIconEmoticon: 'emoticon-neutral', rightIconSize: 28, gap2: 0 })
+                                        this.filterByMood()
+                                    }}
 
                                 />
                             </View>
@@ -708,35 +730,35 @@ class Timeline extends React.Component {
                                 </TouchableOpacity>
                                 <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Activities</Text>
                                 <TouchableOpacity onPress={() => this.addActivities()}>
-                                <AntDesign
-                                    size={26}
-                                    name="plus"
-                                    color="#b2b8c2"
-                                />
+                                    <AntDesign
+                                        size={26}
+                                        name="plus"
+                                        color="#b2b8c2"
+                                    />
                                 </TouchableOpacity>
                             </View>
 
                             <Overlay isVisible={this.state.activitiesOptions} fullScreen animationType='slide'>
-                            <SafeAreaView style={{flex: 1}}>
-                            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
-                                <TouchableOpacity onPress={() => this.closeAddActivities()}>
-                                    <AntDesign
-                                        size={26}
-                                        name="down"
-                                        color="#b2b8c2"
-                                    />
-                                </TouchableOpacity>
-                                <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Add Activity</Text>
-                                <TouchableOpacity onPress={() => this.addActivities()}>
-                                <AntDesign
-                                    size={26}
-                                    name="plus"
-                                    color="#b2b8c2"
-                                />
-                                </TouchableOpacity>
-                            </View>
+                                <SafeAreaView style={{ flex: 1 }}>
+                                    <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
+                                        <TouchableOpacity onPress={() => this.closeAddActivities()}>
+                                            <AntDesign
+                                                size={26}
+                                                name="down"
+                                                color="#b2b8c2"
+                                            />
+                                        </TouchableOpacity>
+                                        <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Add Activity</Text>
+                                        <TouchableOpacity onPress={() => this.addActivities()}>
+                                            <AntDesign
+                                                size={26}
+                                                name="plus"
+                                                color="#b2b8c2"
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
 
-                            <Input
+                                    <Input
                                         placeholder="Add Activity..."
                                         placeholderTextColor="#B1B1B1"
                                         returnKeyType="done"
@@ -744,10 +766,10 @@ class Timeline extends React.Component {
                                         value={this.state.newActivityText}
                                         onChangeText={newActivityText => this.setState({ newActivityText })}
                                     />
-                                     <TouchableOpacity style={{alignSelf: 'center'}} onPress={() => this.createNewActivity()}>
-                                        <Text style={{fontFamily: 'font1', color: theme.colors.blue, fontSize: 16}}>Add Activity</Text>
+                                    <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => this.createNewActivity()}>
+                                        <Text style={{ fontFamily: 'font1', color: theme.colors.blue, fontSize: 16 }}>Add Activity</Text>
                                     </TouchableOpacity>
-                            </SafeAreaView>
+                                </SafeAreaView>
                             </Overlay>
 
                             <ScrollView>

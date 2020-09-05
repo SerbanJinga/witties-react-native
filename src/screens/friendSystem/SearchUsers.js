@@ -65,12 +65,14 @@ let addedMe = []
         }
     }
 
-    storeData = async (key, value) => {
-        try {
-            await AsyncStorage.setItem(key, value);
-        } catch (error) {
-            // Error saving data
+    storeData = async () => {
+        let foo = {
+            receive_chat_notifications: this.state.set_chatNotifications,
+            receive_map_notifications: this.state.set_recieveMapNotification
         }
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+            userSettings: foo
+        })
     }
 
     setInitialSettings = async () => {
@@ -160,6 +162,15 @@ let addedMe = []
         await this.getCurrentUser()
         await this.retrieveData()
         await this.addedMe()
+        await this.getSettings()
+    }
+
+    getSettings = async() => {
+        let query = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+       let cv = await query.data().userSettings
+       this.setState({set_recieveMapNotification:cv.receive_map_notifications, set_chatNotifications: cv.receive_chat_notifications})
+    //    receive_chat_notifications: this.state.set_chatNotifications,
+    //    receive_map_notifications: this.state.set_recieveMapNotification
     }
 
     search = async (searchText) => {
@@ -721,10 +732,7 @@ let addedMe = []
                                         />
                                     </TouchableOpacity>
                                     <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Settings</Text>
-                                    <TouchableOpacity onPress={() => {this.storeData('set_recieveMapNotification', this.state.set_recieveMapNotification.toString())
-                                        this.storeData('set_showMapFriends', this.state.set_showMapFriends.toString())
-                                        this.storeData('set_chatNotifications', this.state.set_chatNotifications.toString())
-                                        this._closeSettings()}}>
+                                    <TouchableOpacity onPress={() => this.storeData()}>
                                         <AntDesign
                                             size={26}
                                             name="check"
@@ -750,19 +758,7 @@ let addedMe = []
                                             checked={Boolean(this.state.set_recieveMapNotification)} />
                                     </View>
 
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-
-                                        <Text style={{ fontFamily: 'font1', fontSize: 16, margin: 10 }}>Show Map Friends Bar</Text>
-                                        <CheckBox
-
-                                            onPress={() => {
-                                                this.state.set_showMapFriends ? this.setState({ set_showMapFriends: false }) :
-                                                    this.setState({ set_showMapFriends: true })
-
-                                            }}
-                                            containerStyle={{ backgroundColor: 'transparent', borderWidth: 0 }}
-                                            checked={Boolean(this.state.set_showMapFriends)} />
-                                    </View>
+                                
 
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                         <Text style={{ fontFamily: 'font1', fontSize: 16, margin: 10 }}>Show Chat Notifications</Text>
@@ -781,6 +777,8 @@ let addedMe = []
 
                                     {/*Aici lucreaza tudor */}
                                 </View>
+
+                                <Text style={{fontFamily: 'font1', fontSize: 12, color: '#000', opacity: 0.75, alignSelf: 'center', marginBottom: 20}}>Settings will be saved once you reopen the app.</Text>
                             </SafeAreaView>
                         </Overlay>
                 

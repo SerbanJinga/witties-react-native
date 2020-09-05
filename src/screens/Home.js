@@ -23,12 +23,14 @@ class Home extends Component {
       notification: {},
       profilePicture: "",
       index: 1,
-      settings: props.navigation.state.params.settings
+      scrollEnabled: true,
     }
 
     this.changeIndexTimeline = this.changeIndexTimeline.bind(this)
     this.changeIndexToCamera = this.changeIndexToCamera.bind(this)
     this.changeIndexToMain = this.changeIndexToMain.bind(this)
+    this.stopIndexChanging = this.stopIndexChanging.bind(this)
+    this.resumeIndexChanging = this.resumeIndexChanging.bind(this)
 
   }
 
@@ -37,15 +39,26 @@ class Home extends Component {
     this.swiper.scrollTo(2)
   }
   changeIndexToCamera = () => {
-
+    console.log('binesss rauuuu !')
     this.swiper.scrollTo(0)
   }
 
   changeIndexToMain = () => {
 
     this.swiper.scrollTo(1)
+
+    this.swiper.context
   }
 
+  stopIndexChanging = () => {
+    console.log(' s a oprit nu se mai misca!')
+    this.setState({ scrollEnabled: false })
+  }
+
+  resumeIndexChanging = () => {
+    console.log(' se misca din nou!')
+    this.setState({ scrollEnabled: true })
+  }
 
 
 
@@ -55,7 +68,6 @@ class Home extends Component {
     await this._getToken()
     await this._getProfilePicture()
     console.log('mergi tati MKAGJAK KAGJAKGJAK')
-    console.log(this.state.settings)
   }
 
 
@@ -98,13 +110,18 @@ class Home extends Component {
 
       <View style={{ flex: 1 }}>
         <Swiper
+          scrollEnabled={this.state.scrollEnabled}
           ref={(swiper) => { this.swiper = swiper; }}
           onIndexChanged={(index) => { console.log(index) }}
           loop={false}
           showsPagination={false}
+          // onScrollBeginDrag={(e) =>{console.log(' se misca')}}
+          
           index={this.state.index}>
           <View style={{ flex: 1 }}>
-            <CameraScreen salut={this.changeIndexToMain} />
+            <CameraScreen salut={this.changeIndexToMain} stopScroll={this.stopIndexChanging} resumeScroll={this.resumeIndexChanging} 
+            onStartShouldSetResponderCapture={(evt) => true} 
+            onMoveShouldSetResponderCapture={(evt) => true} />
           </View>
 
 

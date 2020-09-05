@@ -49,10 +49,13 @@ class ChatRoomsList extends Component {
         // })
         // this.setState({filteredData: filteredData})
         console.log('se schimba...')
-        let data = this.state.documentData
-        let filteredData = data.filter(item => item.chatName.includes(searchChats))
+        // let data = this.state.documentData
+        let filteredData = firebase.firestore().collection('messages').where('chatRoomName', '>=', searchChats).startAt(searchChats.toUppercase).endAt(searchChats.toLowerCase + "\uf8ff").get()
+        let data = (await filteredData).docs.map(doc => doc.data())
+        console.log(data)
+        // let filteredData = data.filter(item => item.chatName.includes(searchChats))
         this.setState({
-            filteredData: filteredData
+            filteredData: data
         })
 
         // this.setState({

@@ -18,7 +18,7 @@ import SendToList from './SendToList'
 import { Send } from 'react-native-gifted-chat'
 import DoubleTap from './DoubleTap'
 import VideoPlayer from 'expo-video-player'
-import { withNavigation } from 'react-navigation'
+import { withNavigationFocus } from 'react-navigation'
 import PlacesInput from 'react-native-places-input';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import SendTo from './SendTo'
@@ -84,7 +84,6 @@ class CameraScreen extends Component {
       flipVideo: false
     }
     this.selectAlbum = this.selectAlbum.bind(this)
-
     this.handleCaptureIn = this.handleCaptureIn.bind(this)
     this.handleCaptureOut = this.handleCaptureOut.bind(this)
     this.handleShortCapture = this.handleShortCapture.bind(this)
@@ -297,7 +296,7 @@ class CameraScreen extends Component {
         console.log('A intrat in video overlay ipotetic', result)
 
         let videores = { uri: result.uri }
-        this.setState({ capturing: false, captures: [videores, ...this.state.captures] });
+        this.setState({ flipVideo: false, capturing: false, captures: [videores, ...this.state.captures] });
       }
     }
 
@@ -305,21 +304,10 @@ class CameraScreen extends Component {
 
   }
 
-  _rotateAndFlip = async (uri) => {
-    const mainResult = await ImageManipulator.manipulateAsync(
-      uri, [{ rotate: 0 }, { flip: ImageManipulator.FlipType.Vertical }],
-      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
-    )
-    this.setState({
-      pictureTaken: mainResult.uri
-    })
-
-
-    console.log(this.state.pictureTaken)
-  }
-
   //Tudor
   handleCaptureIn = () => {
+
+    this.props.stopScroll()
     this.setState({ capturing: true })
     firstPress = Date.now()
 
@@ -330,9 +318,11 @@ class CameraScreen extends Component {
     if (this.state.capturing)
       this.camera.stopRecording();
     finalPress = Date.now()
+    this.props.resumeScroll()
   };
 
   handleShortCapture = async () => {
+    this.props.stopScroll()
     console.log("picture")
     const photoData = await this.camera.takePictureAsync();
     if (this.state.type === Camera.Constants.Type.front) {
@@ -347,6 +337,7 @@ class CameraScreen extends Component {
       this.setState({ pictureTaken: photoData.uri, capturing: false, captures: [photoData, ...this.state.captures], showPhoto: true })
 
     }
+    this.props.resumeScroll()
   };
 
   handleLongCapture = async () => {
@@ -366,6 +357,7 @@ class CameraScreen extends Component {
     this.setState({
       duration: finalPress - firstPress
     })
+    this.props.resumeScroll()
   };
 
 
@@ -463,20 +455,23 @@ class CameraScreen extends Component {
                   onLongCapture={this.handleLongCapture}
                   onShortCapture={this.handleShortCapture}
                 /></View>
-              <TouchableOpacity
-                style={{
-                  alignSelf: 'flex-end',
-                  alignItems: 'center',
-                  backgroundColor: 'transparent',
-                }}
-                onPress={() => this.handleCameraType()}
-
+              {this.state.capturing ? (<TouchableOpacity
+                style={{ alignSelf: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' }}
               >
                 <MaterialCommunityIcons
                   name="camera-switch"
-                  style={{ color: "#fff", fontSize: 30 }}
+                  style={{ color: "#7f7f7f", fontSize: 30 }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity>) :
+                (<TouchableOpacity
+                  style={{ alignSelf: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' }}
+                  onPress={() => this.handleCameraType()}
+                >
+                  <MaterialCommunityIcons
+                    name="camera-switch"
+                    style={{ color: "#fff", fontSize: 30 }}
+                  />
+                </TouchableOpacity>)}
             </View>
             <Overlay isVisible={this.state.settings} animationType="slide" fullScreen>
               <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
@@ -1099,59 +1094,59 @@ class CameraScreen extends Component {
           />
         </TouchableOpacity>
 
-        <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 50, left: 20, right: 0, alignContent: 'center', alignItems: 'center',zIndex:2 }}>
-          
-        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, right: 20 }}>
+        <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 50, left: 20, right: 0, alignContent: 'center', alignItems: 'center', zIndex: 2 }}>
+
+          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, right: 20 }}>
           <MaterialCommunityIcons
             name="format-text"
             style={{ color: "#fff", fontSize: 30 }}
           />
         </TouchableOpacity> */}
 
-        <TouchableOpacity style={{ marginRight: width / 4.6 }}
-          onPress={() => this.openMoodOverlay()}>
-          <MaterialCommunityIcons
-            name={this.state.moodIcon}
-            style={{ color: '#fff', fontSize: 30 }}
-          />
-        </TouchableOpacity>
+          <TouchableOpacity style={{ marginRight: width / 4.6 }}
+            onPress={() => this.openMoodOverlay()}>
+            <MaterialCommunityIcons
+              name={this.state.moodIcon}
+              style={{ color: '#fff', fontSize: 30 }}
+            />
+          </TouchableOpacity>
 
-        <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openActivityOverlay()}>
-          <MaterialCommunityIcons name="basketball" style={{ color: '#fff', fontSize: 30 }} />
-        </TouchableOpacity>
+          <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openActivityOverlay()}>
+            <MaterialCommunityIcons name="basketball" style={{ color: '#fff', fontSize: 30 }} />
+          </TouchableOpacity>
 
-        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 200, right: 20 }} onPress={() => this.openTagFriends()}>
+          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 200, right: 20 }} onPress={() => this.openTagFriends()}>
           <Ionicons
             name="md-pricetags"
             style={{ color: '#fff', fontSize: 30 }}
           />
         </TouchableOpacity> */}
 
-        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 250, right: 20 }} onPress={() => this.openLocationOverlay()}>
+          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 250, right: 20 }} onPress={() => this.openLocationOverlay()}>
           <MaterialIcons name="location-on" style={{ color: '#fff', fontSize: 30 }} />
 
         </TouchableOpacity> */}
 
-        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 300, right: 20 }} onPress={() => this._pressPublic()}>
+          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 300, right: 20 }} onPress={() => this._pressPublic()}>
           <MaterialCommunityIcons name={this.state.publicIcon} style={{ color: '#fff', fontSize: 30 }} />
 
         </TouchableOpacity> */}
 
-        {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 350, right: 20 }} onPress={() => this.openTimeOverlay()}>
+          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 350, right: 20 }} onPress={() => this.openTimeOverlay()}>
           <Ionicons name="ios-time" style={{ color: '#fff', fontSize: 30 }} />
 
         </TouchableOpacity> */}
 
-        <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openAlbumOverlay()}>
-          <Ionicons name="ios-albums" style={{ color: '#fff', fontSize: 30 }} />
+          <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openAlbumOverlay()}>
+            <Ionicons name="ios-albums" style={{ color: '#fff', fontSize: 30 }} />
 
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.sendImage()}>
-          <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
+          <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.sendImage()}>
+            <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
 
-        </TouchableOpacity>
-        
+          </TouchableOpacity>
+
         </View>
 
 
@@ -1466,33 +1461,22 @@ class CameraScreen extends Component {
             <AlbumPopup open={this.selectAlbum} />
           </SafeAreaView>
         </Overlay>
-
-
-
-
-
-
-
-
-
-
-
-
       </Overlay>
-
     </View>)
-
-
-
-
 
   }
 
   render() {
+    const { isFocused } = this.props
     if (this.state.fontsLoaded) {
       if (this.state.captures.length === 0) {
         console.log('n am poza nici video')
-        return this.renderCamera()
+        if (isFocused)
+          return this.renderCamera()
+        else
+          return (<View>
+            <Text style={{ fontSize: 50 }}>salut frate nu e camera</Text>
+          </View>)
       } else if (typeof this.state.captures[0].height !== 'undefined') {
         console.log('am poza')
 
@@ -1561,4 +1545,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default withNavigation(CameraScreen)
+export default withNavigationFocus(CameraScreen)

@@ -66,7 +66,8 @@ export default class Map extends React.Component {
             mode: 'pic', //"pic"/"future"
             futureStatuses: [],
             myUsername: "",
-            street: ""
+            street: "",
+            receive_map_notifications: true
 
         }
         // this.closeSwipablePanel = this.closeSwipablePanel.bind(this)    
@@ -88,6 +89,12 @@ export default class Map extends React.Component {
         })
 
         console.log(street)
+    }
+
+    getUserSettings = async() => {
+        let query = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+       let cv = await query.data().userSettings
+       this.setState({receive_map_notifications:cv.receive_map_notifications})
     }
 
     async componentDidMount() {
@@ -187,6 +194,7 @@ export default class Map extends React.Component {
     }
 
     sendNotificationToUser = async (user, timp) => {
+        if(this.state.receive_map_notifications){
         this.getLocationFromCoords(this.state.futureLocationCoords.lat, this.state.futureLocationCoords.long)
         let query = await firebase.firestore().collection('users').doc(user).get()
         let token = await query.data().tokens
@@ -206,7 +214,7 @@ export default class Map extends React.Component {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(message),
-          });
+          });}
     }
 
     pickTimeFunction = () => {

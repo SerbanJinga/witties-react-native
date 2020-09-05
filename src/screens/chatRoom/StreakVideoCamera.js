@@ -84,11 +84,20 @@ class StreakVideoCamera extends Component {
       flipVideo: false,
       streakVideoDuration: 6,
       timeElapsed: 0,
-      roomId: props.navigation.state.params.roomId
+      roomId: props.navigation.state.params.roomId,
+      groupProfilePicture: ''
     }
     this.selectAlbum = this.selectAlbum.bind(this)
     this.handleCaptureOut = this.handleCaptureOut.bind(this)
     this.handleLongCapture = this.handleLongCapture.bind(this)
+  }
+
+  getGroupProfilePicture = async() => {
+    let query = await firebase.firestore().collection('messages').doc(this.state.roomId).get()
+    let data = await query.data().profilePicture
+    this.setState({
+      groupProfilePicture: data
+    })
   }
 
   openActivityOverlay = () => {
@@ -211,6 +220,8 @@ class StreakVideoCamera extends Component {
 
     })
 
+    await this.getGroupProfilePicture()
+
 
     const { status } = await Camera.requestPermissionsAsync()
     this.setState({ hasPermission: status })
@@ -328,7 +339,7 @@ class StreakVideoCamera extends Component {
 
   handleLongCapture = async () => {
     //tudor
-    this.setState({ capturing: true, timeElapsed:0  })
+    this.setState({ capturing: true, timeElapsed: 0 })
 
     if (this.state.type === Camera.Constants.Type.front) {
       this.setState({ flipVideo: true })
@@ -342,7 +353,7 @@ class StreakVideoCamera extends Component {
     videoData.shouldFlip = this.state.flipVideo
     console.log(videoData, ' asta chiar ma intereseazaaaaa')
     this.setState({ capturing: false, captures: [videoData, ...this.state.captures] });
-    
+
     this.setState({
       duration: this.state.streakVideoDuration
     })
@@ -393,7 +404,7 @@ class StreakVideoCamera extends Component {
                   style={{ color: "#fff", fontSize: 30 }}
                 />
               </TouchableOpacity>
-              {this.state.capturing ? <Text style={{fontSize:40}}>{this.state.timeElapsed}</Text>: null}
+              {this.state.capturing ? <Text style={{ fontSize: 40 }}>{this.state.timeElapsed}</Text> : null}
               {/* <TouchableOpacity
                 style={{
                   alignSelf: 'flex-end',
@@ -443,20 +454,24 @@ class StreakVideoCamera extends Component {
                   onLongCapture={console.log('long capture')}
                   onShortCapture={console.log('short capture')}
                 /></View>
-              <TouchableOpacity
-                style={{
-                  alignSelf: 'flex-end',
-                  alignItems: 'center',
-                  backgroundColor: 'transparent',
-                }}
-                onPress={() => this.handleCameraType()}
+              {this.state.capturing ? (<TouchableOpacity
+                style={{ alignSelf: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' }}
 
               >
                 <MaterialCommunityIcons
                   name="camera-switch"
-                  style={{ color: "#fff", fontSize: 30 }}
+                  style={{ color: "#7f7f7f", fontSize: 30 }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity>) :
+                (<TouchableOpacity
+                  style={{ alignSelf: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' }}
+                  onPress={() => this.handleCameraType()}
+                >
+                  <MaterialCommunityIcons
+                    name="camera-switch"
+                    style={{ color: "#fff", fontSize: 30 }}
+                  />
+                </TouchableOpacity>)}
             </View>
             <Overlay isVisible={this.state.settings} animationType="slide" fullScreen>
               <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
@@ -579,21 +594,22 @@ class StreakVideoCamera extends Component {
     })
   }
   sendImage = async () => {
-    this._pressOverlay()
-      const path = `photos/${this.state.roomId}/${firebase.auth().currentUser.uid}`
-        const response = await fetch(this.state.captures[0].uri)
-        const file = await response.blob()
-        
-            
-        
-        let upload = firebase.storage().ref(path).put(file)
-        upload.on("state_changed", snapshot => { }, err => {
-            console.log(err)
-        },
-            async () => {
-                const url = await upload.snapshot.ref.getDownloadURL()
-                this.sendImageFunction(url)
-              })
+    const path = `photos/${this.state.roomId}/${firebase.auth().currentUser.uid}`
+    const response = await fetch(this.state.captures[0].uri)
+    const file = await response.blob()
+
+
+
+    let upload = firebase.storage().ref(path).put(file)
+    upload.on("state_changed", snapshot => { }, err => {
+      console.log(err)
+    },
+      async () => {
+        const url = await upload.snapshot.ref.getDownloadURL()
+        this.sendImageFunction(url)
+        this._pressOverlay()
+
+      })
   }
 
   sendImageFunction = (url) => {
@@ -673,13 +689,12 @@ class StreakVideoCamera extends Component {
     console.log('---------------------------------')
     console.log('Video ul meu la momentul actual are asa:', this.state.captures[0])
     console.log('---------------------------------')
-    return (<View>
+    return (<View style={{flex: 1, flexDirection: 'column'}}>
       <Overlay isVisible={true}>
         <Video source={{ uri: this.state.captures[0].uri }} resizeMode="cover" style={{ transform: [{ scaleX: this.state.flipVideo ? -1 : 1 }, { scaleY: 1 }], width: width, height: screenHeight }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping />
 
 
-
-
+        {/* <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}> */}
         <TouchableOpacity
           onPress={() => this._closeVideoOverlay()}
           style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, left: 20 }}>
@@ -688,8 +703,19 @@ class StreakVideoCamera extends Component {
             style={{ color: "#fff", fontSize: 30 }}
           />
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => this._closeVideoOverlay()}
+          style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, left: 20 }}>
+          <AntDesign
+            name="close"
+            style={{ color: "#fff", fontSize: 30 }}
+          />
+        </TouchableOpacity>
+        {/* </View> */}
 
-        <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 50, left: 20, right: 0, alignContent: 'center', alignItems: 'center', zIndex: 2 }}>
+    
+
+        <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 50, left: 20, right: 0, alignContent: 'center', alignItems: 'center', zIndex: 2, justifyContent: 'space-between' }}>
 
           {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, right: 20 }}>
           <MaterialCommunityIcons
@@ -698,18 +724,8 @@ class StreakVideoCamera extends Component {
           />
         </TouchableOpacity> */}
 
-          <TouchableOpacity style={{ marginRight: width / 4.6 }}
-            onPress={() => this.openMoodOverlay()}>
-            <MaterialCommunityIcons
-              name={this.state.moodIcon}
-              style={{ color: '#fff', fontSize: 30 }}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openActivityOverlay()}>
-            <MaterialCommunityIcons name="basketball" style={{ color: '#fff', fontSize: 30 }} />
-          </TouchableOpacity>
-
+        
+        
           {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 200, right: 20 }} onPress={() => this.openTagFriends()}>
           <Ionicons
             name="md-pricetags"
@@ -731,13 +747,12 @@ class StreakVideoCamera extends Component {
           <Ionicons name="ios-time" style={{ color: '#fff', fontSize: 30 }} />
 
         </TouchableOpacity> */}
+        <TouchableOpacity>
+        <Avatar rounded size={40} source={{uri: this.state.groupProfilePicture}}/>
 
-          <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.openAlbumOverlay()}>
-            <Ionicons name="ios-albums" style={{ color: '#fff', fontSize: 30 }} />
+        </TouchableOpacity>
 
-          </TouchableOpacity>
-
-          <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.sendImage()}>
+          <TouchableOpacity onPress={() => this.sendImage()} style={{marginRight: 20}}>
             <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
 
           </TouchableOpacity>

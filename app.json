@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "witties-react-native",
-    "slug": "witties-react-native",
+    "name": "Witties",
+    "slug": "Witties",
     "android": {
       "package": "com.h44x.witties",
       "versionCode": 1

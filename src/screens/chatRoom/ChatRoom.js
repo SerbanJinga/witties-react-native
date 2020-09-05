@@ -364,7 +364,7 @@ class ChatRoom extends Component {
                 <TouchableOpacity onPress={() => this.pickVideo()}>
                     <Feather name="video" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ marginLeft: 8 }} onPress={() => this.props.navigation.navigate('ChatCameraScreen', { roomId: this.state.roomId })}>
+                <TouchableOpacity style={{ marginLeft: 8 }} onPress={() => this.props.navigation.navigate('ChatCameraScreen', { roomId: this.state.roomId, profilePicture: this.state.profilePicture })}>
                     <Feather name="camera" size={24} color="black" />
                 </TouchableOpacity>
             </View>
