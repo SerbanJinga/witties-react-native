@@ -9,12 +9,13 @@ import { withNavigation } from 'react-navigation';
 import ActivityPopupChatroomSelect from '../ActivityPop/ActivityPopupChatroomSelect'
 import Room from './Room'
 import { AntDesign } from '@expo/vector-icons'
-import { last } from 'lodash'
+import { last, filter } from 'lodash'
 
 const { width, height } = Dimensions.get('window')
 let groupsIn = []
 let arr = []
 let grupuri = []
+let filtered = []
 
 class ChatRoomsList extends Component {
     constructor(props) {
@@ -43,6 +44,7 @@ class ChatRoomsList extends Component {
 
 
     searchChats = async(searchChats) => {
+        filtered = []
         this.setState({searchChats: searchChats})
         // let filteredData = this.state.documentData.filter(function(item){
         //     return item.chatRoomName.includes(searchChats)
@@ -50,14 +52,38 @@ class ChatRoomsList extends Component {
         // this.setState({filteredData: filteredData})
         console.log('se schimba...')
         // let data = this.state.documentData
-        let filteredData = firebase.firestore().collection('messages').where('chatRoomName', '>=', searchChats).startAt(searchChats.toUppercase).endAt(searchChats.toLowerCase + "\uf8ff").get()
-        let data = (await filteredData).docs.map(doc => doc.data())
+        let filteredData = firebase.firestore().collection('messages').where('chatRoomName', '>=', searchChats).get()
+        (await filteredData).docs.forEach(async doc => {
+            let chatName = await doc.data().chatRoomName
+            let chatPicture = await doc.data().profilePicture
+            let chatId = await doc.data().roomId
+            let chatCreator = doc.data().userWhoCreated
+            let twoUserChat = doc.data().twoUserChat
+            if(chatCreator !== firebase.auth().currentUser.uid && twoUserChat === true){
+                let otherQuery = await firebase.firestore().collection('users').doc(doc.data().userWhoCreated).get()
+                let displayName = await otherQuery.data().displayName
+                chatName = displayName
+                // console.log('asta merge')
+            }
+            let foo = {
+                chatName: chatName,
+                chatPicture: chatPicture,
+                roomId: chatId
+            }
+            filtered.push(foo)
+            this.setState({
+                filteredData: filtered
+            })
+            for(let i = 0; i < this.state.filteredData.length; i++){
+                if (filtered[i].roomId === chatId){
+                    const index = filtered.indexOf(i)
+                    filtered.splice(index, 1)
+                }
+            }
+        })
         console.log(data)
         // let filteredData = data.filter(item => item.chatName.includes(searchChats))
-        this.setState({
-            filteredData: data
-        })
-
+       
         // this.setState({
             // filteredData: data
         // })

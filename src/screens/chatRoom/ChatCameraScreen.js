@@ -16,7 +16,6 @@ import { Video } from 'expo-av'
 import SendToList from '../camera/SendToList'
 import { Send } from 'react-native-gifted-chat'
 import DoubleTap from '../camera/DoubleTap'
-import VideoPlayer from 'expo-video-player'
 import { withNavigation } from 'react-navigation'
 import PlacesInput from 'react-native-places-input';
 import { SafeAreaView } from 'react-native-safe-area-context'

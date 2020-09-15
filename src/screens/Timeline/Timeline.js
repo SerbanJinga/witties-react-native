@@ -67,7 +67,8 @@ class Timeline extends React.Component {
             newAlbumText: '',
             activitiesOptions: false,
             newActivityText: '',
-            mood: ''
+            mood: '',
+            lastSeen: null
         }
         this.closeSwipablePanel = this.closeSwipablePanel.bind(this)
         this.renderOverlay = this.renderOverlay.bind(this)
@@ -88,12 +89,8 @@ class Timeline extends React.Component {
         })
     }
     componentDidMount() {
-        console.log("De aici vine", this.state.displayName)
         arr = []
         this.retrieveData()
-        console.log('=a-ra=r-apkfakfaf')
-        console.log(screenHeight, "   vs  ", height)
-        console.log(this.state.documentDataFriends)
         //Dau reverse la array
         // let reverted = this.state.documentData.reverse()
         // this.setState({ documentData: reverted })
@@ -116,7 +113,6 @@ class Timeline extends React.Component {
         this.setState({ searchText: searchText })
         let query = await firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').where('text', '>=', searchText).get()
         let documentData = query.docs.map(doc => doc.data())
-        console.log(documentData)
         this.setState({ filteredData: documentData })
     }
 
@@ -152,7 +148,7 @@ class Timeline extends React.Component {
     }
 
     async peopleSelection(ceva) {
-        console.log("people selection", ceva)
+        // console.log("people selection", ceva)
         let initialQuery = await firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid).collection("statuses").where("taggedUsers", "array-contains", ceva)//orderBy("timestamp", "desc")
         let documentSnapshots = await initialQuery.get()
         let sos = documentSnapshots.docs.map(document => document.data())
@@ -160,13 +156,13 @@ class Timeline extends React.Component {
         for (let i = 0; i < idMap.length; i++) {
             sos[i].id = idMap[i]
         }
-        console.log("array ul de albume trb sa fie egal cu", sos)
+        // console.log("array ul de albume trb sa fie egal cu", sos)
         this.setState({ documentData: sos, clearFilter: true, openFilter: false })
 
     }
 
     async albumSelection(ceva) {
-        console.log("album selection", ceva)
+        // console.log("album selection", ceva)
         let initialQuery
         initialQuery = await firebase.firestore().collection("private").doc(firebase.auth().currentUser.uid).collection("statuses").where("albums", "array-contains", ceva)//orderBy("timestamp", "desc")
         let documentSnapshots = await initialQuery.get()
@@ -175,7 +171,7 @@ class Timeline extends React.Component {
         for (let i = 0; i < idMap.length; i++) {
             sos[i].id = idMap[i]
         }
-        console.log("array ul de albume trb sa fie egal cu", sos)
+        // console.log("array ul de albume trb sa fie egal cu", sos)
         this.setState({ documentData: sos, clearFilter: true, openFilter: false })
 
     }
@@ -260,7 +256,7 @@ class Timeline extends React.Component {
         for (let i = 0; i < idMap.length; i++) {
             sos[i].id = idMap[i]
         }
-        console.log("array ul de albume trb sa fie egal cu", sos)
+        // console.log("array ul de albume trb sa fie egal cu", sos)
         this.setState({ documentData: sos, clearFilter: true, openFilter: false })
 
 
@@ -270,9 +266,9 @@ class Timeline extends React.Component {
 
     //-------------------------------------------------------Overlays--------------------------
     renderOverlay(id) {
-        console.log('------------------------------------------------')
-        console.log(id)
-        console.log('------------------------------------------------')
+        // console.log('------------------------------------------------')
+        // console.log(id)
+        // console.log('------------------------------------------------')
         this.setState({ id: id, showOverlay: true })
     }
 
@@ -327,40 +323,50 @@ class Timeline extends React.Component {
         })
     }
 
+     retrieveMore = async() => {
+        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").startAt(this.state.lastSeen).limit(9).onSnapshot((doc) => {
+            let data = doc.docs.map(doc => doc.data())
+            let idMap = doc.docs.map(doc => doc.id)
+            for(let i = 0; i < idMap.length; i++){
+                data[i].id = idMap[i]
+            }
+            console.log(data)
+            this.setState({
+                documentData: data,
+                lastSeen: data[0]
+            })
+        })
+    }
+
     //---------------------------------------------------Data retrival------------------------------------
     async retrieveData() {
 
-        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").onSnapshot((doc) => {
+        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").limit(9).onSnapshot((doc) => {
             let data = doc.docs.map(doc => doc.data())
             let idMap = doc.docs.map(doc => doc.id)
             for (let i = 0; i < idMap.length; i++) {
                 data[i].id = idMap[i]
             }
             this.setState({
-                documentData: data
+                documentData: data,
+                lastSeen: data[0] 
             })
+            let lastSeen = data[0]
+            console.log('ultimul pe care il vezi e aici', lastSeen)
         })
         this.setState({
             userName: data
         })
         this.setState({ documentData: documentData })
     }
+    
+  
 
 
     render() {
         return (<SafeAreaView style={{ height: screenHeight, flex: 1, width: width, backgroundColor: '#fff' }}>
             <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
-                <SearchBar round placeholder="Search" style={{ fontFamily: 'font1', padding: 20 }} lightTheme inputStyle={{ fontFamily: 'font1' }} placeholderTextColor="#ecedef" containerStyle={{
-                    backgroundColor: "#fff",
-                    borderBottomColor: '#ecedef',
-                    borderTopColor: '#ecedef',
-                    borderLeftColor: '#ecedef',
-                    borderRightColor: '#ecedef',
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    margin: 10,
-                    width: width / 1.2
-                }} inputContainerStyle={{ backgroundColor: '#fff', height: 30 }} value={this.state.searchText} onChangeText={this.search} />
+                <Button onPress={() => this.retrieveMore()} title="Esti prost"/>
                 <TouchableOpacity onPress={() => this.openFilter()}>
                     <AntDesign name="filter" size={20} />
                 </TouchableOpacity>

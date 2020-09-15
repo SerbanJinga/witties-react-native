@@ -47,7 +47,6 @@ export default class LoadingScreen extends Component {
             if(user){
                 await this.setUpSettingsFirebase().then(
                 this.props.navigation.navigate('Home'))
-                // await this.retrieveDataFromFriends()
                 }else{
                 this.props.navigation.navigate('SignUp')
             }

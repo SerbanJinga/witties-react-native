@@ -1,39 +1,69 @@
 import React, { Component } from 'react'
-import { Text, ScrollView, Dimensions } from 'react-native'
+import { View, StyleSheet, Dimensions } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import firebase from 'firebase'
 import { Video } from 'expo-av'
-
 const { width, height } = Dimensions.get('window')
+import StreakVideoFullScreenVideo from './StreakVideoFullScreenVideo'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import StreakVideoItem from './StreakVideoItem'
+import { FlatList } from 'react-native-gesture-handler'
+
+const cellHeight = height * 0.6;
+const cellWidth = width;
+const viewabilityConfig = {
+    itemVisiblePercentThreshold: 80,
+  };
 class StreakVideoAvatar extends Component {
     scrollRef = React.createRef()
     constructor(props) {
         super(props)
+        this.cellRefs = {}
         this.state = {
             roomId: props.navigation.state.params.roomId,
-            documentData: [],
+            documentData: props.navigation.state.params.data,
             selectedIndex: 0,
-            xPosition: 1
+            xPosition: 1,
+            onEndReached: false,
+            uri: ''
         }
+
+        this.goToNextStorty = this.goToNextStorty.bind(this)
     }
 
-    retrieveData = async () => {
-        // let query = await firebase.firestore().collection('messages').doc(this.state.roomId).get()
-        // let data = await query.data().streakVideo
-        // this.setState({
-            // documentData: data
-        // })
-        let query = await firebase.firestore().collection('streak-video').doc(this.state.roomId).collection('videos').orderBy('timestamp', 'desc').get()
-        let data =  query.docs.map(doc => doc.data())
-        this.setState({
-            documentData: data
-        })
-        console.log(data)
+    // loadItems = () => {
+    //     const start = this.state.documentData.length
+    //     const newItems = this.state.documentData.map((item, i) => ({
+    //         ...item,
+    //         id: start + i
+    //     }))
+    //     const documentData = [...this.state.documentData, ...newItems]
+    //     this.setState({ documentData })
+    // }
+
+    _renderItem = ({ item }) => {
+        return (
+            <StreakVideoItem
+                ref={(ref) => {
+                    this.cellRefs[item.id] = ref
+                }}
+                {...item}
+            />
+        )
     }
+
+
+
+
+
+    // retrieveData = async () => {
+    //   this.setState({
+    //   })
+    // }
 
     componentDidMount = async () => {
-        await this.retrieveData()
-        console.log(this.scrollRef.current.index)
+        // await this.retrieveData()
+        console.log(this.state.documentData, 'da;da;dla;dla')
 
     }
 
@@ -51,39 +81,122 @@ class StreakVideoAvatar extends Component {
 
     _onPlaybackStatusUpdate = playbackStatus => {
         if (playbackStatus.didJustFinish) {
-           
-                if (this.state.selectedIndex === this.state.documentData.length - 1) {
-                    this.props.navigation.navigate('Home')
-                }
-                this.setState(prev => ({ selectedIndex: prev.selectedIndex + 1 }),
-                    () => {
-                        this.scrollRef.current.scrollTo({
-                            animated: true,
-                            y: 0,
-                            x: width * this.state.selectedIndex
-                        })
-                    })
+
+            this.playbackObject.loadAsync(this.state.documentData[this.state.selectedIndex].video)
+            if (this.state.selectedIndex === this.state.documentData.length - 1) {
+                this.props.navigation.navigate('Home')
             }
+            this.setState(prev => ({ selectedIndex: prev.selectedIndex + 1 }),
+                () => {
+                    this.scrollRef.current.scrollTo({
+                        animated: true,
+                        y: 0,
+                        x: width * this.state.selectedIndex
+                    })
+                })
         }
-    
+
+    }
+
+    goToNextStorty = () => {
+        console.log('a intrat in checkend')
+        if (this.state.onEndReached)
+            this.props.navigation.goBack(null)
+
+        this.setState(prev => ({ selectedIndex: prev.selectedIndex + 1 }),
+            () => {
+                this.scrollRef.current.scrollTo({
+                    animated: true,
+                    y: 0,
+                    x: width * this.state.selectedIndex
+                })
+            })
+    }
+
 
     handleScroll = event => {
         console.log(event.nativeEvent.contentOffset.x);
 
     }
 
+    _onViewableItemsChanged = (props) => {
+        const changed = props.changed
+        changed.forEach((item) => {
+            const cell = this.cellRefs[item.key]
+            if (cell) {
+                if (item.isViewable) {
+                    cell.play()
+                } else {
+                    cell.pause()
+                }
+            }
+        })
+    }
+
     render() {
         return (
-            <ScrollView scrollEventThrottle={16} onScroll={this.handleScroll} ref={this.scrollRef} horizontal pagingEnabled onMomentumScrollEnd={this.setSelectedIndex} style={{ flex: 1, width: width, height: height }}>
-                {this.state.documentData.map((element, index) => (
-                    <Video onPlaybackStatusUpdate=
-                        {(playbackStatus) => this._onPlaybackStatusUpdate(playbackStatus)} key={index} resizeMode="cover" style={{ width: width, height: height }}
-                        rate={1.0} volume={1.0} source={{ uri: element.video }} shouldPlay={index === this.state.selectedIndex ? true : false} />
+            <View style={styles.container}>
+                <FlatList
+                horizontal
+                    style={{ flex: 1 }}
+                    data={this.state.documentData}
+                    renderItem={this._renderItem}
+                    keyExtractor={(item) => item.id}
+                    onViewableItemsChanged={this._onViewableItemsChanged}
+                    initialNumToRender={3}
+                    maxToRenderPerBatch={3}
+                    windowSize={5}
+                    getItemLayout={(_data, index) => ({
+                        length: cellHeight,
+                        offset: cellHeight * index,
+                        index,
+                    })}
+                    viewabilityConfig={viewabilityConfig}
+                    removeClippedSubviews={true}
 
-                ))}
-            </ScrollView>
+                />
+            </View>
         )
     }
 }
+
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#fff',
+    },
+    cell: {
+      width: cellWidth - 20,
+      height: cellHeight - 20,
+      backgroundColor: '#eee',
+      borderRadius: 20,
+      overflow: 'hidden',
+      margin: 10,
+    },
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      padding: 40,
+    },
+    full: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    },
+    poster: {
+      resizeMode: 'cover',
+    },
+    overlayText: {
+      color: '#fff',
+    },
+  });
+
 
 export default withNavigation(StreakVideoAvatar)

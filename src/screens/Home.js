@@ -67,7 +67,6 @@ class Home extends Component {
     finalArr = []
     await this._getToken()
     await this._getProfilePicture()
-    console.log('mergi tati MKAGJAK KAGJAKGJAK')
   }
 
 
