@@ -120,7 +120,7 @@ class Room extends Component {
   }
 
   sendToAvatar = async () => {
-     await firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').orderBy('timestamp', 'desc').limit(2).get().then(doc => {
+     await firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').orderBy('timestamp', 'desc').limit(3).get().then(doc => {
       let data = doc.docs.map(doc => doc.data())
       let idMap = doc.docs.map(doc => doc.id)
 

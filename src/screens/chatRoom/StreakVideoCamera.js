@@ -746,15 +746,12 @@ class StreakVideoCamera extends Component {
           <Ionicons name="ios-time" style={{ color: '#fff', fontSize: 30 }} />
 
         </TouchableOpacity> */}
-        <TouchableOpacity>
+        <TouchableOpacity style={{position: 'absolute', right: 20, bottom: 20}} onPress={() => this.sendImage()}>
         <Avatar rounded size={40} source={{uri: this.state.groupProfilePicture}}/>
 
         </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => this.sendImage()} style={{marginRight: 20}}>
-            <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
-
-          </TouchableOpacity>
+          
 
         </View>
 

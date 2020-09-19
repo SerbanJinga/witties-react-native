@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions } from 'react-native'
+import { View, StyleSheet, Dimensions, SafeAreaView } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import firebase from 'firebase'
 import { Video } from 'expo-av'
 const { width, height } = Dimensions.get('window')
 import StreakVideoFullScreenVideo from './StreakVideoFullScreenVideo'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import StreakVideoItem from './StreakVideoItem'
 import { FlatList } from 'react-native-gesture-handler'
 
@@ -13,7 +12,7 @@ const cellHeight = height * 0.6;
 const cellWidth = width;
 const viewabilityConfig = {
     itemVisiblePercentThreshold: 80,
-  };
+};
 class StreakVideoAvatar extends Component {
     scrollRef = React.createRef()
     constructor(props) {
@@ -48,6 +47,7 @@ class StreakVideoAvatar extends Component {
                     this.cellRefs[item.id] = ref
                 }}
                 {...item}
+                close={() => this.props.navigation.goBack(null)}
             />
         )
     }
@@ -63,7 +63,7 @@ class StreakVideoAvatar extends Component {
 
     componentDidMount = async () => {
         // await this.retrieveData()
-        console.log(this.state.documentData, 'da;da;dla;dla')
+        // console.log(this.state.documentData, 'da;da;dla;dla')
 
     }
 
@@ -135,9 +135,9 @@ class StreakVideoAvatar extends Component {
 
     render() {
         return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <FlatList
-                horizontal
+                    horizontal
                     style={{ flex: 1 }}
                     data={this.state.documentData}
                     renderItem={this._renderItem}
@@ -146,16 +146,17 @@ class StreakVideoAvatar extends Component {
                     initialNumToRender={3}
                     maxToRenderPerBatch={3}
                     windowSize={5}
+                    pagingEnabled
                     getItemLayout={(_data, index) => ({
-                        length: cellHeight,
-                        offset: cellHeight * index,
+                        length: cellWidth,
+                        offset: cellWidth * index,
                         index,
                     })}
                     viewabilityConfig={viewabilityConfig}
                     removeClippedSubviews={true}
 
                 />
-            </View>
+            </SafeAreaView>
         )
     }
 }
@@ -163,40 +164,40 @@ class StreakVideoAvatar extends Component {
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: '#fff',
+        flex: 1,
+        backgroundColor: '#fff',
     },
     cell: {
-      width: cellWidth - 20,
-      height: cellHeight - 20,
-      backgroundColor: '#eee',
-      borderRadius: 20,
-      overflow: 'hidden',
-      margin: 10,
+        width: cellWidth,
+        height: cellHeight ,
+        backgroundColor: '#eee',
+        borderRadius: 20,
+        overflow: 'hidden',
+        margin: 10,
     },
     overlay: {
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      backgroundColor: 'rgba(0,0,0,0.4)',
-      padding: 40,
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        padding: 40,
     },
     full: {
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
     },
     poster: {
-      resizeMode: 'cover',
+        resizeMode: 'cover',
     },
     overlayText: {
-      color: '#fff',
+        color: '#fff',
     },
-  });
+});
 
 
 export default withNavigation(StreakVideoAvatar)

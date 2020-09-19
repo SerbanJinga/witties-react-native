@@ -12,7 +12,7 @@ import {
     ImageBackground,
     Dimensions,
     FlatList,
-    ScrollView,
+    ScrollView, RefreshControl
 } from 'react-native';
 
 import ActivityPopup from '../ActivityPop/ActivityPopup'
@@ -68,7 +68,8 @@ class Timeline extends React.Component {
             activitiesOptions: false,
             newActivityText: '',
             mood: '',
-            lastSeen: null
+            lastSeen: null,
+            lastVisible: null
         }
         this.closeSwipablePanel = this.closeSwipablePanel.bind(this)
         this.renderOverlay = this.renderOverlay.bind(this)
@@ -96,10 +97,17 @@ class Timeline extends React.Component {
         // this.setState({ documentData: reverted })
     }
     renderHeader() {
-        return (<View>
-            <Text>TIMELINE</Text>
-            <Divider />
-        </View>)
+     try{ if(this.state.refreshing){
+          return(
+              <View>
+                  <ActivityIndicator size="large"/>
+              </View>
+          )
+      }else{
+          return null
+      }}catch(err){
+          console.log(err)
+      }
     }
 
     filterByMood = async () => {
@@ -324,7 +332,13 @@ class Timeline extends React.Component {
     }
 
      retrieveMore = async() => {
-        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").startAt(this.state.lastSeen).limit(9).onSnapshot((doc) => {
+         this.setState({
+             refreshing: true
+         })
+        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").startAfter(this.state.lastSeen).limit(9).onSnapshot((doc) => {
+            if(doc.empty){
+                return
+            }
             let data = doc.docs.map(doc => doc.data())
             let idMap = doc.docs.map(doc => doc.id)
             for(let i = 0; i < idMap.length; i++){
@@ -332,8 +346,9 @@ class Timeline extends React.Component {
             }
             console.log(data)
             this.setState({
-                documentData: data,
-                lastSeen: data[0]
+                documentData: [...this.state.documentData, ...data],
+                lastSeen: data[data.length - 1].timestamp,
+                refreshing: false
             })
         })
     }
@@ -349,10 +364,9 @@ class Timeline extends React.Component {
             }
             this.setState({
                 documentData: data,
-                lastSeen: data[0] 
+                lastSeen: data[data.length - 1].timestamp 
             })
-            let lastSeen = data[0]
-            console.log('ultimul pe care il vezi e aici', lastSeen)
+            console.log('ultimul pe care il vezi e aici', data[data.length - 1].timestamp)
         })
         this.setState({
             userName: data
@@ -366,10 +380,10 @@ class Timeline extends React.Component {
     render() {
         return (<SafeAreaView style={{ height: screenHeight, flex: 1, width: width, backgroundColor: '#fff' }}>
             <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
-                <Button onPress={() => this.retrieveMore()} title="Esti prost"/>
-                <TouchableOpacity onPress={() => this.openFilter()}>
-                    <AntDesign name="filter" size={20} />
-                </TouchableOpacity>
+                {/* <Button onPress={() => this.retrieveMore()} title="Esti prost"/> */}
+                {/* <TouchableOpacity onPress={() => this.openFilter()}> */}
+                    {/* <AntDesign name="filter" size={20} /> */}
+                {/* </TouchableOpacity> */}
 
 
             </View>
@@ -432,7 +446,7 @@ class Timeline extends React.Component {
             <View style={{ alignItems: 'center' }}>
                 <FlatList
                     // decelerationRate={0}
-
+                    // refreshControl={<RefreshControl top refreshing={this.state.refreshing} onRefresh={() => this.retrieveMore()} />}
 
                     data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                     renderItem={({ item, index }) => (
@@ -468,13 +482,13 @@ class Timeline extends React.Component {
                         </View>
                     )}
                     keyExtractor={(item, index) => String(index)}
-                    ListHeaderComponent={<View style={{ height: 150 }}></View>}
-                    // ListFooterComponent={}
+                    // ListHeaderComponent={this.renderHeader}
+                    ListFooterComponent={<TouchableOpacity onPress={()=> this.retrieveMore()}><Text style={{fontSize: 16, alignSelf: 'center', color: '#0984e3'}}>Load More</Text></TouchableOpacity>}
                     // ItemSeparatorComponent={(item) => (<Text>{item.date}</Text>)}
                     ref={ref => this.flatList = ref}
                     onContentSizeChange={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
                     onLayout={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
-                    onEndReached={this.retrieveMore}
+                    // onEndReached={this.retrieveMore}
                     onEndReachedThreshold={1}
                     columnWrapperStyle={{ flexDirection: "row-reverse" }}
                     refreshing={this.state.refreshing}

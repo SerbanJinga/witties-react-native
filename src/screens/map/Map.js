@@ -32,6 +32,7 @@ let arr = []
 import firebase from 'firebase';
 const screenHeight = Dimensions.get('screen').height;
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Toast from 'react-native-easy-toast'
 let circle = {}
 
 import MapView from 'react-native-maps';
@@ -83,7 +84,7 @@ export default class Map extends React.Component {
         result.find(mata => {
             street = mata.street
         })
-        
+
         this.setState({
             street: street
         })
@@ -91,10 +92,10 @@ export default class Map extends React.Component {
         console.log(street)
     }
 
-    getUserSettings = async() => {
+    getUserSettings = async () => {
         let query = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
-       let cv = await query.data().userSettings
-       this.setState({receive_map_notifications:cv.receive_map_notifications})
+        let cv = await query.data().userSettings
+        this.setState({ receive_map_notifications: cv.receive_map_notifications })
     }
 
     async componentDidMount() {
@@ -140,7 +141,7 @@ export default class Map extends React.Component {
     async retrieveImageFromOneUser(element) {
         let initialQuery = await firebase.firestore().collection('status-public').doc(element).get()
         let documentData = await initialQuery.data().futureLocation
-        if (documentData){
+        if (documentData) {
             arr.push(documentData)
         }
         // arr.push(documentData)
@@ -178,7 +179,7 @@ export default class Map extends React.Component {
 
         circle = { lat: loc.latitude, long: loc.longitude, name: this.state.currentUserName, pic: this.state.currentUserProfilePic }
         this.setState({ futureLocation: true, futureLocationCoords: circle, futureLocationSpamTimer: Date.now() })
-        setTimeout(() =>{
+        setTimeout(() => {
             this.setState({
                 pickTime: true
             })
@@ -194,27 +195,28 @@ export default class Map extends React.Component {
     }
 
     sendNotificationToUser = async (user, timp) => {
-        if(this.state.receive_map_notifications){
-        this.getLocationFromCoords(this.state.futureLocationCoords.lat, this.state.futureLocationCoords.long)
-        let query = await firebase.firestore().collection('users').doc(user).get()
-        let token = await query.data().tokens
-        const message = {
-            to: token,
-            sound: 'default',
-            title: this.state.currentUserName + ' changed their location',
-            body:  this.toHours(timp - Date.now()) + ' near ' + this.state.street ,
-            data: {data: 'goes here'},
-            _displayInForeground: true
+        if (this.state.receive_map_notifications) {
+            this.getLocationFromCoords(this.state.futureLocationCoords.lat, this.state.futureLocationCoords.long)
+            let query = await firebase.firestore().collection('users').doc(user).get()
+            let token = await query.data().tokens
+            const message = {
+                to: token,
+                sound: 'default',
+                title: this.state.currentUserName + ' changed their location',
+                body: this.toHours(timp - Date.now()) + ' near ' + this.state.street,
+                data: { data: 'goes here' },
+                _displayInForeground: true
+            }
+            const response = await fetch('https://exp.host/--/api/v2/push/send', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Accept-encoding': 'gzip, deflate',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+            });
         }
-        const response = await fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Accept-encoding': 'gzip, deflate',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(message),
-          });}
     }
 
     pickTimeFunction = () => {
@@ -245,8 +247,8 @@ export default class Map extends React.Component {
         this.setState({
             pickTime: false
         })
-    
-         
+
+
     }
 
     // _renderTimestamps = (timestamp) => {
@@ -262,9 +264,11 @@ export default class Map extends React.Component {
 
     confirmFutureLocation = (date) => {
         console.log(date.valueOf())
-        if(date.valueOf() < Date.now())
+        if (date.valueOf() < Date.now() - 14400000) { //daca pun data cu pana 4 ore in trecut se pune azi, daca nu se pune maine
+            //serban pune toasta si da dismiis la time selectorul
             circle.time = date.valueOf() + 86400000
-        else 
+        }
+        else
             circle.time = date.valueOf()
         firebase.firestore().collection("status-public").doc(firebase.auth().currentUser.uid).set({
             futureLocation: circle,
@@ -280,18 +284,26 @@ export default class Map extends React.Component {
         })
 
         this.sendNotifications(circle.time)
-        
+        this.componentDidMount()
+
     }
 
     toHours = (timestamp) => {
+        if (timestamp < 0 && timestamp > -600000)
+            return 'now'
         let minutes = ((Math.round(timestamp * 1.67 / (100000))))
         let hours = Math.floor(minutes / 60)
         let minutesRemaining = minutes % 60
-        if (hours === 0){
+        if (hours === 0) {
+            if (timestamp < 0)
+                return -minutesRemaining + " minutes ago"
+
             return "in " + minutesRemaining + " minutes"
         }
-        return 'in ' + hours + ' h '  + minutesRemaining + " min"
-
+        if (timestamp < 0) {
+            return -hours + ' h ' + -minutesRemaining + " min ago"
+        }
+        return 'in ' + hours + ' h ' + minutesRemaining + " min"
     }
 
 
@@ -311,68 +323,72 @@ export default class Map extends React.Component {
             text = JSON.stringify(this.state.location)
 
         return (<View style={{ flex: 1 }}>
+            <Toast
+                ref="error"
+                style={{ backgroundColor: '#282828' }}
+                textStyle={{ color: '#fff' }}
+                position='bottom'
+                opacity={0.8}
+                fadeInDuration={750}
+            />
             <Button title="" type='clear' icon={<MaterialIcons name={'my-location'} size={28} />} containerStyle={{
-                    position:'absolute',
-                    right:10,
-                    
-                    bottom:100,
-                    zIndex:1,
+                position: 'absolute',
+                right: 10,
+
+                bottom: 100,
+                zIndex: 1,
+                borderRadius: 30,
+
+                backgroundColor: '#f5f6fa',
+                height: 45,
+            }} onPress={() => {
+                this.setState({ animating: true })
+                this.map.animateToRegion({
+                    latitude: this.state.location.coords.latitude,
+                    longitude: this.state.location.coords.longitude,
+                    latitudeDelta: 0.03,
+                    longitudeDelta: 0.0421,
+                }, 1000)
+                console.log(this.state.location, "te")
+            }} />
+            <SafeAreaView style={{ position: 'absolute', top: 40, left: 10, zIndex: 4 }}>
+                <Button onPress={() => this.props.navigation.navigate('Home')} title="" type='clear' icon={<AntDesign name={'close'} size={18} />} containerStyle={{
                     borderRadius: 30,
-                    
                     backgroundColor: '#f5f6fa',
-                    height: 45,
-                }} onPress={() => {
-                    this.setState({ animating: true })
-                    this.map.animateToRegion({
-                        latitude: this.state.location.coords.latitude,
-                        longitude: this.state.location.coords.longitude,
-                        latitudeDelta: 0.03,
-                        longitudeDelta: 0.0421,
-                    }, 1000)
-                    console.log(this.state.location, "te")
                 }} />
-            <SafeAreaView style={{position:'absolute', top:40, left:10,zIndex:4}}>
-                <Button onPress={()=> this.props.navigation.navigate('Home')} title="" type='clear' icon={<AntDesign name={'close'} size={18} />} containerStyle={{
-                    borderRadius: 30,
-                    backgroundColor: '#f5f6fa',
-                    }}/>
             </SafeAreaView>
-            <View style={{ flex: 1, flexDirection: "row-reverse", justifyContent: 'space-between', position: "absolute", bottom: 15, right: 15, left: 15, zIndex: 1, height: 60}}>
-                {/* <Button title="" type='clear' icon={<MaterialCommunityIcons name={'timetable'} size={28} />} containerStyle={{
-                    borderRadius: 30, marginHorizontal: 5, backgroundColor: '#f5f6fa',
-                }}
-                    onPress={() => { this.state.mode === 'pic' ? this.setState({ mode: 'future' }) : this.setState({ mode: 'pic' }) }}
-                /> */}
-                
+            <View style={{ flex: 1, flexDirection: "row-reverse", justifyContent: 'space-between', position: "absolute", bottom: 15, right: 15, left: 15, zIndex: 1, height: 60 }}>
+
                 <FlatList
-                extraData={false}
+                    extraData={false}
                     pagingEnabled
-                  horizontal
-                  scrollEnabled
-                  showsHorizontalScrollIndicator={false}
-                  scrollEventThrottle={16}
-                  data={this.state.users.length > 1 ? this.state.users.slice(0, -1) : this.state.users}
-                  snapToAlignment='center'
-                  style={{shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, overflow: 'visible'}}
-                renderItem={({ item, index }) => (
-                    <TouchableOpacity onPress={() => { 
-                    this.map.animateToRegion({
-                        latitude: item.lat,
-                        longitude: item.long,
-                        latitudeDelta: 0.03,
-                        longitudeDelta: 0.0421,
-                    }, 1000)}} key={index} style={{width: width / 4, height: 26, alignItems: 'center'}}>
-                        <Avatar rounded size={35} source={{uri: item.pic}}/>
-                        <Text>{item.name}</Text>
-                    </TouchableOpacity>
-                )}
-                keyExtractor={(item, index) => String(index)}
+                    horizontal
+                    scrollEnabled
+                    showsHorizontalScrollIndicator={false}
+                    scrollEventThrottle={16}
+                    data={this.state.users.length > 1 ? this.state.users.slice(0, -1) : this.state.users}
+                    snapToAlignment='center'
+                    style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, overflow: 'visible' }}
+                    renderItem={({ item, index }) => (
+                        <TouchableOpacity onPress={() => {
+                            this.map.animateToRegion({
+                                latitude: item.lat,
+                                longitude: item.long,
+                                latitudeDelta: 0.03,
+                                longitudeDelta: 0.0421,
+                            }, 1000)
+                        }} key={index} style={{ width: width / 4, height: 26, alignItems: 'center' }}>
+                            <Avatar rounded size={35} source={{ uri: item.pic }} />
+                            <Text>{item.name}</Text>
+                        </TouchableOpacity>
+                    )}
+                    keyExtractor={(item, index) => String(index)}
 
                 />
             </View>
 
-        <DateTimePickerModal date={new Date()} minuteInterval={15}  isVisible={this.state.pickTime} mode="time" onConfirm={this.confirmFutureLocation}
-        onCancel={() => this.setState({ pickTime: false, futureLocation: false })}/>
+            <DateTimePickerModal date={new Date()} minuteInterval={15} isVisible={this.state.pickTime} mode="time" onConfirm={this.confirmFutureLocation}
+                onCancel={() => this.setState({ pickTime: false, futureLocation: false })} />
 
 
             {this.state.hasLoadedMap ? <MapView
@@ -389,35 +405,23 @@ export default class Map extends React.Component {
                 initialRegion={this.state.region}
                 ref={(map) => { this.map = map; }}
                 onRegionChangeComplete={region => { this.onRegionChangeComplete(region) }}
+                customMapStyle={mapStyle}
 
+>
 
-            >
-
-                {this.state.mode === "pic" ?
-                    this.state.users.map(marker => (
+                {this.state.users.map(marker => (
                         <Marker
                             coordinate={{ latitude: marker.lat, longitude: marker.long }}
                             title={marker.name + ' ' + this.toHours(marker.time - Date.now())}
                             description={marker.description}
                             style={{ alignItems: 'center', alignContent: 'center' }}
-                        ><Image source={{ uri: marker.pic }} style={{ height: 40, width: 40, borderRadius: 60, borderWidth: 1, borderColor: 'black'  }} /></Marker>
-                    )) : this.state.futureStatuses.map(ceva => (
-                        <Marker
-
-                            coordinate={{ latitude: ceva.lat, longitude: ceva.long }}
-                            style={{ alignItems: 'center', alignContent: 'center', alignItems: 'center' }}
-                            title={ceva.name}
-                        ><Image source={{ uri: ceva.pic }} style={{ height: 40, width: 40, borderRadius: 60, borderWidth: 1, borderColor: 'black' }} /></Marker>
+                        ><Image source={{ uri: marker.pic }} style={{ height: 40, width: 40, borderRadius: 60, borderWidth: 1, borderColor: 'black' }} /></Marker>
+                    
 
                     ))}
+
                 {this.state.futureLocation ?
                     <View>
-                        {/* <Circle
-                            key={(this.state.futureLocationCoords.lat+this.state.futureLocationCoords.lat)*2}
-                            center={{ latitude: this.state.futureLocationCoords.lat, longitude: this.state.futureLocationCoords.long }}
-                            radius={250}
-                            fillColor={'rgba(216,216,216,0.5)'}
-                        /> */}
 
                         <Marker
                             // key={this.state.futureLocationCoords.lat+this.state.futureLocationCoords.lat}
@@ -434,7 +438,7 @@ export default class Map extends React.Component {
             </MapView> : null}
 
 
-            {/* <Text>{text}</Text> */}
+
 
         </View>)
     }
@@ -465,3 +469,219 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     }
 })
+
+const mapStyle = [
+    {
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#ebe3cd"
+            }
+        ]
+    },
+    {
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#523735"
+            }
+        ]
+    },
+    {
+        "elementType": "labels.text.stroke",
+        "stylers": [
+            {
+                "color": "#f5f1e6"
+            }
+        ]
+    },
+    {
+        "featureType": "administrative",
+        "elementType": "geometry.stroke",
+        "stylers": [
+            {
+                "color": "#c9b2a6"
+            }
+        ]
+    },
+    {
+        "featureType": "administrative.land_parcel",
+        "elementType": "geometry.stroke",
+        "stylers": [
+            {
+                "color": "#dcd2be"
+            }
+        ]
+    },
+    {
+        "featureType": "administrative.land_parcel",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#ae9e90"
+            }
+        ]
+    },
+    {
+        "featureType": "landscape.natural",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#dfd2ae"
+            }
+        ]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#dfd2ae"
+            }
+        ]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#93817c"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "geometry.fill",
+        "stylers": [
+            {
+                "color": "#a5b076"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#447530"
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#f5f1e6"
+            }
+        ]
+    },
+    {
+        "featureType": "road.arterial",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#fdfcf8"
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#f8c967"
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry.stroke",
+        "stylers": [
+            {
+                "color": "#e9bc62"
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway.controlled_access",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#e98d58"
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway.controlled_access",
+        "elementType": "geometry.stroke",
+        "stylers": [
+            {
+                "color": "#db8555"
+            }
+        ]
+    },
+    {
+        "featureType": "road.local",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#806b63"
+            }
+        ]
+    },
+    {
+        "featureType": "transit.line",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#dfd2ae"
+            }
+        ]
+    },
+    {
+        "featureType": "transit.line",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#8f7d77"
+            }
+        ]
+    },
+    {
+        "featureType": "transit.line",
+        "elementType": "labels.text.stroke",
+        "stylers": [
+            {
+                "color": "#ebe3cd"
+            }
+        ]
+    },
+    {
+        "featureType": "transit.station",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#dfd2ae"
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "elementType": "geometry.fill",
+        "stylers": [
+            {
+                "color": "#b9d3c2"
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#92998d"
+            }
+        ]
+    }
+]

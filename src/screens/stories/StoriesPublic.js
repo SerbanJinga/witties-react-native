@@ -204,7 +204,7 @@ class StoriesPublic extends Component {
   render() {
     // if (this.state.fontsLoaded) {
       return (
-        <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl tintColor="red" onRefresh={() => this.onRefresh()} refreshing={this.state.refreshing} />}>
+        <ScrollView style={{ flex: 1 }}>
     
 
           <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
