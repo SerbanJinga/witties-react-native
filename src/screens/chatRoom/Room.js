@@ -8,6 +8,7 @@ import { Camera } from 'expo-camera'
 import CameraScreen from '../camera/Camera'
 import DoubleTap from '../camera/DoubleTap'
 import { withNavigation } from 'react-navigation'
+import { last } from 'lodash'
 const { width, height } = Dimensions.get('screen')
 class Room extends Component {
   constructor(props) {
@@ -25,14 +26,17 @@ class Room extends Component {
   }
 
   hasStreakVideoFunction = async () => {
-    let query = await firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').get()
-    let data = await query.docs.map(doc => doc.data())
-    console.log('e data', data)
-    if (data.length === 0) {
-      this.setState({
-        hasStreakVideo: false
-      })
-    }
+    firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').onSnapshot((doc) => {
+      let data = doc.docs.map(doc => doc.data())
+      if(data.length === 0){
+          this.setState({
+            hasStreakVideo: false
+          })
+      }
+    })
+    // let data = await query.docs.map(doc => doc.data())
+    // console.log('e data', data)
+    
   }
 
   canPressFunction = async () => {
@@ -121,13 +125,16 @@ class Room extends Component {
 
   sendToAvatar = async () => {
      await firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').orderBy('timestamp', 'desc').limit(3).get().then(doc => {
+      if(doc.empty){
+        return
+      }
       let data = doc.docs.map(doc => doc.data())
       let idMap = doc.docs.map(doc => doc.id)
-
       for (let i = 0; i < idMap.length; i++) {
         data[i].id = idMap[i]
       }
-      this.props.navigation.navigate('StreakVideoAvatar', { roomId: this.props.roomId, data: data })
+      let lastSeen = data[data.length - 1].timestamp
+      this.props.navigation.navigate('StreakVideoAvatar', { roomId: this.props.roomId, data: data, lastSeen: lastSeen })
       // this.setState({
         // documentDataForAvatar: data
       // })
@@ -247,7 +254,7 @@ render(){
         <TouchableOpacity style={{ padding: 0 }} onPress={() => this.props.press()}>
           <View style={{ flex: 1, padding: 6 }}>
             <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center' }}>
-              <Avatar containerStyle={{ borderWidth: 3, borderColor: this.state.hasStreakVideo === true ? '#f6b93b' : '#fff' }} onPress={() => this.sendToAvatar()} size={48} rounded source={{ uri: this.props.profilePicture }} />
+              <Avatar containerStyle={{ borderWidth: 3, borderColor: this.state.hasStreakVideo === true ? '#f6b93b' : '#fff' }} onPress={() => this.state.hasStreakVideo === true ? this.sendToAvatar() : null} size={48} rounded source={{ uri: this.props.profilePicture }} />
               <View style={{ flex: 1, flexDirection: 'column', marginLeft: 10 }}>
 
                 <Text style={{ fontFamily: 'font1', fontSize: 18 }}>{this.props.chatRoomName}</Text>

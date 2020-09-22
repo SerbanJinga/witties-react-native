@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, View, StyleSheet, Dimensions, TouchableOpacity, FlatList, ScrollView, Alert } from 'react-native'
+import { Text, View, StyleSheet, Dimensions, TouchableOpacity, FlatList, ScrollView, Alert, Platform } from 'react-native'
 import { SearchBar, Avatar, Divider, ThemeConsumer, CheckBox } from 'react-native-elements'
 import { AntDesign } from '@expo/vector-icons'
 import firebase from 'firebase'
@@ -21,6 +21,8 @@ class SendToList extends Component {
             friendsData: [],
             image: this.props.image,
             saveToTimeline: false,
+            searchAll: '',
+            filteredData: []
         }
     }
 
@@ -63,6 +65,12 @@ class SendToList extends Component {
     componentDidMount = async () => {
         await this.retrieveMe()
         console.log('imagine', this.state.image)
+        if(this.props.shouldFlip){
+            console.log('daikfajkfahfjkagjahfgjahgfa')
+        }else{
+            console.log('esti curva')
+
+        }
         arr = []
         friendArr = []
         await this._retrieveData()
@@ -139,7 +147,7 @@ class SendToList extends Component {
 
     sendPost = (url) => {
 
-
+        console.log('intra aici nui asa')
         this.state.sendTo.forEach(chatRoom => {
             firebase.firestore().collection('messages').doc(chatRoom).update({
                 lastUpdated: Date.now()
@@ -154,7 +162,8 @@ class SendToList extends Component {
                 location: this.props.location,
                 creatorId: this.props.creatorId,
                 taggedUsers: this.props.taggedUsers,
-                albums: this.props.albums
+                albums: this.props.albums,
+                shouldFlip: this.props.shouldFlip
             })
         })
         if (this.state.saveToTimeline === true)
@@ -168,7 +177,8 @@ class SendToList extends Component {
                 location: this.props.location,
                 creatorId: this.props.creatorId,
                 taggedUsers: this.props.taggedUsers,
-                albums: this.props.albums
+                albums: this.props.albums,
+                shouldFlip: this.props.shouldFlip
             })
 
         this.props.close()
@@ -321,6 +331,21 @@ class SendToList extends Component {
             })
     }
 
+    search = async (searchAll) => {
+        // filtered = []
+        this.setState({ searchAll: searchAll })
+        // let filteredData = this.state.documentData.filter(function(item){
+        //     return item.chatRoomName.includes(searchChats)
+        // })
+        // this.setState({filteredData: filteredData})
+
+        let filteredData = this.state.documentData.filter(item => item.chatRoomName .toLowerCase().includes(searchAll.toLowerCase()))
+
+        this.setState({
+        filteredData: filteredData
+        })
+    }
+
     uploadToStoryVideo = async (url) => {
         console.log('se deschide ')
         firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).collection('statuses').add({
@@ -380,7 +405,7 @@ class SendToList extends Component {
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
                     <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
 
-                        <SearchBar round placeholder="Search" style={{ fontFamily: 'font1', padding: 20 }} lightTheme inputStyle={{ fontFamily: 'font1' }} placeholderTextColor="#ecedef" containerStyle={{
+                        <SearchBar placeholder="Search"  lightTheme placeholderTextColor="#ecedef" containerStyle={{
                             backgroundColor: "#fff",
                             borderBottomColor: '#ecedef',
                             borderTopColor: '#ecedef',
@@ -390,7 +415,8 @@ class SendToList extends Component {
                             borderRadius: 10,
                             margin: 10,
                             width: width / 1.3
-                        }} inputContainerStyle={{ backgroundColor: '#fff', height: 30 }} value={this.state.searchText} onChangeText={this.search} />
+                        }} inputContainerStyle={{ height: 30, backgroundColor: '#fff' }} value={this.state.searchAll} onChangeText={this.search} />
+                        
                         <TouchableOpacity onPress={() => this.decideUpload()}>
                             <AntDesign name="arrowright" size={20} />
                         </TouchableOpacity>
@@ -399,22 +425,7 @@ class SendToList extends Component {
                     </View>
                 </View>
 
-                {/* <Text style={{fontFamily: 'font1', fontSize: 24, margin: 10}}>My Story</Text>
-       <TouchableOpacity onPress={() => this.props.image === '' ? this.uploadVideoToStory() : this.uploadPhotoToStory()}>
-        
-            <View style={{flex: 1, padding: 10}}>
-                <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
-                    <Avatar size={40} rounded source={{uri: this.state.profilePicture}}/>
-                    <View style={{flex: 1, flexDirection: 'column',}}>
-                    <Text style={{marginLeft: 4, fontFamily: 'font1'}}>{this.state.displayName}</Text>
-                    </View>
-                </View>
-                <Divider style={{marginTop: 20}}/>
 
-            </View>
-            
-
-             </TouchableOpacity>  */}
 
 
                 <View style={{ flex: 1, padding: 10 }}>
@@ -449,7 +460,7 @@ class SendToList extends Component {
 
 
                 <FlatList
-                    data={this.state.documentData}
+                                data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                     renderItem={({ item }) => (
                         <SendTo displayName={item.chatRoomName} profilePicture={item.profilePicture} mama={this.mama} tata={this.tata} id={item.roomId} />
                     )}
@@ -460,7 +471,6 @@ class SendToList extends Component {
                 //    refreshing={this.state.refreshing}
                 //    onRefresh={this.handleRefresh}
                 />
-                <Text style={{ fontFamily: 'font1', fontSize: 24, margin: 10 }}>All Friends</Text>
 
                 {/* <FlatList
                     data={this.state.friendsData}

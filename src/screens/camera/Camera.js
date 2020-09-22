@@ -846,7 +846,7 @@ class CameraScreen extends Component {
                     color="#b2b8c2"
                   />
                 </View>
-                <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
+                <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} shouldFlip={this.state.captures[0].shouldFlip} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
               </SafeAreaView>
             </Overlay>
 
@@ -1028,7 +1028,7 @@ class CameraScreen extends Component {
         </Overlay>
 
         <Overlay fullScreen animationType="slide" isVisible={this.state.openSend}>
-          <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} />
+          <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} shouldFlip={this.state.captures[0].shouldFlip}/>
         </Overlay>
       </Overlay>
     )
@@ -1436,7 +1436,7 @@ class CameraScreen extends Component {
                 color="#b2b8c2"
               />
             </View>
-            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
+            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} shouldFlip={this.state.captures[0].shouldFlip}/>
           </SafeAreaView>
         </Overlay>
 

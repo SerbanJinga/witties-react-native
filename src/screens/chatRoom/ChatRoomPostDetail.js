@@ -11,7 +11,8 @@ class ChatRoomPostDetail extends Component {
         this.state = {
             image: props.navigation.state.params.image,
             timestamp: props.navigation.state.params.timestamp,
-            video: props.navigation.state.params.video
+            video: props.navigation.state.params.video,
+            shouldFlip: props.navigation.state.params.shouldFlip
 
         }
     }
@@ -28,7 +29,7 @@ class ChatRoomPostDetail extends Component {
                     <Image source={{ uri: this.state.image }} style={{width: width, height: height}} />
                 </View>
             )}else { return(<View style={{flex: 1}}>
-                    <Video source={{uri: this.state.video}} resizeMode="cover" style={{width: width, height: height}} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+                    <Video source={{uri: this.state.video}} resizeMode="cover" style={{width: width, height: height, transform: [{scaleX: this.state.shouldFlip ? -1 : 1}, { scaleY: 1}]}} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
                 </View>)
             }
         }

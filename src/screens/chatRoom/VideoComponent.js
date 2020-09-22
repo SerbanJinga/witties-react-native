@@ -10,6 +10,7 @@ import { withNavigation } from 'react-navigation'
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { SharedElement } from 'react-native-shared-element'
 import { userSettings } from '../LoadingScreen'
+import { transform } from 'lodash'
 class VideoComponent extends Component {
 
     constructor(props){
@@ -85,10 +86,10 @@ class VideoComponent extends Component {
  <TouchableOpacity
                 activeOpacity={0.8} 
                 style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10 }}
-                onPress={() => navigation.push('ChatRoomPostDetail', { video: this.props.video, timestamp: this.props.timestamp })}>
+                onPress={() => navigation.push('ChatRoomPostDetail', { video: this.props.video, timestamp: this.props.timestamp, shouldFlip: this.props.shouldFlip })}>
                  <ImageBackground
                     style={[styles.flex, styles.destination, styles.shadow]}
-                    imageStyle={{ borderRadius: theme.sizes.radius }}
+                    imageStyle={{ borderRadius: theme.sizes.radius, transform: [{ scaleX: this.props.shouldFlip ? -1 : 1 }, { scaleY: 1 }],}}
                     source={{ uri: this.state.imageUri }}
                 >
                     <View style={[styles.column, { justifyContent: 'center' }]}>

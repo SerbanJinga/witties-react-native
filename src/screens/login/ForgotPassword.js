@@ -80,10 +80,12 @@ class ForgotPassword extends Component {
                       <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500",marginBottom: 40 }]}>Forgot Password?</Text>
             </View>
 
-                        <Input 
+                        <Input
+                        autoCapitalize={true} 
                             label="Email"
                             labelStyle={{fontFamily: "font1"}}
-                            style={{marginTop: 32, marginBottom: 8}}
+                            style={styles.inputTitle}
+                            // style={{marginTop: 32, marginBottom: 8}}
                             returnKeyType="next"
                             textContentType="name"
                             value={this.state.email}
@@ -117,7 +119,7 @@ class ForgotPassword extends Component {
                           }
                       ]}
                   >
-                      Remember your password?<Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}>Login here</Text>
+                      Remember your password?<Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}> Login here</Text>
                      
                   </Text>
                   <Toast 
@@ -187,6 +189,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
         shadowRadius: 20,
         elevation: 5
-    }
+    },
+    inputTitle: {
+        color: "#ABB4BD",
+        fontSize: 18,
+        fontFamily: "font1"
+    },
   });
   

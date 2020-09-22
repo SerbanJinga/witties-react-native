@@ -1,26 +1,38 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator } from 'react-native'
-import firebase from 'firebase'
+import { View, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native'
+import firebase, { app } from 'firebase'
 import * as theme from '../styles/theme'
 const { width, height } = Dimensions.get('window');
 import * as Font from 'expo-font'
 import AsyncStorage from '@react-native-community/async-storage';
+import Constants from 'expo-constants'
 let arr = []
 
-let settings 
+let settings
 export default class LoadingScreen extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props)
         this.state = {
             fontLoaded: false,
-            documentData: []
+            documentData: [],
         }
     }
 
-    setUpSettingsFirebase = async() => {
+    verifyVersions = async () => {
+        let query = await firebase.firestore().collection('constants').doc('document').get()
+        let appVersion = await query.data().appVersion
+        console.log(typeof appVersion, "dajfakfja ", typeof Constants.manifest.version)
+        if (appVersion !== Constants.manifest.version) {
+            return false
+        }
+        return true
+
+    }
+
+    setUpSettingsFirebase = async () => {
         let query = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
-        if(typeof query.data().userSettings !== 'undefined') {
+        if (typeof query.data().userSettings !== 'undefined') {
             return
         }
 
@@ -33,51 +45,57 @@ export default class LoadingScreen extends Component {
         })
     }
 
-  
-     componentDidMount =  async() => {
-         arr = []
+
+    componentDidMount = async () => {
+        arr = []
 
         await Font.loadAsync({
             font1: require('../../assets/SourceSansPro-Black.ttf')
         })
 
-            
-        
+
+
         firebase.auth().onAuthStateChanged(async user => {
-            if(user){
+            if (user) {
+                let t = await this.verifyVersions()
+                if(t){
                 await this.setUpSettingsFirebase().then(
-                this.props.navigation.navigate('Home'))
-                }else{
+                        this.props.navigation.navigate('Home'))
+                } else{
+                    this.props.navigation.navigate('UpdateScreen')
+                }
+                                        
+            }else {
                 this.props.navigation.navigate('SignUp')
             }
         })
     }
+    
 
-    retrieveDataFromFriends = async() => {
+    retrieveDataFromFriends = async () => {
         arr = []
         const currentId = firebase.auth().currentUser.uid
         let friendsQuery = await firebase.firestore().collection('users').doc(currentId).get()
         let friendsData = await friendsQuery.data().friends
         friendsData.forEach(async friend => await this.getStoriesFromFriend(friend))
-      }
-  
-      getStoriesFromFriend = async(friend) => {
+    }
+
+    getStoriesFromFriend = async (friend) => {
         let initialQuery = await firebase.firestore().collection('status-public').doc(friend).collection('statuses').get()
-        if(initialQuery.empty){ return }
+        if (initialQuery.empty) { return }
         let friendStories = initialQuery.docs.map(doc => doc.data())
         arr.push(friendStories[0])
         this.setState({
-          documentData: arr
+            documentData: arr
         })
-        this.props.navigation.navigate('Home', {stories: arr})
+        this.props.navigation.navigate('Home', { stories: arr })
     }
 
 
-    render(){
-        return(
+    render() {
+        return (
             <View style={styles.container}>
-             </View>
-        )
+            </View>)
     }
 }
 

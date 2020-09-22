@@ -11,7 +11,7 @@ import _ from 'lodash'
 import SearchUsers from './src/screens/friendSystem/SearchUsers'
 import FullScreenStory from './src/screens/stories/FullScreenStory'
 import SendToList from './src/screens/camera/SendToList'
-
+import UpdateScreen from './src/screens/UpdateScreen'
 import ChatNavigator from './src/screens/chatRoom/ChatNavigator'
 import Camera from './src/screens/camera/Camera';
 import StreakVideoCamera from './src/screens/chatRoom/StreakVideoCamera';
@@ -157,7 +157,16 @@ const navigator = createStackNavigator(
     TutorialSlider: TutorialSlider,
     SeeAllFriends: SeeAllFriends,
     SeeAllChats: SeeAllChats,
-    VideoComponent: VideoComponent
+    VideoComponent: VideoComponent,
+    // Welcome: Welcome,
+    UpdateScreen: {
+      name: 'UpdateScreen',
+      screen: UpdateScreen,
+      navigationOptions: {
+        gestureEnabled: false
+      }
+    }
+
   },{
     initialRouteName: 'Auth',
     headerMode: null,

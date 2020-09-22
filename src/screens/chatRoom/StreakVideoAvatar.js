@@ -21,6 +21,7 @@ class StreakVideoAvatar extends Component {
         this.state = {
             roomId: props.navigation.state.params.roomId,
             documentData: props.navigation.state.params.data,
+            lastSeen: props.navigation.state.params.lastSeen,
             selectedIndex: 0,
             xPosition: 1,
             onEndReached: false,
@@ -62,10 +63,35 @@ class StreakVideoAvatar extends Component {
     // }
 
     componentDidMount = async () => {
+        this.retrieveMore()
+        setInterval(()=>{
+            this.retrieveMore()
+        }, 4000)
         // await this.retrieveData()
         // console.log(this.state.documentData, 'da;da;dla;dla')
 
     }
+
+    retrieveMore = async() => {
+        firebase.firestore().collection('streak-video').doc(this.state.roomId).collection('videos').orderBy("timestamp", "desc").startAfter(this.state.lastSeen).limit(4).onSnapshot((doc) => {
+            if(doc.empty){
+                return
+            }
+            let data = doc.docs.map(doc => doc.data())
+            let idMap = doc.docs.map(doc => doc.id)
+            for(let i = 0; i < idMap.length; i++){
+                data[i].id = idMap[i]
+            }
+            this.setState({
+                documentData: [...this.state.documentData, ...data],
+                lastSeen: data[data.length - 1].timestamp
+            })
+        })
+    }
+
+    // componentWillUnmount = () => {
+    //     clearInterval(t)
+    // }
 
     setSelectedIndex = event => {
         const viewSize = event.nativeEvent.layoutMeasurement.width

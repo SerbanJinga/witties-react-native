@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Button, Text, CheckBox, SearchBar, Overlay, ButtonGroup, Divider } from 'react-native-elements'
-import { View, Dimensions, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native'
+import { View, Dimensions, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl, Platform } from 'react-native'
 import firebase from 'firebase'
 import { render } from 'react-dom'
 import { FlatList, ScrollView, } from 'react-native-gesture-handler'
@@ -44,49 +44,18 @@ class ChatRoomsList extends Component {
 
 
     searchChats = async (searchChats) => {
-        filtered = []
+        // filtered = []
         this.setState({ searchChats: searchChats })
         // let filteredData = this.state.documentData.filter(function(item){
         //     return item.chatRoomName.includes(searchChats)
         // })
         // this.setState({filteredData: filteredData})
-        console.log('se schimba...')
-        // let data = this.state.documentData
-        let filteredData = firebase.firestore().collection('messages').where('chatRoomName', '>=', searchChats).get()
-            (await filteredData).docs.forEach(async doc => {
-                let chatName = await doc.data().chatRoomName
-                let chatPicture = await doc.data().profilePicture
-                let chatId = await doc.data().roomId
-                let chatCreator = doc.data().userWhoCreated
-                let twoUserChat = doc.data().twoUserChat
-                if (chatCreator !== firebase.auth().currentUser.uid && twoUserChat === true) {
-                    let otherQuery = await firebase.firestore().collection('users').doc(doc.data().userWhoCreated).get()
-                    let displayName = await otherQuery.data().displayName
-                    chatName = displayName
-                    // console.log('asta merge')
-                }
-                let foo = {
-                    chatName: chatName,
-                    chatPicture: chatPicture,
-                    roomId: chatId
-                }
-                filtered.push(foo)
-                this.setState({
-                    filteredData: filtered
-                })
-                for (let i = 0; i < this.state.filteredData.length; i++) {
-                    if (filtered[i].roomId === chatId) {
-                        const index = filtered.indexOf(i)
-                        filtered.splice(index, 1)
-                    }
-                }
-            })
-        console.log(data)
-        // let filteredData = data.filter(item => item.chatName.includes(searchChats))
 
-        // this.setState({
-        // filteredData: data
-        // })
+        let filteredData = this.state.documentData.filter(item => item.chatName.toLowerCase().includes(searchChats.toLowerCase()))
+
+        this.setState({
+        filteredData: filteredData
+        })
     }
 
 
@@ -138,11 +107,42 @@ class ChatRoomsList extends Component {
                 console.log(arr)
 
                 this.setState({
-                    documentData: arr
+                    documentData: arr,
+                    lastVisible: arr[arr.length - 1].chatName
                 })
             })
 
         })
+    }
+
+    _retrieveMoreChats = async () => {
+        firebase.firestore().collection('messages').where('usersParticipating', 'array-contains', firebase.auth().currentUser.uid).orderBy('lastUpdated', 'desc').startAfter(this.state.lastVisible).limit(12).onSnapshot((doc) => {
+            if(doc.empty){
+                return
+            }
+
+            let documentData = doc.docs.map(doc => doc.data())
+            documentData.forEach(async document => {
+                let foo = {
+                    chatName: document.chatRoomName,
+                    chatPicture: document.profilePicture,
+                    roomId: document.roomId
+                }
+                if (document.userWhoCreated !== firebase.auth().currentUser.uid && document.twoUserChat === true) {
+                    let otherQuery = await firebase.firestore().collection('users').doc(document.userWhoCreated).get()
+                    let displayName = await otherQuery.data().displayName
+                    foo.chatName = displayName
+                }
+                arr.push(foo)
+                console.log(arr)
+
+                this.setState({
+                    documentData: [...this.state.documentData, ...arr],
+                    lastVisible: arr[arr.length - 1].chatName
+                })
+            })
+
+    })
     }
 
     _retrieveData = async () => {
@@ -301,7 +301,15 @@ class ChatRoomsList extends Component {
             return (
                 <View>
                     <ScrollView style={{ flex: 1 }}>
-                        <SearchBar round placeholder="Search" style={{ fontFamily: 'font1', padding: 20 }} lightTheme inputStyle={{ fontFamily: 'font1' }} placeholderTextColor="#ecedef" containerStyle={{
+                    <SearchBar
+                    platform={Platform.OS}
+                    containerStyle={{backgroundColor: '#fff'}}
+                    lightTheme
+        placeholder="Search chats"
+        onChangeText={this.searchChats}
+        value={this.state.searchChats}
+      />
+                        {/* <SearchBar round placeholder="Search" style={{ fontFamily: 'font1', padding: 20, color: '#000' }} color inputStyle={{ fontFamily: 'font1', color: '#000' }} placeholderTextColor="#ecedef" containerStyle={{
                             backgroundColor: "#fff",
                             borderBottomColor: '#ecedef',
                             borderTopColor: '#ecedef',
@@ -311,13 +319,13 @@ class ChatRoomsList extends Component {
                             borderRadius: 10,
                             marginHorizontal: 10,
                             marginBottom: 10
-                        }} inputContainerStyle={{ backgroundColor: '#fff', height: 30 }}
+                        }} inputContainerStyle={{ backgroundColor: '#fff', height: 30,  }}
                             value={this.state.searchChats}
                             onChangeText={this.searchChats}
-                        />
+                        /> */}
                         {this.state.documentData.length !== 0 ?
                             <FlatList
-                                refreshControl={<RefreshControl tintColor="red" onRefresh={() => this.componentDidMount()} refreshing={this.state.refreshing} />}
+
                                 data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                                 renderItem={({ item, index }) => (
 
@@ -327,7 +335,6 @@ class ChatRoomsList extends Component {
                                 keyExtractor={(item, index) => String(index)}
                                 // ListHeaderComponent={this.renderHeader}
                                 ListFooterComponent={this.renderFooter}
-                                onEndReached={this.retrieveMore}
                                 onEndReachedThreshold={0}
                                 refreshing={this.state.refreshing}
                             /> : <Text style={{ fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center' }}>You have no active chats.</Text>}

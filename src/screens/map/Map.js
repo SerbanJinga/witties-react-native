@@ -32,7 +32,7 @@ let arr = []
 import firebase from 'firebase';
 const screenHeight = Dimensions.get('screen').height;
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Toast from 'react-native-easy-toast'
+import Toast from 'react-native-toast-message'
 let circle = {}
 
 import MapView from 'react-native-maps';
@@ -68,7 +68,8 @@ export default class Map extends React.Component {
             futureStatuses: [],
             myUsername: "",
             street: "",
-            receive_map_notifications: true
+            receive_map_notifications: true,
+            flButton: false
 
         }
         // this.closeSwipablePanel = this.closeSwipablePanel.bind(this)    
@@ -99,6 +100,7 @@ export default class Map extends React.Component {
     }
 
     async componentDidMount() {
+
         arr = []
         this.findCurrentLocationAsync()
         if (typeof this.props.users === 'undefined') {
@@ -130,12 +132,19 @@ export default class Map extends React.Component {
         let initialQuery = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
         let documentSnapshots = await initialQuery.get()
         let documentData = await documentSnapshots.data().friends
-        documentData.push(firebase.auth().currentUser.uid)
+        // documentData.push(firebase.auth().currentUser.uid)
         documentData.forEach(async element => await this.retrieveImageFromOneUser(element))
         // this.setState({ users: arr })
         // this.setState({ peopleData: sos, clearFilter: true,openFilter:false })
 
-
+        let initialQuery2 = await firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).get()
+        let documentData2 = await initialQuery2.data().futureLocation
+        if (documentData2) {
+            this.setState({
+                flButton: true
+            })
+            arr.push(documentData2)
+        }
     }
 
     async retrieveImageFromOneUser(element) {
@@ -237,36 +246,36 @@ export default class Map extends React.Component {
         this.setState({
             valueOfPicker: currentDate.valueOf()
         })
-
-
-        // console.log(currentDate.valueOf())
-        // console.log(currentDate)
     }
 
     onPressButton = () => {
         this.setState({
             pickTime: false
         })
-
-
     }
 
-    // _renderTimestamps = (timestamp) => {
-    //     let date = new Date(timestamp)
-    //     let day = date.getDay()
-    //     let month = date.getMonth() + 1
-    //     let year = date.getUTCFullYear()
-    //     return day + ":" + month + ":" + year
+    deleteFutureLocation = () => {
+        firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).update({
+            futureLocation: {}
+        })
 
-
-    // }
-
+    }
 
     confirmFutureLocation = (date) => {
         console.log(date.valueOf())
         if (date.valueOf() < Date.now() - 14400000) { //daca pun data cu pana 4 ore in trecut se pune azi, daca nu se pune maine
-            //serban pune toasta si da dismiis la time selectorul
-            circle.time = date.valueOf() + 86400000
+
+            this.setState({ pickTime: false, })
+            Toast.show({
+                text1: 'Cannot add future location!',
+                type: 'error',
+                position: 'top',
+                visibilityTime: 2000,
+                autoHide: true,
+                bottomOffset: 40
+            })
+            return
+            // circle.time = date.valueOf() + 86400000
         }
         else
             circle.time = date.valueOf()
@@ -289,21 +298,36 @@ export default class Map extends React.Component {
     }
 
     toHours = (timestamp) => {
-        if (timestamp < 0 && timestamp > -600000)
-            return 'now'
-        let minutes = ((Math.round(timestamp * 1.67 / (100000))))
-        let hours = Math.floor(minutes / 60)
-        let minutesRemaining = minutes % 60
-        if (hours === 0) {
-            if (timestamp < 0)
-                return -minutesRemaining + " minutes ago"
+        // if (timestamp < 0 && timestamp > -600000)
+        //     return 'now'
+        // let minutes = ((Math.round(timestamp * 1.67 / (100000))))
+        // let hours = Math.floor(minutes / 60)
+        // let minutesRemaining = minutes % 60
+        // if (hours === 0) {
+        //     if (timestamp < 0)
+        //         return -minutesRemaining + " minutes ago"
 
-            return "in " + minutesRemaining + " minutes"
+        //     return "in " + minutesRemaining + " minutes"
+        // }
+        // if (timestamp < 0) {
+        //     return -hours + ' h ' + -minutesRemaining + " min ago"
+        // }
+        // return 'in ' + hours + ' h ' + minutesRemaining + " min"
+        let minutes = Math.round(timestamp / 60000)
+        if (minutes < -10) {
+            if (minutes < -60)
+                return + Math.floor(Math.abs(minutes) / 60) + " hours " + Math.abs(minutes) % 60 + ' minutes ago'
+            if (minutes >= -60)
+                return Math.abs(minutes) + ' minutes ago'
+
+        } else if (minutes > -10 && minutes < 0) {
+            return "now";
+        } else {
+            if (minutes > 60)
+                return "in " + Math.floor(minutes / 60) + " hours " + minutes % 60 + ' minutes'
+            if (minutes <= 60)
+                return "in " + minutes + ' minutes'
         }
-        if (timestamp < 0) {
-            return -hours + ' h ' + -minutesRemaining + " min ago"
-        }
-        return 'in ' + hours + ' h ' + minutesRemaining + " min"
     }
 
 
@@ -323,73 +347,6 @@ export default class Map extends React.Component {
             text = JSON.stringify(this.state.location)
 
         return (<View style={{ flex: 1 }}>
-            <Toast
-                ref="error"
-                style={{ backgroundColor: '#282828' }}
-                textStyle={{ color: '#fff' }}
-                position='bottom'
-                opacity={0.8}
-                fadeInDuration={750}
-            />
-            <Button title="" type='clear' icon={<MaterialIcons name={'my-location'} size={28} />} containerStyle={{
-                position: 'absolute',
-                right: 10,
-
-                bottom: 100,
-                zIndex: 1,
-                borderRadius: 30,
-
-                backgroundColor: '#f5f6fa',
-                height: 45,
-            }} onPress={() => {
-                this.setState({ animating: true })
-                this.map.animateToRegion({
-                    latitude: this.state.location.coords.latitude,
-                    longitude: this.state.location.coords.longitude,
-                    latitudeDelta: 0.03,
-                    longitudeDelta: 0.0421,
-                }, 1000)
-                console.log(this.state.location, "te")
-            }} />
-            <SafeAreaView style={{ position: 'absolute', top: 40, left: 10, zIndex: 4 }}>
-                <Button onPress={() => this.props.navigation.navigate('Home')} title="" type='clear' icon={<AntDesign name={'close'} size={18} />} containerStyle={{
-                    borderRadius: 30,
-                    backgroundColor: '#f5f6fa',
-                }} />
-            </SafeAreaView>
-            <View style={{ flex: 1, flexDirection: "row-reverse", justifyContent: 'space-between', position: "absolute", bottom: 15, right: 15, left: 15, zIndex: 1, height: 60 }}>
-
-                <FlatList
-                    extraData={false}
-                    pagingEnabled
-                    horizontal
-                    scrollEnabled
-                    showsHorizontalScrollIndicator={false}
-                    scrollEventThrottle={16}
-                    data={this.state.users.length > 1 ? this.state.users.slice(0, -1) : this.state.users}
-                    snapToAlignment='center'
-                    style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, overflow: 'visible' }}
-                    renderItem={({ item, index }) => (
-                        <TouchableOpacity onPress={() => {
-                            this.map.animateToRegion({
-                                latitude: item.lat,
-                                longitude: item.long,
-                                latitudeDelta: 0.03,
-                                longitudeDelta: 0.0421,
-                            }, 1000)
-                        }} key={index} style={{ width: width / 4, height: 26, alignItems: 'center' }}>
-                            <Avatar rounded size={35} source={{ uri: item.pic }} />
-                            <Text>{item.name}</Text>
-                        </TouchableOpacity>
-                    )}
-                    keyExtractor={(item, index) => String(index)}
-
-                />
-            </View>
-
-            <DateTimePickerModal date={new Date()} minuteInterval={15} isVisible={this.state.pickTime} mode="time" onConfirm={this.confirmFutureLocation}
-                onCancel={() => this.setState({ pickTime: false, futureLocation: false })} />
-
 
             {this.state.hasLoadedMap ? <MapView
                 style={{ marginTop: 30, height: screenHeight, width: width }}
@@ -407,18 +364,18 @@ export default class Map extends React.Component {
                 onRegionChangeComplete={region => { this.onRegionChangeComplete(region) }}
                 customMapStyle={mapStyle}
 
->
+            >
 
                 {this.state.users.map(marker => (
-                        <Marker
-                            coordinate={{ latitude: marker.lat, longitude: marker.long }}
-                            title={marker.name + ' ' + this.toHours(marker.time - Date.now())}
-                            description={marker.description}
-                            style={{ alignItems: 'center', alignContent: 'center' }}
-                        ><Image source={{ uri: marker.pic }} style={{ height: 40, width: 40, borderRadius: 60, borderWidth: 1, borderColor: 'black' }} /></Marker>
-                    
+                    <Marker
+                        coordinate={{ latitude: marker.lat, longitude: marker.long }}
+                        title={marker.name + ' ' + this.toHours(marker.time - Date.now())}
 
-                    ))}
+                        style={{ alignItems: 'center', alignContent: 'center' }}
+                    ><Image source={{ uri: marker.pic }} style={{ height: 40, width: 40, borderRadius: 60, borderWidth: 1, borderColor: 'black' }} /></Marker>
+
+
+                ))}
 
                 {this.state.futureLocation ?
                     <View>
@@ -428,6 +385,7 @@ export default class Map extends React.Component {
                             coordinate={{ latitude: this.state.futureLocationCoords.lat, longitude: this.state.futureLocationCoords.long }}
                             style={{ alignItems: 'center', alignContent: 'center', alignItems: 'center' }}
                             title={this.state.currentUserName + " " + this.toHours(this.state.valueOfPicker)}
+
                         ><Image source={{ uri: this.state.currentUserProfilePic }} style={{ height: 40, width: 40, borderRadius: 60, borderWidth: 1, borderColor: 'black' }} /></Marker>
                     </View>
 
@@ -436,10 +394,75 @@ export default class Map extends React.Component {
                     : null}
 
             </MapView> : null}
+            <>
 
+                <Button title="" type='clear' icon={<MaterialIcons name={'my-location'} size={28} />} containerStyle={{
+                    position: 'absolute',
+                    right: 10,
 
+                    bottom: 100,
+                    zIndex: 1,
+                    borderRadius: 30,
 
+                    backgroundColor: '#f5f6fa',
+                    height: 45,
+                }} onPress={() => {
+                    this.setState({ animating: true })
+                    this.map.animateToRegion({
+                        latitude: this.state.location.coords.latitude,
+                        longitude: this.state.location.coords.longitude,
+                        latitudeDelta: 0.03,
+                        longitudeDelta: 0.0421,
+                    }, 1000)
+                    console.log(this.state.location, "te")
+                }} />
+                <SafeAreaView style={{ position: 'absolute', top: 40, left: 10, zIndex: 4 }}>
+                    <Button onPress={() => this.props.navigation.navigate('Home')} title="" type='clear' icon={<AntDesign name={'close'} size={18} />} containerStyle={{
+                        borderRadius: 30,
+                        backgroundColor: '#f5f6fa',
+                    }} />
+                </SafeAreaView>
+                {this.state.flButton ?
+                    <SafeAreaView style={{ position: 'absolute', top: 40, right: 10, zIndex: 4 }}>
+                        <Button onPress={() => this.deleteFutureLocation()} title="" type='clear' icon={<MaterialIcons name={'location-off'} color='red' size={18} />} containerStyle={{
+                            borderRadius: 30,
+                            backgroundColor: '#f5f6fa',
+                        }} />
+                    </SafeAreaView> : null}
+                <View style={{ flex: 1, flexDirection: "row-reverse", justifyContent: 'space-between', position: "absolute", bottom: 15, right: 15, left: 15, zIndex: 1, height: 60 }}>
 
+                    <FlatList
+                        extraData={false}
+                        horizontal
+                        scrollEnabled
+                        showsHorizontalScrollIndicator={false}
+                        scrollEventThrottle={16}
+                        data={this.state.users.length > 1 ? this.state.users.slice(0, -1) : this.state.users}
+                        style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, overflow: 'visible' }}
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity onPress={() => {
+                                this.map.animateToRegion({
+                                    latitude: item.lat,
+                                    longitude: item.long,
+                                    latitudeDelta: 0.03,
+                                    longitudeDelta: 0.0421,
+                                }, 1000)
+                            }} key={index} style={{ width: width / 4, height: 26, alignItems: 'center' }}>
+                                <Avatar rounded size={35} source={{ uri: item.pic }} />
+                                <Text>{item.name}</Text>
+                            </TouchableOpacity>
+                        )}
+                        keyExtractor={(item, index) => String(index)}
+
+                    />
+
+                </View>
+
+                <DateTimePickerModal date={new Date()} minuteInterval={15} isVisible={this.state.pickTime} mode="time" onConfirm={this.confirmFutureLocation}
+                    onCancel={() => this.setState({ pickTime: false, futureLocation: false })} />
+                <Toast ref={(ref) => Toast.setRef(ref)} />
+
+            </>
         </View>)
     }
 }

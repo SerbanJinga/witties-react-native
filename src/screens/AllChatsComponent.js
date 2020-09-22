@@ -71,7 +71,7 @@ export default class AllChatsComponent extends Component {
            renderItem={({item}) => (
            
             
-            <TouchableOpacity style={{width: width / 2, height: 40}} onPress={() => this._pressTouchableOpacity()}>
+            <TouchableOpacity style={{width: width / 2, height: 40}}>
         
         <View style={{flex: 0, padding: 10, width: width, height: 40}}>
             <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>

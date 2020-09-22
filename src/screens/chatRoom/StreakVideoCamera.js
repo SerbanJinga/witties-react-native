@@ -26,6 +26,8 @@ import AlbumPopup from '../ActivityPop/AlbumPopup'
 import Toolbar from '../camera/Toolbar'
 import { first } from 'lodash'
 let interval;
+import Toast from 'react-native-toast-message'
+
 const { width, height } = Dimensions.get('window')
 const screenWidth = Dimensions.get('screen').width
 const screenHeight = Dimensions.get('screen').height
@@ -84,7 +86,8 @@ class StreakVideoCamera extends Component {
       streakVideoDuration: 6,
       timeElapsed: 0,
       roomId: props.navigation.state.params.roomId,
-      groupProfilePicture: ''
+      groupProfilePicture: '',
+      chatRoomName: ''
     }
     this.selectAlbum = this.selectAlbum.bind(this)
     this.handleCaptureOut = this.handleCaptureOut.bind(this)
@@ -94,8 +97,10 @@ class StreakVideoCamera extends Component {
   getGroupProfilePicture = async() => {
     let query = await firebase.firestore().collection('messages').doc(this.state.roomId).get()
     let data = await query.data().profilePicture
+    let name = await query.data().chatRoomName
     this.setState({
-      groupProfilePicture: data
+      groupProfilePicture: data,
+      chatRoomName: name
     })
   }
 
@@ -432,14 +437,14 @@ class StreakVideoCamera extends Component {
             </View>
             <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", margin: 20 }}>
               <TouchableOpacity
-                onPress={() => this.pickImage()}
+                onPress={() => console.log('se deschid informatiile aici')}
                 style={{
                   alignSelf: 'flex-end',
                   alignItems: 'center',
                   backgroundColor: 'transparent',
                 }}>
                 <Ionicons
-                  name="ios-photos"
+                  name="md-information-circle-outline"
                   style={{ color: "#fff", fontSize: 30 }}
                 />
               </TouchableOpacity>
@@ -593,6 +598,8 @@ class StreakVideoCamera extends Component {
     })
   }
   sendImage = async () => {
+    Alert.alert('Your video is loading')
+
     const path = `photos/${this.state.roomId}/${firebase.auth().currentUser.uid}`
     const response = await fetch(this.state.captures[0].uri)
     const file = await response.blob()
@@ -614,9 +621,13 @@ class StreakVideoCamera extends Component {
   sendImageFunction = (url) => {
     firebase.firestore().collection('streak-video').doc(this.state.roomId).collection('videos').add({
       creatorId: firebase.auth().currentUser.uid,
+      shouldFlip: this.state.captures[0].shouldFlip,
       video: url,
       timestamp: Date.now(),
       timeDue: Date.now() + 86400000
+    })
+    firebase.firestore().collection('messages').doc(this.state.roomId).update({
+      groupScore: firebase.firestore.FieldValue.increment(1)
     })
   }
 
@@ -688,72 +699,50 @@ class StreakVideoCamera extends Component {
     console.log('---------------------------------')
     console.log('Video ul meu la momentul actual are asa:', this.state.captures[0])
     console.log('---------------------------------')
-    return (<View style={{flex: 1, flexDirection: 'column'}}>
-      <Overlay isVisible={true}>
+    return (<SafeAreaView style={{flex: 1, flexDirection: 'column', backgroundColor: '#000'}}>
+      <Overlay isVisible={true} overlayStyle={{backgroundColor: '#000'}}>
+      <View style={{flex: 1, backgroundColor: '#000'}}>
+      <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center', backgroundColor: '#000'}}>
+        <TouchableOpacity onPress={() => this._closeVideoOverlay()} style={{backgroundColor: 'transparent'}}>
+        <AntDesign
+            name="close"
+            style={{ color: "#fff", fontSize: 30 }}
+          />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 20, fontFamily: "font1", paddingTop: 0, color: '#fff' }}>Sending To {this.state.chatRoomName}</Text>
+        <Avatar onPress={() => console.log('da')} rounded source={{ uri: this.state.groupProfilePicture }} />
+      </View>
         <Video source={{ uri: this.state.captures[0].uri }} resizeMode="cover" style={{ transform: [{ scaleX: this.state.flipVideo ? -1 : 1 }, { scaleY: 1 }], width: width, height: screenHeight }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping />
 
 
-        {/* <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}> */}
-        <TouchableOpacity
-          onPress={() => this._closeVideoOverlay()}
-          style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, left: 20 }}>
-          <AntDesign
-            name="close"
-            style={{ color: "#fff", fontSize: 30 }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => this._closeVideoOverlay()}
-          style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, left: 20 }}>
-          <AntDesign
-            name="close"
-            style={{ color: "#fff", fontSize: 30 }}
-          />
-        </TouchableOpacity>
-        {/* </View> */}
+        <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 0, alignItems: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 20, right: 20}}>
+               
+             
+                    
 
+                      <TouchableOpacity
+                        style={{alignSelf: 'flex-end'}}
+                    onPress={() => this.sendImage()}
+                 >
+                    <MaterialCommunityIcons name="send-circle" size={48} color="#0984e3"/>
+
+                          </TouchableOpacity> 
+                          
+               </View>
+               </View>
     
 
-        <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 50, left: 20, right: 0, alignContent: 'center', alignItems: 'center', zIndex: 2, justifyContent: 'space-between' }}>
+        {/* <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 50, left: 20, right: 0, alignContent: 'center', alignItems: 'center', zIndex: 2, justifyContent: 'space-between' }}>
 
-          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 50, right: 20 }}>
-          <MaterialCommunityIcons
-            name="format-text"
-            style={{ color: "#fff", fontSize: 30 }}
-          />
-        </TouchableOpacity> */}
-
-        
-        
-          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 200, right: 20 }} onPress={() => this.openTagFriends()}>
-          <Ionicons
-            name="md-pricetags"
-            style={{ color: '#fff', fontSize: 30 }}
-          />
-        </TouchableOpacity> */}
-
-          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 250, right: 20 }} onPress={() => this.openLocationOverlay()}>
-          <MaterialIcons name="location-on" style={{ color: '#fff', fontSize: 30 }} />
-
-        </TouchableOpacity> */}
-
-          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 300, right: 20 }} onPress={() => this._pressPublic()}>
-          <MaterialCommunityIcons name={this.state.publicIcon} style={{ color: '#fff', fontSize: 30 }} />
-
-        </TouchableOpacity> */}
-
-          {/* <TouchableOpacity style={{ backgroundColor: 'transparent', position: 'absolute', top: 350, right: 20 }} onPress={() => this.openTimeOverlay()}>
-          <Ionicons name="ios-time" style={{ color: '#fff', fontSize: 30 }} />
-
-        </TouchableOpacity> */}
+       
         <TouchableOpacity style={{position: 'absolute', right: 20, bottom: 20}} onPress={() => this.sendImage()}>
         <Avatar rounded size={40} source={{uri: this.state.groupProfilePicture}}/>
 
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
           
 
-        </View>
+        {/* </View> */}
 
 
         <Overlay isVisible={this.state.moodOverlay} fullScreen animationType="slide">
@@ -948,7 +937,7 @@ class StreakVideoCamera extends Component {
           </SafeAreaView>
         </Overlay>
       </Overlay>
-    </View>)
+    </SafeAreaView>)
   }
 
   render() {

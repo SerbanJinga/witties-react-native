@@ -118,7 +118,7 @@ export default class TimelineVideoPost extends Component {
                 >
                     {this._renderTimestamps(this.props.timestamp)}
                     <View style={[styles.column, { justifyContent: 'center' }]}>
-                        <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
+                        <Image source={{ uri: this.state.profilePicture }} style={[styles.avatar, {transform: [{scaleX: this.props.shouldFlip ? -1 : 1}, { scaleY: 1}]}]} />
 {/* 
                         <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.state.displayName}</Text>
                         <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
@@ -134,7 +134,7 @@ export default class TimelineVideoPost extends Component {
                     </View>
                 </ImageBackground>
 
-            </TouchableOpacity >
+            </TouchableOpacity>
 
 
         )
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
         marginTop: theme.sizes.padding * 2,
         marginBottom: 10,
         marginLeft: theme.sizes.padding
-
+  
     },
     rating: {
         fontSize: theme.sizes.font,

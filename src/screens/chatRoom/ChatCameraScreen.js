@@ -714,13 +714,20 @@ class ChatCameraScreen extends Component {
             </View>
 
 
-            <View style={{ flex: 1, flexDirection: 'row', position: 'absolute', bottom: 30, left: 0, right: 0, alignContent: 'center', alignItems: 'center' }}>
+            <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 0, alignItems: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 20, right: 20}}>
 
 
-              <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.uploadPhoto()}>
-                {/* <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} /> */}
+              {/* <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.uploadPhoto()}>
                 <Avatar size={40} rounded source={{ uri: this.state.groupProfilePicture }} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
+              
+              <TouchableOpacity
+                  style={{alignSelf: 'flex-end'}}
+                    onPress={() => this.uploadPhoto()}
+                 >
+                    <MaterialCommunityIcons name="send-circle" size={48} color="#0984e3"/>
+
+                          </TouchableOpacity> 
 
             </View>
             <Overlay isVisible={this.state.moodOverlay} fullScreen animationType="slide">

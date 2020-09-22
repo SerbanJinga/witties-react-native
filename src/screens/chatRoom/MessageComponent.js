@@ -18,30 +18,72 @@ export default class MessageComponent extends Component {
             marginLeft: 0,
             marginRight: 0,
             fontsLoaded: false,
-            displayName: ""
+            displayName: "",
+            newDay: props.newDay,
+            day: ''
 
         }
+    }
+
+    
+    _renderDayTimestamp = (timestamp) => {
+        let date = new Date(timestamp)
+        let day = date.getDate()
+        let month = date.getMonth() + 1
+        switch (month) {
+            case 1: month = 'Jan'
+                break;
+            case 2: month = 'Feb'
+                break;
+            case 3: month = 'Mar'
+                break;
+            case 4: month = 'Apr'
+                break;
+            case 5: month = 'May'
+                break;
+            case 6: month = 'Jun'
+                break;
+            case 7: month = 'Jul'
+                break;
+            case 8: month = 'Aug'
+                break;
+            case 9: month = 'Sep'
+                break;
+            case 10: month = 'Oct'
+                break;
+            case 11: month = 'Nov'
+                break;
+            case 12: month = 'Dec'
+                break;
+        }
+        return day + ' ' + month 
     }
 
     pad = (val) => {
         return (val < 10) ? '0' + val : val
     }
-    
-  _renderTimestamps = (timestamp) => {
-    let hours = new Date(timestamp).getHours()
-    let minutes = new Date(timestamp).getMinutes()
-    return this.pad(hours) + ':' + this.pad(minutes)
-  } 
 
-  _renderName = async () => {
-    let displayNameQuery = await firebase.firestore().collection('users').doc(this.state.sender).get()
-    let displayNameData = await displayNameQuery.data().displayName
-    this.setState({
-        displayName: displayNameData
-    })
-  }
+    _renderTimestamps = (timestamp) => {
+        let hours = new Date(timestamp).getHours()
+        let minutes = new Date(timestamp).getMinutes()
+        return this.pad(hours) + ':' + this.pad(minutes)
+    }
 
-    componentDidMount = async() => {
+    _renderName = async () => {
+        let displayNameQuery = await firebase.firestore().collection('users').doc(this.state.sender).get()
+        let displayNameData = await displayNameQuery.data().displayName
+        this.setState({
+            displayName: displayNameData
+        })
+    }
+
+    componentDidMount = async () => {
+        if (this.props.newDay) {
+            console.log(this.state.msg, 'asta-i mesajul')
+
+        } else {
+            console.log('matai curva ', this.state.msg)
+        }
         await Font.loadAsync({
             font1: require('../../../assets/SourceSansPro-Black.ttf'),
             font2: require('../../../assets/SourceSansPro-Regular.ttf')
@@ -67,27 +109,31 @@ export default class MessageComponent extends Component {
     }
     //{this.state.translatedDate}
     render() {
-        if(this.state.fontsLoaded)
-{
-        return (
-            // <View style={{flex: 1, wid}}
-            <TouchableOpacity style={{width: width}}>
+        if (this.state.fontsLoaded) {
 
-            <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf:(this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' :"flex-start", flex: 0, flexDirection: 'row'}]}>
-                <View>
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', padding: 5}}>
-                <Text style={{fontFamily: 'font1', fontSize: 15}}>{firebase.auth().currentUser.uid === this.state.sender ? "me" :  this.state.displayName}</Text>
-                <Text style={{fontFamily: 'font1', marginLeft: 20}}>{this._renderTimestamps(this.state.date)}</Text>
+            // if(this.state.date === 1663775563000){
+            // return <View></View>
+            // }
 
-                </View>
-                <Text style={{fontFamily: 'font2'}}>{this.state.msg}</Text>
-</View>
-        </View>
-        </TouchableOpacity>
-        )
-        }else{
-            return(
-                <ActivityIndicator size="large"/>
+            return (
+                // <View style={{flex: 1, wid}}
+                <TouchableOpacity style={{ width: width }}>
+                    {this.state.newDay ? <Text>{this._renderDayTimestamp(this.state.date)}</Text> : null}
+                    <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf: (this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' : "flex-start", flex: 0, flexDirection: 'row' }]}>
+                        <View>
+                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', padding: 5 }}>
+                                <Text style={{ fontFamily: 'font1', fontSize: 15 }}>{firebase.auth().currentUser.uid === this.state.sender ? "me" : this.state.displayName}</Text>
+                                <Text style={{ fontFamily: 'font1', marginLeft: 20 }}>{this._renderTimestamps(this.state.date)}</Text>
+
+                            </View>
+                            <Text style={{ fontFamily: 'font2' }}>{this.state.msg}</Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            )
+        } else {
+            return (
+                <ActivityIndicator size="large" />
             )
         }
     }
@@ -95,11 +141,11 @@ export default class MessageComponent extends Component {
 }
 
 const styles = StyleSheet.create({
-    submit:{
-        paddingTop:10,
-        paddingBottom:10,
-        backgroundColor:'#daf5c4',
-        borderRadius:10,
+    submit: {
+        paddingTop: 10,
+        paddingBottom: 10,
+        backgroundColor: '#daf5c4',
+        borderRadius: 10,
         borderWidth: 1,
         borderColor: 'transparent',
         marginBottom: 2,
@@ -108,8 +154,8 @@ const styles = StyleSheet.create({
         // width: width,
         // alignSelf: 'flex-start'
     },
-      submitText:{
-          color:'#fff',
-          textAlign:'center',
-      }
+    submitText: {
+        color: '#fff',
+        textAlign: 'center',
+    }
 })

@@ -85,7 +85,7 @@ const { height, width } = Dimensions.get('window')
                                 size={theme.sizes.font * 0.8}
                                 color={theme.colors.white}
                             />
-                            <Text> {this.props.msg}</Text>
+                            <Text> {this.props.mood}</Text>
                         </Text>
 
 

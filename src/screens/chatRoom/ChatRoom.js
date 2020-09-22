@@ -97,7 +97,9 @@ class ChatRoom extends Component {
 
 
     createMessage = (message) => {
+        const timestamp = Date.now()
         const msg = message
+        const sender = this.state.currentUser
 
         const newMessage = {
             timestamp: Date.now(),
@@ -108,7 +110,7 @@ class ChatRoom extends Component {
         let aru = []
         aru = this.state.messages
         aru.push(newMessage)
-        this.setState({ messages: aru })
+        this.setState({ message: aru })
 
         firebase.firestore().collection('messages').doc(this.state.roomId).update({
             lastUpdated: Date.now()
@@ -163,7 +165,7 @@ class ChatRoom extends Component {
     componentDidMount = async () => {
         arrDocumentData = []
         userDataArray = []
-         this.retrieveData()
+        await this.retrieveData()
 
         await this.retrieveParticipants()
 
@@ -186,10 +188,7 @@ class ChatRoom extends Component {
         let initalQuery = firebase.firestore().collection('messages').doc(this.state.roomId)
         let initalSnapshot = await initalQuery.get()
         let initialData = initalSnapshot.data().usersParticipating
-        console.log('<=========================================>')
-        // console.log(initialData)
-        // console.log(this.state.roomId)
-        console.log('<=========================================>')
+     
 
         initialData.forEach(async user => await this.retrieveParticipantDetail(user))
     }
@@ -203,92 +202,42 @@ class ChatRoom extends Component {
             userData: userDataArray
         })
         console.log('DATATETETATTTE')
-        // console.log(this.state.userData)
     }
 
 
 
 
     retrieveData = async () => {
-        // let query = await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').get()
-        // if (query.empty) { return }
+        let query = await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').get()
+        if (query.empty) { return }
 
-        firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy("timestamp", "desc").limit(6).onSnapshot((doc) => {
-            doc.docChanges().forEach(change => {
-                if(change.type === 'added'){
-                    console.log('s a adaugat')
+        firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp').limitToLast(15).get().then((docs => {
+
+            docs.forEach((doc) => { arrDocumentData.push(doc.data()) })
+
+
+            // let tata = docs.map(doc => doc.id)
+            // console.log(tata)
+            // this.reloadData(arrDocumentData)
+
+            // console.log(arrDocumentData[0].timestamp)
+            this.setState({ finishedReloading: true, lastVisible: arrDocumentData[0].timestamp, messages: arrDocumentData })
+        }))
+
+        firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp', 'desc').limit(1).onSnapshot((doc) => {
+            if (this.state.finishedReloading) {
+                let documentData = doc.docs.map(doc => doc.data())
+                if (documentData[0].sender !== firebase.auth().currentUser.uid) {
+                    this.setState({
+                        messages: [...this.state.messages, documentData[0]]
+                    })
                 }
-            })
-            let data = doc.docs.map(doc => doc.data())
-            let idMap = doc.docs.map(doc => doc.id)
-            for (let i = 0; i < idMap.length; i++) {
-                data[i].id = idMap[i]
+
+
             }
-            this.setState({
-                messages: data,
-                lastVisible: data[data.length - 1].timestamp,
-                finishedReloading: true
-            })
-            console.log('asta-i ultimu')
-        })
-        // firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp').limitToLast(26).get().then((docs => {
-
-        //     docs.forEach((doc) => { arrDocumentData.push(doc.data()) })
-
-
-        //     // let tata = docs.map(doc => doc.id)
-        //     // console.log(tata)
-        //     // this.reloadData(arrDocumentData)
-
-        //     console.log(arrDocumentData[0].timestamp)
-        //     this.setState({ finishedReloading: true, lastVisible: arrDocumentData[0].timestamp, messages: arrDocumentData })
-        // }))
-
-        // firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp', 'desc').limit(1).onSnapshot((doc) => {
-        //     console.log('intra aici')
-        //     // if (this.state.finishedReloading) {
-        //         let data = doc.docs.map(doc => doc.data())
-        //         let idMap = doc.docs.map(doc => doc.id)
-        //         for(let i = 0; i < idMap.length; i++){
-        //             data[i].id = idMap[i]
-        //         }
-        //         console.log('aici a intrat si', data[0])
-        //         let arr = this.state.messages
-        //         arr.unshift(data[0])
-        //         // if (data[0].sender !== firebase.auth().currentUser.uid) {
-        //             this.setState({
-        //                 messages: arr
-        //                 // messages: [...data[0], ...this.state.messages]
-        //             })
-        //         // }
-
-
-        //     // }
-        // })
-
-
-    }
-
-    retrieveMore = async() => {
-        this.setState({
-            refreshing: true
         })
 
-        firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy("timestamp", "desc").startAfter(this.state.lastVisible).limit(6).onSnapshot((doc) => {
-            if(doc.empty){
-                return
-            }
-            let data = doc.docs.map(doc => doc.data())
-            let idMap = doc.docs.map(doc => doc.id)
-            for(let i = 0; i < idMap.length; i++){
-                data[i].id = idMap[i]
-            }
-            this.setState({
-                messages: [...this.state.messages, ...data],
-                lastVisible: data[data.length - 1].timestamp,
-                refreshing: false
-            })
-        })
+
     }
 
 
@@ -441,6 +390,9 @@ class ChatRoom extends Component {
         await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
             chatRoomsIn: firebase.firestore.FieldValue.arrayRemove(this.state.roomId)
         }).then(this.props.navigation.goBack(null))
+        await firebase.firestore().collection('messages').doc(this.state.roomId).update({
+            usersParticipating: firebase.firestore.FieldValue.arrayRemove(firebase.auth().currentUser.uid)
+        })
 
     }
 
@@ -452,32 +404,31 @@ class ChatRoom extends Component {
         setTimeout(async () => {
 
             // console.log(this.state.lastVisible)
-            let additionalQuery = await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').where('timestamp', '<', this.state.lastVisible).orderBy('timestamp', 'desc').limit(20).get()
-            let data = additionalQuery.docs.map(doc => doc.data())
-            data.reverse()
-            // data.forEach(doc => arrDocumentData.unshift(doc))
-            // data.forEach(doc => arrDocumentData.unshift(doc))
-            // arrDocumentData.sort((a, b) => a.timestamp > b.timestamp)
-            // firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp', 'asc').endBefore(this.state.lastVisible).limit(2).get().then(docs => {
+           firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').orderBy('timestamp', "desc").startAfter(this.state.lastVisible).limit(6).onSnapshot((doc) => {
+            if(doc.empty){
+                this.setState({
+                    refreshing: false
+                })
+                return
+            }    
+            let data = doc.docs.map(doc => doc.data())
+            this.setState({
+                lastVisible: data[data.length - 1].timestamp,
 
-            //     let arr = docs.docs.map(doc => doc.data())
-            //     console.log(arr)
-            //     arr.forEach(documents => {
-            //         arrDocumentData.splice(0, 0, documents)
-            //     })
-            // })
-            // console.log(mesaje)
+            })
+            data.reverse()
             data = data.concat(this.state.messages)
-            // console.log('---------------------', data)
             this.setState({
                 messages: []
             })
+            console.log('asta e data PLS', data)
             this.setState({
-                refreshing: false,
-                messages: data
+                messages: data,
+                // lastVisible: data[data.length - 1].timestamp,
+                refreshing: false
             })
-
-            this.setState({ lastVisible: data[0].timestamp })
+            })
+        
         }, 500)
     }
     openAddParticipants = () => {
@@ -487,10 +438,20 @@ class ChatRoom extends Component {
     }
 
 
+
     closeAddParticipants = () => {
         this.setState({
             addParticipants: false
         })
+    }
+
+    compareForNextDay = (date1, date2) => {
+        let next1 = new Date(date1)
+        let next2 = new Date(date2)
+        if(next1.getDate() !== next2.getDate()){
+            return true
+        }
+        return false
     }
 
     render() {
@@ -624,25 +585,24 @@ class ChatRoom extends Component {
                             {/* <ScrollView> */}
 
                             <FlatList
-                                ListFooterComponent={<TouchableOpacity onPress={() => this.retrieveMore()}><Text style={{ fontSize: 16, alignSelf: 'center', color: '#0984e3' }}>Load More</Text></TouchableOpacity>}
-                                inverted
-                                // refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={() => this.refresh()} />}
+                                ref={ref => this.flatList = ref}
+                                refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={() => this.refresh()} />}
+                                // initialNumToRender={this.state.messages.length / 2}
                                 nestedScrollEnabled={true}
                                 scrollEnabled={true}
                                 onEndReached={() => { console.log('end ricid') }}
-                                onEndReachedThreshold={1}
-                                ref={ref => this.flatList = ref}
-                                onLayout={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
-                                onContentSizeChange={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
+                                onEndReachedThreshold={0.5}
+                                // initialScrollIndex={this.state.messages.length - 1}
+                                // onScrollToIndexFailed={() => console.log('failed')}
+                                // ref="flatList"
                                 extraData={this.state.updateInMata}
                                 data={this.state.messages}
                                 renderItem={({ item, index }) => (
                                     <View key={index} style={{ width: width, flex: 1 }}>
                                         {/* {(typeof item.reply === 'undefined') ? null : <View><Text>{item.reply} has replied to your story!</Text></View>} */}
-                                        {(typeof (item.location) === 'undefined') ? <MessageComponent id={item.id} msg={item.msg} date={item.timestamp} sender={item.sender} /> :
+                                        {(typeof (item.location) === 'undefined') ? <MessageComponent newDay={(this.state.messages.length >= 2 && index >= 1) ? (this.compareForNextDay(item.timestamp, this.state.messages[index - 1].timestamp)) : false} msg={item.msg} date={item.timestamp} sender={item.sender} /> :
                                             (typeof item.video === 'undefined') ?
                                                 <ChatRoomPost
-                                                    id={item.id}
                                                     item={item}
                                                     postedFor={item.hoursPosted}
                                                     activity={item.activity}
@@ -652,15 +612,22 @@ class ChatRoom extends Component {
                                                     timestamp={item.timestamp}
                                                     image={item.image}
                                                 /> :
-                                                <VideoComponent id={item.id} timestamp={item.timestamp} item={item} video={item.video} creatorId={item.creatorId} msg={item.msg} />
+                                                <VideoComponent shouldFlip={item.shouldFlip} timestamp={item.timestamp} item={item} video={item.video} creatorId={item.creatorId} msg={item.msg} />
                                         }
 
+                                        {/* <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> */}
                                     </View>
                                 )}
                                 keyExtractor={(item, index) => String(index)}
-
+                                // ListHeaderComponent={this.renderHeader}
+                                // ListFooterComponent={this.Renderpizdamatii}
+                                // onEndReached={this.retrieveMore}
+                                // onEndReachedThreshold={0}
+                                // refreshing={this.state.refreshing}
+                                // renderHeader={this.renderHeader}
                                 style={{ position: 'absolute', top: 0, bottom: 65, left: 5, right: 5 }}
                             />
+                            {/* </ScrollView> */}
                         </View>
                     </TouchableWithoutFeedback>
 

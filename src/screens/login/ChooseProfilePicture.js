@@ -14,7 +14,7 @@ class ChooseProfilePicture extends Component {
         super(props)
         this.state = {
             fontsLoaded: false,
-            imageUri: '',
+            imageUri: 'http://www.gstatic.com/images/icons/material/system/2x/photo_camera_grey600_24dp.png',
             buttonVisible: true
         }
     }

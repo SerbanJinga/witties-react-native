@@ -20,7 +20,7 @@ import { Notifications } from 'expo'
 import * as Font from 'expo-font'
 import * as Expo from 'expo'
 
-import Toast, { DURATION } from 'react-native-easy-toast'
+import Toast from 'react-native-toast-message'
 import { Text, Input, Button } from 'react-native-elements'
 import firebase from 'firebase'
 import 'firebase/firestore'
@@ -31,7 +31,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 require('firebase/functions')
 //function pad(num) {
 //    var s = "000000000" + num;
- //   return s.substr(s.length - 4);
+//   return s.substr(s.length - 4);
 //}
 const { width: WIDTH, height: HEIGHT } = Dimensions.get('window')
 class SignUp extends Component {
@@ -53,16 +53,16 @@ class SignUp extends Component {
             fonstLoaded: false
         }
     }
-    async componentDidMount(){
+    async componentDidMount() {
         // this.refs.toast.show('hello gigica')
         await Font.loadAsync({
             //font1 or 2 can be any name. This'll be used in font-family
-             
-            font1: require('../../../assets/SourceSansPro-Black.ttf'),                         
+
+            font1: require('../../../assets/SourceSansPro-Black.ttf'),
         });
-        this.setState({fonstLoaded: true})
+        this.setState({ fonstLoaded: true })
     }
-   
+
 
     async calculateDiscrim(searchName) {
         try {
@@ -134,7 +134,7 @@ class SignUp extends Component {
             console.log(error)
             alert(error)
         })
-      //the rest works in backend 
+        //the rest works in backend 
     }
 
     onLoginFailure(errorMessage) {
@@ -143,7 +143,16 @@ class SignUp extends Component {
             loading: false
         })
         const err = this.state.errorMessage
-        this.refs.error.show(err)
+        // this.refs.error.show(err)
+        Toast.show({
+            text1: 'Error signing in',
+            text2: err,
+            type: 'error',
+            position: 'bottom',
+            visibilityTime: 2000,
+            autoHide: true,
+            bottomOffset: 40
+        })
     }
 
     renderLoading() {
@@ -172,46 +181,111 @@ class SignUp extends Component {
 
     isUserEqual = (googleUser, firebaseUser) => {
         if (firebaseUser) {
-          var providerData = firebaseUser.providerData;
-          for (var i = 0; i < providerData.length; i++) {
-            if (
-              providerData[i].providerId ===
-                firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
-              providerData[i].uid === googleUser.getBasicProfile().getId()
-            ) {
-              // We don't need to reauth the Firebase connection.
-              return true;
+            var providerData = firebaseUser.providerData;
+            for (var i = 0; i < providerData.length; i++) {
+                if (
+                    providerData[i].providerId ===
+                    firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+                    providerData[i].uid === googleUser.getBasicProfile().getId()
+                ) {
+                    // We don't need to reauth the Firebase connection.
+                    return true;
+                }
             }
-          }
         }
         return false;
-      };
+    };
 
-      onSignIn = googleUser => {
+    onSignIn = googleUser => {
         console.log('Google Auth Response', googleUser);
         // We need to register an Observer on Firebase Auth to make sure auth is initialized.
         var unsubscribe = firebase.auth().onAuthStateChanged(
-          firebaseUser => {
-            unsubscribe();
-            // Check if we are already signed-in Firebase with the correct user.
-            if (!this.isUserEqual(googleUser, firebaseUser)) {
-              // Build Firebase credential with the Google ID token.
-              var credential = firebase.auth.GoogleAuthProvider.credential(
-                googleUser.idToken,
-                googleUser.accessToken
-              );
-              // Sign in with credential from the Google user.
-              firebase
-                .auth()
-                .signInAndRetrieveDataWithCredential(credential)
-                .then(result => {
+            firebaseUser => {
+                unsubscribe();
+                // Check if we are already signed-in Firebase with the correct user.
+                if (!this.isUserEqual(googleUser, firebaseUser)) {
+                    // Build Firebase credential with the Google ID token.
+                    var credential = firebase.auth.GoogleAuthProvider.credential(
+                        googleUser.idToken,
+                        googleUser.accessToken
+                    );
+                    // Sign in with credential from the Google user.
+                    firebase
+                        .auth()
+                        .signInAndRetrieveDataWithCredential(credential)
+                        .then(result => {
+                            console.log(firebase.auth().currentUser.uid)
+                            firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).set({
+                                email: result.user.email,
+                                displayName: result.user.displayName,
+                                careScore: this.state.careScore,
+                                discriminator: this.state.discriminator,
+                                profilePicture: result.user.photoURL,
+                                friends: this.state.friends,
+                                uid: firebase.auth().currentUser.uid,
+                                status: "",
+                                customActivities: []
+                            }).then(this._retrieveDisplayName(), (error) => {
+                                console.log(error)
+                                alert(error)
+                            })
+
+                        })
+
+
+                } else {
+                    console.log('User already signed-in Firebase.');
+                }
+            }
+        );
+    };
+
+    signInWithGoogleAsync = async () => {
+        try {
+            const result = await Google.logInAsync({
+                iosClientId: '178061533357-0hii23b04uupl074ggdpfg53s92thkvk.apps.googleusercontent.com',
+                androidClientId: '178061533357-qv4brh779ah25i7m20lrfh9vbf2q00dn.apps.googleusercontent.com',
+                scopes: ['profile', 'email'],
+                behavior: 'web'
+            });
+
+            if (result.type === 'success') {
+                this.onSignIn(result);
+                return result.accessToken
+            } else {
+                return { cancelled: true }
+            }
+        } catch (e) {
+            return { error: true }
+        }
+    }
+
+
+    loginWithFacebook = async () => {
+        try {
+            await Facebook.initializeAsync('175604747105532');
+            const result = await Facebook.logInWithReadPermissionsAsync({
+                permissions: ['public_profile', 'email'],
+            });
+            if (result.type === 'success') {
+                const token = result.token;
+                console.log(token)
+                const credential = firebase.auth.FacebookAuthProvider.credential(token)
+                const response = await fetch(
+                    `https://graph.facebook.com/me?access_token=${token}&fields=id,name,birthday,email,picture.type(large)`
+                );
+                const { picture, name, birthday, email } = await response.json();
+                console.log(email)
+                firebase.auth().signInWithCredential(credential).catch((error) => {
+                    console.log(error)
+                }).then(result => {
                     console.log(firebase.auth().currentUser.uid)
                     firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).set({
-                        email: result.user.email,
-                        displayName: result.user.displayName,
+                        email: email,
+                        displayName: name,
                         careScore: this.state.careScore,
                         discriminator: this.state.discriminator,
-                        profilePicture: result.user.photoURL,
+                        profilePicture: picture.data.url,
                         friends: this.state.friends,
                         uid: firebase.auth().currentUser.uid,
                         status: "",
@@ -220,91 +294,26 @@ class SignUp extends Component {
                         console.log(error)
                         alert(error)
                     })
-                    
+
                 })
-
-                            
-            } else {
-              console.log('User already signed-in Firebase.');
             }
-          }
-        );
-      };
-
-    signInWithGoogleAsync = async() => {
-        try{
-            const result = await Google.logInAsync({
-                iosClientId: '178061533357-0hii23b04uupl074ggdpfg53s92thkvk.apps.googleusercontent.com',
-                androidClientId: '178061533357-qv4brh779ah25i7m20lrfh9vbf2q00dn.apps.googleusercontent.com',
-                scopes: ['profile', 'email'],
-                behavior: 'web'
-            });
-
-            if(result.type === 'success'){
-                this.onSignIn(result);
-                return result.accessToken
-            }else {
-                return { cancelled: true }
-            }
-        }catch(e){
-            return { error: true }
-        }
-    }
-
-
-    loginWithFacebook = async() => {
-        try{
-            await Facebook.initializeAsync('175604747105532');
-           const result= await Facebook.logInWithReadPermissionsAsync({
-                permissions: ['public_profile', 'email'],
-              }); 
-            if(result.type === 'success'){
-            const token = result.token;
-            console.log(token)
-            const credential = firebase.auth.FacebookAuthProvider.credential(token)    
-            const response = await fetch(
-                `https://graph.facebook.com/me?access_token=${token}&fields=id,name,birthday,email,picture.type(large)`
-            );
-              const { picture, name, birthday, email } = await response.json();
-              console.log(email)
-            firebase.auth().signInWithCredential(credential).catch((error) => {
-                console.log(error)
-            }) .then(result => {
-                console.log(firebase.auth().currentUser.uid)
-                firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).set({
-                    email: email,
-                    displayName: name,
-                    careScore: this.state.careScore,
-                    discriminator: this.state.discriminator,
-                    profilePicture: picture.data.url,
-                    friends: this.state.friends,
-                    uid: firebase.auth().currentUser.uid,
-                    status: "",
-                    customActivities: []
-                }).then(this._retrieveDisplayName(), (error) => {
-                    console.log(error)
-                    alert(error)
-                })
-                
-            })
-            }     
-        }catch(e){
+        } catch (e) {
             console.log(e)
         }
     }
-   
+
     render() {
         const loaded = this.state.fonstLoaded
-        if(loaded){
-        return (
-        
-        <ScrollView style={styles.container}>
-            <SafeAreaView style={{flex: 1}}>
-            <View style={{ marginTop: 60, alignItems: "center", justifyContent: "center" }}>
-                        {/* <Image source={require("../../../assets/logo.png")} /> */}
-                        <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500" }]}>Witties</Text>
-                    </View>
-                    <View style={{ marginTop: 48, flexDirection: "row", justifyContent: "center" }}>
+        if (loaded) {
+            return (
+
+                <ScrollView style={styles.container}>
+                    <SafeAreaView style={{ flex: 1 }}>
+                        <View style={{ marginTop: 60, alignItems: "center", justifyContent: "center" }}>
+                            {/* <Image source={require("../../../assets/logo.png")} /> */}
+                            <Text style={[styles.text, { marginTop: 10, fontSize: 22, fontWeight: "500", marginBottom: 40 }]}>Witties</Text>
+                        </View>
+                        {/* <View style={{ marginTop: 48, flexDirection: "row", justifyContent: "center" }}>
                         <TouchableOpacity onPress = {() => this.loginWithFacebook()}>
                             <View style={styles.socialButton}>
                                 <Image source={require("../../../assets/facebook.png")} style={styles.socialLogo} />
@@ -317,87 +326,88 @@ class SignUp extends Component {
                             <Text style={styles.text}>Google</Text>
                         </TouchableOpacity>
                     </View>
-                    <Text style={[styles.text, { color: "#ABB4BD", fontSize: 15, textAlign: "center", marginVertical: 20 }]}>or</Text>
+                    <Text style={[styles.text, { color: "#ABB4BD", fontSize: 15, textAlign: "center", marginVertical: 20 }]}>or</Text> */}
 
-                <Input 
-                    label="Name"
-                    labelStyle={{fontFamily: "font1"}}
-                    style={styles.inputTitle}
-                    returnKeyType="next"
-                    textContentType="name"
-                    value={this.state.displayName}
-                    onChangeText={displayName => this.setState({ displayName })}
-                    blurOnSubmit={false}
-                    onSubmitEditing={() => this.emailInput.focus()}
-                />
-                <Input 
-                ref={(input) => { this.emailInput = input }}
-                    label="Email"
-                    style={{marginTop: 32, marginBottom: 8}}
-                    returnKeyType="next"
-                    textContentType="name"
-                    labelStyle={{fontFamily: "font1"}}
-                    value={this.state.email}
-                    onChangeText={email => this.setState({ email })}
-                    onSubmitEditing={() => this.passwordInput.focus()}
+                        <Input
+                            autoCapitalize={false}
+                            label="Name"
+                            labelStyle={{ fontFamily: "font1" }}
+                            style={styles.inputTitle}
+                            returnKeyType="next"
+                            textContentType="name"
+                            value={this.state.displayName}
+                            onChangeText={displayName => this.setState({ displayName })}
+                            blurOnSubmit={false}
+                            onSubmitEditing={() => this.emailInput.focus()}
+                        />
+                        <Input
+                            autoCapitalize={false}
+                            style={styles.inputTitle}
+                            ref={(input) => { this.emailInput = input }}
+                            label="Email"
+                            // style={{marginTop: 32, marginBottom: 8}}
+                            returnKeyType="next"
+                            textContentType="name"
+                            labelStyle={{ fontFamily: "font1" }}
+                            value={this.state.email}
+                            onChangeText={email => this.setState({ email })}
+                            onSubmitEditing={() => this.passwordInput.focus()}
 
-                />
-                <Input 
-                    ref={(input) => { this.passwordInput = input }}
-                    label="Password"
-                    style={styles.inputTitle}
-                    returnKeyType="go"
-                    secureTextEntry={true}
-                    labelStyle={{fontFamily: "font1"}}
-                    textContentType="newPassword"
-                    value={this.state.password}
-                    onChangeText={password => this.setState({ password })}
-                />
-                <TouchableOpacity 
-                    style={styles.submitContainer}
-                    onPress={() => this.signInWithEmail()}
-                    >
-                        <Text                            
+                        />
+                        <Input
+                            autoCapitalize={false}
+
+                            ref={(input) => { this.passwordInput = input }}
+                            label="Password"
+                            style={styles.inputTitle}
+                            returnKeyType="go"
+                            secureTextEntry={true}
+                            labelStyle={{ fontFamily: "font1" }}
+                            textContentType="newPassword"
+                            value={this.state.password}
+                            onChangeText={password => this.setState({ password })}
+                        />
+                        <TouchableOpacity
+                            style={styles.submitContainer}
+                            onPress={() => this.signInWithEmail()}
+                        >
+                            <Text
+                                style={[
+                                    styles.text,
+                                    {
+                                        color: "#FFF",
+                                        fontWeight: "600",
+                                        fontSize: 16
+                                    }
+                                ]}
+                            >
+                                Signup
+                        </Text>
+                        </TouchableOpacity>
+                        <Text
                             style={[
                                 styles.text,
                                 {
-                                    color: "#FFF",
-                                    fontWeight: "600",
-                                    fontSize: 16
+                                    fontSize: 14,
+                                    color: "#ABB4BD",
+                                    textAlign: "center",
+                                    marginTop: 24,
+                                    marginBottom: 20
                                 }
                             ]}
                         >
-                            Signup
+                            Already have an account? <Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}>Login Now</Text>
                         </Text>
-                    </TouchableOpacity>
-                    <Text
-                        style={[
-                            styles.text,
-                            {
-                                fontSize: 14,
-                                color: "#ABB4BD",
-                                textAlign: "center",
-                                marginTop: 24,
-                                marginBottom: 20
-                            }
-                        ]}
-                    >
-                        Already have an account? <Text style={[styles.text, styles.link]} onPress={() => this.props.navigation.navigate('LogIn')}>Login Now</Text>
-                    </Text>
-                    <Toast 
-                        ref="error"
-                        style={{backgroundColor: '#282828'}}
-                        textStyle={{color: '#fff'}}
-                        position='bottom'
-                        opacity={0.8}
-                        fadeInDuration={750}
-                    /> 
-                </SafeAreaView>        
-        </ScrollView>
-        );}else{
-            return(
+
+                    </SafeAreaView>
+                    <Toast ref={(ref) => Toast.setRef(ref)} />
+
+                </ScrollView>
+            );
+        } else {
+            return (
                 <View style={styles.container}>
-                    <ActivityIndicator size={'large'}/>
+                    <ActivityIndicator size={'large'} />
                 </View>
             )
         }
@@ -456,7 +466,7 @@ const styles = StyleSheet.create({
     },
     inputTitle: {
         color: "#ABB4BD",
-        fontSize: 14,
+        fontSize: 18,
         fontFamily: "font1"
     },
     input: {
@@ -465,8 +475,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: "font1"
     }
-  });
-  
+});
+
 
 export default SignUp
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, TouchableOpacity, Alert } from 'react-native'
 import { Text, Divider, CheckBox, Input, Overlay, Avatar } from 'react-native-elements'
 import firebase from 'firebase'
 import { FlatList,  } from 'react-native-gesture-handler'
@@ -12,9 +12,7 @@ const { width, height } = Dimensions.get('window')
 import { withNavigation } from 'react-navigation';
 import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
-import Toast, { DURATION } from 'react-native-easy-toast'
-
-
+import Toast from 'react-native-toast-message'
 let arr = []
 let twoUserArr = []
 let roomArrId = []
@@ -81,12 +79,19 @@ let roomArrId = []
     create = () => {
     const uid = firebase.firestore().collection("messages").doc().id
     
+        firebase.firestore().collection("messages").doc(uid).collection('chats').add({
+            msg: "This is the beggining of the conversation. Send a message.",
+            timestamp: Date.now(),
+            sender: 'alkdaldka'
+        })
         firebase.firestore().collection("messages").doc(uid).set({
             usersParticipating: this.state.chatRoomIds,
             messages: [],
             roomId: uid,
             chatRoomName: this.state.groupName,
-            profilePicture: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Group_font_awesome.svg/480px-Group_font_awesome.svg.png"
+            profilePicture: "http://www.gstatic.com/images/icons/material/system/2x/photo_camera_grey600_24dp.png",
+            lastUpdated: Date.now(),
+            groupScore: 0
         }).then(this.uploadToStorage(uid))
         this.state.chatRoomIds.forEach(id => {
             firebase.firestore().collection("users").doc(id).update({
@@ -102,7 +107,7 @@ let roomArrId = []
 
     createChatRoom = () => {
         if(this.state.chatRoomIds.length === 1){
-            this.refs.error.show('You have not selected at least one friend!')
+            Alert.alert('You have not selected at least one friend!')
             return
         }
         this.setState({
@@ -216,6 +221,7 @@ let roomArrId = []
     render(){
         return(
             <SafeAreaView style={{flex: 1, flexDirection: 'column'}}>
+
                 <SafeAreaView style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20}}>
                 <TouchableOpacity
                         onPress={()=> this.props.close()}
@@ -252,16 +258,9 @@ let roomArrId = []
                 refreshing={this.state.refreshing}
                 />}
             </View>
-            <Toast 
-                        ref="error"
-                        style={{backgroundColor: '#282828'}}
-                        textStyle={{color: '#fff'}}
-                        position='bottom'
-                        opacity={0.8}
-                        fadeInDuration={750}
-                    /> 
 
             <Overlay fullScreen animationType="fade" isVisible={this.state.nextOverlay}>
+
                     <SafeAreaView style={{flex: 1, flexDirection: 'column'}}>
                     <View style={{flex: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <TouchableOpacity

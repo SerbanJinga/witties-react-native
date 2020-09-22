@@ -14,6 +14,7 @@ import { AntDesign } from '@expo/vector-icons'
 import { Avatar } from 'react-native-elements'
 const { height, width } = Dimensions.get('screen');
 import firebase from 'firebase'
+import { transform } from 'lodash';
 const cellHeight = height * 0.6;
 const cellWidth = width;
 
@@ -77,7 +78,7 @@ class StreakVideoItem extends React.PureComponent {
     }
   }
   render() {
-    const { id, poster, video } = this.props;
+    const { id, poster, video, shouldFlip } = this.props;
 
     return (
       <SafeAreaView style={styles.cell}>
@@ -89,11 +90,11 @@ class StreakVideoItem extends React.PureComponent {
           shouldPlay={false}
           isMuted={false}
           resizeMode="cover"
-          style={styles.full}
+          style={[styles.full, { transform: [{scaleX: shouldFlip ? -1 : 1}, {scaleY: 1}]}]}
         />
         <View style={{ marginLeft: 15, marginRight: 15, flex: 1, flexDirection: 'row', bottom: 50, top: 5, justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
         <TouchableOpacity
-            onPress={() => this.props.close()}>
+            >
             <Avatar size={40} rounded source={{ uri: this.state.profilePicture }} />
           </TouchableOpacity>
           <Text style={{fontSize: 15, color: '#fff'}}>{this.state.displayName}</Text>

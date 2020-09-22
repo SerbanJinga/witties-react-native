@@ -121,18 +121,20 @@ let addedMe = []
     
 
     _retrieveProfilePicture = async() => {
-        let initialQuery = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid)
-        let documentSnapshots = await initialQuery.get()
-        let documentData = documentSnapshots.data().profilePicture
-        let displayNameDocumentData = documentSnapshots.data().displayName
-        let discrim = documentSnapshots.data().discriminator
-        let careScore = documentSnapshots.data().careScore
-        this.setState({
-            imageUri: documentData,
-            displayName: displayNameDocumentData,
-            discriminator: discrim,
-            careScore: careScore
+      
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).onSnapshot(async (doc) => {
+            let documentData = await doc.data().profilePicture
+            let displayName = await doc.data().displayName
+            let discrimantor = await doc.data().discriminator
+            let careScore = await doc.data().careScore
+            this.setState({
+                imageUri: documentData,
+                displayName: displayName,
+                discriminator: discrimantor,
+                careScore: careScore
+            })
         })
+     
     }
    
 
@@ -572,20 +574,22 @@ let addedMe = []
                 <TouchableOpacity onPress={() => this._onCloseSearch()}>
                 <AntDesign name="close" size={20}/>
             </TouchableOpacity>
-              <SearchBar round placeholder="Search" style={{fontFamily: 'font1', padding: 20}} lightTheme inputStyle={{fontFamily: 'font1'}} placeholderTextColor="#ecedef" containerStyle={{
-    backgroundColor:"#fff",
-    borderBottomColor: '#ecedef',
-    borderTopColor: '#ecedef',
-    borderLeftColor: '#ecedef',
-    borderRightColor: '#ecedef',
-    borderWidth: 1,
-    borderRadius: 10,
-    margin: 10,
-    width: width / 1.3
-}}  inputContainerStyle={{backgroundColor: '#fff', height: 30}} value={this.state.searchText} onChangeText={this.search} />
-            <TouchableOpacity onPress={() => this.openFilter()}>
+              
+
+<SearchBar placeholder="Search"  lightTheme placeholderTextColor="#ecedef" containerStyle={{
+                            backgroundColor: "#fff",
+                            borderBottomColor: '#ecedef',
+                            borderTopColor: '#ecedef',
+                            borderLeftColor: '#ecedef',
+                            borderRightColor: '#ecedef',
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            margin: 10,
+                            width: width / 1.3
+                        }} inputContainerStyle={{ height: 30, backgroundColor: '#fff' }} value={this.state.searchText} onChangeText={this.search} />
+            {/* <TouchableOpacity onPress={() => this.openFilter()}>
                 <AntDesign name="filter" size={20}/>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
            </View>
            </View>
@@ -732,7 +736,8 @@ let addedMe = []
                                         />
                                     </TouchableOpacity>
                                     <Text style={{ fontFamily: 'font1', fontSize: 20 }}>Settings</Text>
-                                    <TouchableOpacity onPress={() => this.storeData()}>
+                                    <TouchableOpacity onPress={() =>{ this.storeData()
+                                    this._closeSettings()}}>
                                         <AntDesign
                                             size={26}
                                             name="check"
@@ -840,7 +845,7 @@ let addedMe = []
                 
                 <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                   <Text style={{fontFamily: 'font1', fontSize: 15, margin: 10}}>Chats</Text>
-                  <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" />
+                  {/* <Button onPress={()=> this.addFriends()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add" /> */}
                 </View>
                 <View style={{height: 80}}>
                     {/* <AllFriends/> */}

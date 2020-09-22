@@ -335,7 +335,7 @@ class Timeline extends React.Component {
          this.setState({
              refreshing: true
          })
-        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").startAfter(this.state.lastSeen).limit(9).onSnapshot((doc) => {
+        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").startAfter(this.state.lastSeen).limit(25).onSnapshot((doc) => {
             if(doc.empty){
                 return
             }
@@ -356,7 +356,10 @@ class Timeline extends React.Component {
     //---------------------------------------------------Data retrival------------------------------------
     async retrieveData() {
 
-        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").limit(9).onSnapshot((doc) => {
+        firebase.firestore().collection('private').doc(firebase.auth().currentUser.uid).collection('statuses').orderBy("timestamp", "desc").limit(21).onSnapshot((doc) => {
+            if(doc.empty){
+                return
+            }
             let data = doc.docs.map(doc => doc.data())
             let idMap = doc.docs.map(doc => doc.id)
             for (let i = 0; i < idMap.length; i++) {
@@ -466,6 +469,7 @@ class Timeline extends React.Component {
                                     press={() => this.props.navigation.navigate('TimelinePostDetail', { imageUri: item.image })}
 
                                 /> : <TimelineVideoPost
+                                    shouldFlip={item.shouldFlip}
                                     postedFor={item.hoursPosted}
                                     activity={item.activity}
                                     mood={item.mood}
@@ -476,18 +480,18 @@ class Timeline extends React.Component {
                                     showOverlay={this.renderOverlay}
                                     id={item.id}
 
-                                    press={() => this.props.navigation.navigate('TimelinePostDetail', { videoUri: item.video })}
+                                    press={() => this.props.navigation.navigate('TimelinePostDetail', { videoUri: item.video, shouldFlip: item.shouldFlip })}
 
                                 />}
                         </View>
                     )}
                     keyExtractor={(item, index) => String(index)}
                     // ListHeaderComponent={this.renderHeader}
-                    ListFooterComponent={<TouchableOpacity onPress={()=> this.retrieveMore()}><Text style={{fontSize: 16, alignSelf: 'center', color: '#0984e3'}}>Load More</Text></TouchableOpacity>}
+                    ListFooterComponent={<TouchableOpacity onPress={()=> this.retrieveMore()}><Text style={{fontSize: 16, alignSelf: 'center', color: '#0984e3', marginBottom: 10, marginTop: 10}}>Load More</Text></TouchableOpacity>}
                     // ItemSeparatorComponent={(item) => (<Text>{item.date}</Text>)}
                     ref={ref => this.flatList = ref}
-                    onContentSizeChange={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
-                    onLayout={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
+                    // onContentSizeChange={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
+                    // onLayout={() => this.flatList.scrollToOffset({ animated: true, offset: 0 })}
                     // onEndReached={this.retrieveMore}
                     onEndReachedThreshold={1}
                     columnWrapperStyle={{ flexDirection: "row-reverse" }}
