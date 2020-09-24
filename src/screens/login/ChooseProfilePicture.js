@@ -71,7 +71,7 @@ class ChooseProfilePicture extends Component {
     }
 
     render() {
-        if (this.state.fontsLoaded) {
+        // if (this.state.fontsLoaded) {
 
             return (
 
@@ -82,7 +82,7 @@ class ChooseProfilePicture extends Component {
                     </TouchableOpacity>
 
                     <View style={{ flex: 1, marginBottom: 20, justifyContent: 'flex-end' }}>
-                        {this.state.buttonVisible === true ? <TouchableOpacity onPress={() => this.props.navigation.navigate('Home')}>
+                        {this.state.buttonVisible === true ? <TouchableOpacity onPress={() => this.props.navigation.navigate('TutorialSlider')}>
                             <Text style={{ fontFamily: 'font1', fontSize: 16, color: '#0984e3' }}>Skip for now</Text>
                         </TouchableOpacity>:<TouchableOpacity onPress={() => this.props.navigation.navigate('TutorialSlider')}>
                             <Text style={{ fontFamily: 'font1', fontSize: 16, color: '#0984e3' }}>Continue</Text>
@@ -94,9 +94,9 @@ class ChooseProfilePicture extends Component {
 
 
             )
-        } else {
-            return null
-        }
+        // } else {
+            // return null
+        // }
     }
 }
 

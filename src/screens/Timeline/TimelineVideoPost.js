@@ -103,17 +103,14 @@ export default class TimelineVideoPost extends Component {
             <TouchableOpacity
                 activeOpacity={0.8}
                 style={{}}
-                onLongPress={() => {
-                    console.log("Saluttt")
-                    this.props.showOverlay(this.props.id)
-                }}
+                
                 onPressIn={() => { console.log("Press In") }}
             onPress={() => this.props.press()}
             >
                
                 <ImageBackground
                     style={[styles.flex, styles.destination]}
-                    imageStyle={{ borderColor: 'black', borderWidth: 1 }}
+                    imageStyle={{ borderColor: 'black', borderWidth: 1, transform: [{scaleX: this.props.shouldFlip ? -1 : 1}, {scaleY: 1}] }}
                     source={{ uri: this.state.imageShown }}
                 >
                     {this._renderTimestamps(this.props.timestamp)}

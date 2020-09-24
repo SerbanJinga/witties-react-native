@@ -77,13 +77,13 @@ let roomArrId = []
     }
 
     create = () => {
+        if(this.state.groupName.trim().length <= 2 || !this.state.groupName.replace((/\s/g, '')).length){
+            Alert.alert('Group names must be at least 2 characters long.')
+            return
+        }
     const uid = firebase.firestore().collection("messages").doc().id
     
-        firebase.firestore().collection("messages").doc(uid).collection('chats').add({
-            msg: "This is the beggining of the conversation. Send a message.",
-            timestamp: Date.now(),
-            sender: 'alkdaldka'
-        })
+        
         firebase.firestore().collection("messages").doc(uid).set({
             usersParticipating: this.state.chatRoomIds,
             messages: [],
@@ -91,12 +91,19 @@ let roomArrId = []
             chatRoomName: this.state.groupName,
             profilePicture: "http://www.gstatic.com/images/icons/material/system/2x/photo_camera_grey600_24dp.png",
             lastUpdated: Date.now(),
-            groupScore: 0
+            groupScore: 0,
+            twoUserChat: false,
+            userWhoCreated: firebase.auth().currentUser.uid
         }).then(this.uploadToStorage(uid))
         this.state.chatRoomIds.forEach(id => {
             firebase.firestore().collection("users").doc(id).update({
                 chatRoomsIn: firebase.firestore.FieldValue.arrayUnion(uid)
             })
+        })
+        firebase.firestore().collection("messages").doc(uid).collection('chats').add({
+            msg: "This is the beggining of the conversation. Send a message.",
+            timestamp: Date.now(),
+            sender: 'alkdaldka'
         })
         this.setState({
             nextOverlay: false,
@@ -201,7 +208,8 @@ let roomArrId = []
             otherUser: uid,
             usersParticipating: twoUserArr,
             userWhoCreated: firebase.auth().currentUser.uid,
-            twoUserChat: true
+            twoUserChat: true,
+            groupScore: 0
         })
         firebase.firestore().collection("users").doc(uid).update({
             chatRoomsIn: firebase.firestore.FieldValue.arrayUnion(roomId)
@@ -281,7 +289,7 @@ let roomArrId = []
                             </TouchableOpacity>
                 </View>
                         <View style={{flex: 1, flexDirection: 'row', padding: 20}}>
-                        <Avatar source={{uri: this.state.imageUri}} size={50} rounded onPress={()=>this.onAvatarPress()}/>
+                        <Avatar source={{uri: this.state.imageUri === '' ? 'http://www.gstatic.com/images/icons/material/system/2x/photo_camera_grey600_24dp.png' : this.state.imageUri}} size={50} rounded onPress={()=>this.onAvatarPress()}/>
                         <View style={{flex: 1, flexDirection: 'column'}}>
                         <Divider/>
                         <Input

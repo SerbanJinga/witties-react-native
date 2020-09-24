@@ -10,11 +10,10 @@ import {
 } from 'react-native';
 import { Video } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AntDesign } from '@expo/vector-icons'
+import { AntDesign, Feather } from '@expo/vector-icons'
 import { Avatar } from 'react-native-elements'
 const { height, width } = Dimensions.get('screen');
 import firebase from 'firebase'
-import { transform } from 'lodash';
 const cellHeight = height * 0.6;
 const cellWidth = width;
 
@@ -23,15 +22,15 @@ const viewabilityConfig = {
 };
 
 class StreakVideoItem extends React.PureComponent {
-  constructor(props){
+  constructor(props) {
     super(props)
     this.state = {
       profilePicture: '',
       displayName: '',
-      timestamp: this._renderTimestamps(this.props.timestamp)
+      timestamp: this.props.timestamp
     }
   }
-  componentDidMount = async() => {
+  componentDidMount = async () => {
     console.log('intra aici a a a a')
     await this.retrieveProfilePicture()
   }
@@ -50,9 +49,9 @@ class StreakVideoItem extends React.PureComponent {
 
     let formattedTime = hours + ":" + minutes.substr(-2) + ':' + seconds.substr(-2)
     return formattedTime
-  } 
+  }
 
-  retrieveProfilePicture = async() => {
+  retrieveProfilePicture = async () => {
     console.log('intra si aici aparent')
     const { creatorId } = this.props
     let query = await firebase.firestore().collection('users').doc(creatorId).get()
@@ -62,6 +61,14 @@ class StreakVideoItem extends React.PureComponent {
       profilePicture: data,
       displayName: name,
     })
+  }
+
+  toMinutes = (timestamp) => {
+    let minutes = Math.round(timestamp / 60000)
+    if (minutes < -60)
+      return + Math.floor(Math.abs(minutes) / 60) + " h " + Math.abs(minutes) % 60 + ' m ago'
+    if (minutes >= -60)
+      return Math.abs(minutes) + ' m ago'
   }
 
   async play() {
@@ -90,16 +97,19 @@ class StreakVideoItem extends React.PureComponent {
           shouldPlay={false}
           isMuted={false}
           resizeMode="cover"
-          style={[styles.full, { transform: [{scaleX: shouldFlip ? -1 : 1}, {scaleY: 1}]}]}
+          style={[styles.full, { transform: [{ scaleX: shouldFlip ? -1 : 1 }, { scaleY: 1 }] }]}
         />
-        <View style={{ marginLeft: 15, marginRight: 15, flex: 1, flexDirection: 'row', bottom: 50, top: 5, justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
+        {/* <View style={{padding: 10, flex: 0, flexDirection: 'row', justifyContent: 'flex-start', bottom: 50, top: 5, zIndex: 2 }}>
         <TouchableOpacity
             >
-            <Avatar size={40} rounded source={{ uri: this.state.profilePicture }} />
           </TouchableOpacity>
+          <View style={{flexDirection: 'column', alignSelf: 'flex-start'}}>
           <Text style={{fontSize: 15, color: '#fff'}}>{this.state.displayName}</Text>
-          <Text style={{fontSize: 15, color: '#fff'}}>at {this.state.timestamp}</Text>
+          <Text style={{fontSize: 15, color: '#fff'}}>{this.state.timestamp}</Text>
+          </View>
+          
           <TouchableOpacity
+          style={{justifyContent: 'flex-end', alignSelf: 'flex-end'}}
             onPress={() => this.props.close()}>
             <AntDesign
               name="close"
@@ -107,8 +117,34 @@ class StreakVideoItem extends React.PureComponent {
             />
           </TouchableOpacity>
           
-          </View>
+          </View> */}
 
+
+        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-around', paddingLeft: 10, paddingRight: 10, paddingBottom: 10, }}>
+          <Avatar size={40} rounded source={{ uri: this.state.profilePicture }} />
+
+
+          <Text style={{ fontSize: 16, color: '#fff', fontFamily: "font1", paddingTop: 5, marginRight: 'auto', marginLeft: 10 }}>{this.state.displayName + " " + this.toMinutes(this.state.timestamp - Date.now())}</Text>
+
+          <TouchableOpacity
+            onPress={() => this.props.close()}
+            style={{
+              backgroundColor: 'transparent',
+              margin: 4,
+              marginRight: 20,
+            }}>
+            <AntDesign
+              name="close"
+              style={{ fontSize: 26, fontWeight: "bold", color: '#fff' }}
+            />
+          </TouchableOpacity>
+
+
+
+
+
+
+        </View>
 
       </SafeAreaView>
     );
@@ -126,6 +162,7 @@ const styles = StyleSheet.create({
     height: height,
     backgroundColor: '#eee',
     // borderRadius: 20,
+    flex: 1,
     overflow: 'hidden',
     // margin: 10,
 

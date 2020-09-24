@@ -874,7 +874,7 @@ class ChatCameraScreen extends Component {
                     color="#b2b8c2"
                   />
                 </View>
-                <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
+                <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={""} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} image={this.state.pictureTaken} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
               </SafeAreaView>
             </Overlay>
 
@@ -1384,7 +1384,7 @@ class ChatCameraScreen extends Component {
                 color="#b2b8c2"
               />
             </View>
-            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
+            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={""} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
           </SafeAreaView>
         </Overlay>
 

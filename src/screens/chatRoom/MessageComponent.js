@@ -25,7 +25,7 @@ export default class MessageComponent extends Component {
         }
     }
 
-    
+
     _renderDayTimestamp = (timestamp) => {
         let date = new Date(timestamp)
         let day = date.getDate()
@@ -56,7 +56,7 @@ export default class MessageComponent extends Component {
             case 12: month = 'Dec'
                 break;
         }
-        return day + ' ' + month 
+        return day + ' ' + month
     }
 
     pad = (val) => {
@@ -118,7 +118,9 @@ export default class MessageComponent extends Component {
             return (
                 // <View style={{flex: 1, wid}}
                 <TouchableOpacity style={{ width: width }}>
-                    {this.state.newDay ? <Text>{this._renderDayTimestamp(this.state.date)}</Text> : null}
+                    {this.state.newDay ? <View style={{ backgroundColor: '#66ccff', alignSelf: 'center', borderRadius: 10, padding: 10, marginTop: 10, marginBottom: 10 }}>
+                        <Text style={{ alignSelf: 'center'}}>{this._renderDayTimestamp(this.state.date)}</Text>
+                    </View> : null}
                     <View style={[styles.submit, { marginLeft: this.state.marginLeft, marginRight: this.state.marginRight, alignSelf: (this.state.sender == firebase.auth().currentUser.uid) ? 'flex-end' : "flex-start", flex: 0, flexDirection: 'row' }]}>
                         <View>
                             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', padding: 5 }}>

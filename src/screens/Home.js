@@ -67,6 +67,9 @@ class Home extends Component {
     finalArr = []
     await this._getToken()
     await this._getProfilePicture()
+    setTimeout(() => {
+      this.componentDidMount()
+    }, 4000)
   }
 
 
@@ -125,7 +128,7 @@ class Home extends Component {
 
 
           <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-            <SearchUsers changeIndex={() => this.changeIndexTimeline()} />
+            <SearchUsers aia={() => this.componentDidMount()} changeIndex={() => this.changeIndexTimeline()} />
           </SafeAreaView>
 
           <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native'
+import { View, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native'
 import { Text, Badge, Avatar, Divider, Overlay } from 'react-native-elements'
 import * as Font from 'expo-font'
 import { AntDesign, Feather, MaterialCommunityIcons, Ionicons, FontAwesome } from '@expo/vector-icons'
@@ -18,25 +18,35 @@ class Room extends Component {
       openChangeImage: false,
       cameraOverlay: false,
       lastMessage: "",
-      hasStreakVideo: true,
+      hasStreakVideo: false,
       sentStreakVideo: false,
       canPress: true,
-      documentDataForAvatar: []
+      documentDataForAvatar: [],
+      name: '',
+      groupScore: ''
     }
+  }
+
+  getWhoCreated = async () => {
+    let query = await firebase.firestore().collection('users').doc(this.props.userWhoCreated).get()
+    let data = await query.data().displayName
+    this.setState({
+      name: data
+    })
   }
 
   hasStreakVideoFunction = async () => {
     firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').onSnapshot((doc) => {
       let data = doc.docs.map(doc => doc.data())
-      if(data.length === 0){
-          this.setState({
-            hasStreakVideo: false
-          })
+      if (data.length !== 0) {
+        this.setState({
+          hasStreakVideo: true
+        })
       }
     })
     // let data = await query.docs.map(doc => doc.data())
     // console.log('e data', data)
-    
+
   }
 
   canPressFunction = async () => {
@@ -62,6 +72,14 @@ class Room extends Component {
   }
 
 
+  getUserFromId = async () => {
+    let query = await firebase.firestore().collection('users').doc(this.props.userWhoCreated).get()
+    let name = await query.data().displayName
+    // return name
+    this.setState({
+      name: name
+    })
+  }
 
   componentDidMount = async () => {
     this.canPressFunction()
@@ -75,6 +93,8 @@ class Room extends Component {
 
     // await this.sentStreakVideo()
     await this.hasStreakVideoFunction()
+    await this.getUserFromId()
+    await this.retrieveScore()
 
     firebase.firestore().collection('messages').doc(this.props.roomId).collection('chats').orderBy('timestamp', 'desc').onSnapshot((doc) => {
       if (doc.empty) {
@@ -123,9 +143,65 @@ class Room extends Component {
     })
   }
 
+
+  retrieveScore = async () => {
+    firebase.firestore().collection('messages').doc(this.props.roomId).onSnapshot(async (doc) => {
+      let data = await doc.data().groupScore
+      if (data >= 0 && data <= 5) {
+        this.setState({
+          groupScore: data + "😴"
+        })
+      } else if (data >= 6 && data <= 10) {
+        this.setState({
+          groupScore: data + "🤤"
+        })
+      }else if(data >= 11 && data <= 25){
+        this.setState({
+          groupScore: data + "🤓"
+        })
+      }else if(data >= 26 && data <= 50){
+        this.setState({
+          groupScore: data + "🤒"
+        })
+      }else if(data >= 51 && data <= 75){
+        this.setState({
+          groupScore: data + "🥶"
+        })
+      }else if(data >= 76 && data <= 100){
+        this.setState({
+          groupScore: data + "😳"
+        })
+      }else if(data >= 101 && data <= 126){
+        this.setState({
+          groupScore: data + "🤯"
+        })
+      }else if(data >= 127 && data <= 150){
+        this.setState({
+          groupScore: data + "🤐"
+        })
+      }else if(data >= 151 && data <= 175){
+        this.setState({
+          groupScore: data + "😣"
+        })
+      }else if(data >= 176 && data <= 200){
+        this.setState({
+          groupScore: data + "🧐"
+        })
+      }else if(data >= 201 && data <= 225){
+        this.setState({
+          groupScore: data + "🥳"
+        })
+      }else if(data >= 226){
+        this.setState({
+          groupScore: data + "😎"
+        })
+      }
+    })
+  }
+
   sendToAvatar = async () => {
-     await firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').orderBy('timestamp', 'desc').limit(3).get().then(doc => {
-      if(doc.empty){
+    await firebase.firestore().collection('streak-video').doc(this.props.roomId).collection('videos').orderBy('timestamp', 'desc').limit(3).get().then(doc => {
+      if (doc.empty) {
         return
       }
       let data = doc.docs.map(doc => doc.data())
@@ -136,153 +212,154 @@ class Room extends Component {
       let lastSeen = data[data.length - 1].timestamp
       this.props.navigation.navigate('StreakVideoAvatar', { roomId: this.props.roomId, data: data, lastSeen: lastSeen })
       // this.setState({
-        // documentDataForAvatar: data
+      // documentDataForAvatar: data
       // })
     })
   }
 
-renderCamera = () => {
-  return (
-    <View style={{ flex: 1 }}>
-      <DoubleTap onDoubleTap={() => this.handleCameraType()}>
-        <Camera ratio={'16: 9'} style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
-
-          <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
-            <TouchableOpacity
-              onPress={() => this.openSettings()}
-              activeOpacity={0.8}
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}>
-              <Feather
-                name="settings"
-                style={{ color: "#fff", fontSize: 30 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}>
-              <MaterialCommunityIcons
-                onPress={() => this.changeFlashIcon()}
-                name={this.state.flashIcon}
-                style={{ color: "#fff", fontSize: 30 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}>
-              <MaterialCommunityIcons
-                name="close"
-                style={{ color: "#fff", fontSize: 30 }}
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", margin: 20 }}>
-            <TouchableOpacity
-              onPress={() => this.pickImage()}
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}>
-              <Ionicons
-                name="ios-photos"
-                style={{ color: "#fff", fontSize: 30 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPressIn={this.startTimer}
-              // onLongPress={() => console.log('apas lung')}
-              onPressOut={this.stopTimer}
-              // onPress={this.takePicture}
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}>
-              <FontAwesome
-                name="camera"
-                style={{ color: "#fff", fontSize: 30 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}
-              onPress={() => this.handleCameraType()}
-
-            >
-              <MaterialCommunityIcons
-                name="camera-switch"
-                style={{ color: "#fff", fontSize: 30 }}
-              />
-            </TouchableOpacity>
-          </View>
-          <Overlay isVisible={false} animationType="slide" fullScreen>
-            <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
-
-              <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
-                <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
-                  <TouchableOpacity onPress={() => this.closeSettings()}>
-                    <AntDesign name="close" size={20} />
-                  </TouchableOpacity>
-
-
-                </View>
-              </View>
-            </ScrollView>
-          </Overlay>
-        </Camera>
-      </DoubleTap>
-    </View>)
-}
-render(){
-  if (this.state.fontsLoaded) {
-
+  renderCamera = () => {
     return (
-      <View style={{ flex: 1, justifyContent: 'space-between' }}>
-        <TouchableOpacity style={{ padding: 0 }} onPress={() => this.props.press()}>
-          <View style={{ flex: 1, padding: 6 }}>
-            <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center' }}>
-              <Avatar containerStyle={{ borderWidth: 3, borderColor: this.state.hasStreakVideo === true ? '#f6b93b' : '#fff' }} onPress={() => this.state.hasStreakVideo === true ? this.sendToAvatar() : null} size={48} rounded source={{ uri: this.props.profilePicture }} />
-              <View style={{ flex: 1, flexDirection: 'column', marginLeft: 10 }}>
+      <View style={{ flex: 1 }}>
+        <DoubleTap onDoubleTap={() => this.handleCameraType()}>
+          <Camera ratio={'16: 9'} style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
 
-                <Text style={{ fontFamily: 'font1', fontSize: 18 }}>{this.props.chatRoomName}</Text>
-                <Text>{this.state.lastMessage}</Text>
-              </View>
-              <TouchableOpacity onPress={() => this.state.canPress ? this.openCamera(this.props.roomId) : console.log('nu mai poti acum')}>
-                <AntDesign
-                  color="#D4AF37"
-                  name="camera"
-                  size={24}
+            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
+              <TouchableOpacity
+                onPress={() => this.openSettings()}
+                activeOpacity={0.8}
+                style={{
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent',
+                }}>
+                <Feather
+                  name="settings"
+                  style={{ color: "#fff", fontSize: 30 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent',
+                }}>
+                <MaterialCommunityIcons
+                  onPress={() => this.changeFlashIcon()}
+                  name={this.state.flashIcon}
+                  style={{ color: "#fff", fontSize: 30 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent',
+                }}>
+                <MaterialCommunityIcons
+                  name="close"
+                  style={{ color: "#fff", fontSize: 30 }}
                 />
               </TouchableOpacity>
             </View>
-            <Divider style={{ marginTop: 20 }} />
+            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", margin: 20 }}>
+              <TouchableOpacity
+                onPress={() => this.pickImage()}
+                style={{
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent',
+                }}>
+                <Ionicons
+                  name="ios-photos"
+                  style={{ color: "#fff", fontSize: 30 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPressIn={this.startTimer}
+                // onLongPress={() => console.log('apas lung')}
+                onPressOut={this.stopTimer}
+                // onPress={this.takePicture}
+                style={{
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent',
+                }}>
+                <FontAwesome
+                  name="camera"
+                  style={{ color: "#fff", fontSize: 30 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent',
+                }}
+                onPress={() => this.handleCameraType()}
 
-          </View>
+              >
+                <MaterialCommunityIcons
+                  name="camera-switch"
+                  style={{ color: "#fff", fontSize: 30 }}
+                />
+              </TouchableOpacity>
+            </View>
+            <Overlay isVisible={false} animationType="slide" fullScreen>
+              <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
 
-        </TouchableOpacity>
-        <Overlay isVisible={this.state.cameraOverlay} overlayStyle={{ width: width, height: height }} animationType="slide">
+                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
+                  <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
+                    <TouchableOpacity onPress={() => this.closeSettings()}>
+                      <AntDesign name="close" size={20} />
+                    </TouchableOpacity>
 
-        </Overlay>
-      </View>
-    )
-  } else {
-    return (<ActivityIndicator size="large" />)
+
+                  </View>
+                </View>
+              </ScrollView>
+            </Overlay>
+          </Camera>
+        </DoubleTap>
+      </View>)
   }
+  render() {
+    if (this.state.fontsLoaded) {
 
-}
+      return (
+        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+          <TouchableOpacity style={{ padding: 0 }} onPress={() => this.props.press()}>
+            <View style={{ flex: 1, padding: 6 }}>
+              <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center' }}>
+                <Avatar containerStyle={{ borderWidth: 3, borderColor: this.state.hasStreakVideo === true ? '#f6b93b' : '#fff' }} onPress={() => this.state.hasStreakVideo === true ? this.sendToAvatar() : null} size={48} rounded source={{ uri: this.props.profilePicture }} />
+                <View style={{ flex: 1, flexDirection: 'column', marginLeft: 10 }}>
+
+                  <Text style={{ fontFamily: 'font1', fontSize: 18 }}>{(this.props.userWhoCreated !== firebase.auth().currentUser.uid && this.props.twoUserChat === true) ? this.state.name : this.props.chatRoomName}</Text>
+                  <Text>{this.state.lastMessage}</Text>
+                </View>
+                <Text style={{ padding: 4 }}>{this.state.groupScore}</Text>
+                <TouchableOpacity onPress={() => this.state.canPress ? this.openCamera(this.props.roomId) : Alert.alert('You are only allowed one streak a day!')}>
+                  <AntDesign
+                    color="#D4AF37"
+                    name="camera"
+                    size={24}
+                  />
+                </TouchableOpacity>
+              </View>
+              <Divider style={{ marginTop: 20 }} />
+
+            </View>
+
+          </TouchableOpacity>
+          <Overlay isVisible={this.state.cameraOverlay} overlayStyle={{ width: width, height: height }} animationType="slide">
+
+          </Overlay>
+        </View>
+      )
+    } else {
+      return (<ActivityIndicator size="large" />)
+    }
+
+  }
 }
 
 export default withNavigation(Room)

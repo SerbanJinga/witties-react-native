@@ -158,14 +158,7 @@ const navigator = createStackNavigator(
     SeeAllFriends: SeeAllFriends,
     SeeAllChats: SeeAllChats,
     VideoComponent: VideoComponent,
-    // Welcome: Welcome,
-    UpdateScreen: {
-      name: 'UpdateScreen',
-      screen: UpdateScreen,
-      navigationOptions: {
-        gestureEnabled: false
-      }
-    }
+    UpdateScreen: UpdateScreen
 
   },{
     initialRouteName: 'Auth',

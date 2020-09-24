@@ -8,7 +8,7 @@ import * as Font from 'expo-font'
 import { withNavigation } from 'react-navigation'
 import { SharedElement } from 'react-native-shared-element'
 const { height, width } = Dimensions.get('window')
- class ChatRoomPost extends Component {
+class ChatRoomPost extends Component {
 
     constructor(props) {
         super(props)
@@ -40,7 +40,7 @@ const { height, width } = Dimensions.get('window')
 
     }
     componentDidMount = async () => {
-        console.log(this.props.creatorId,"ar trebui sa fie egal cu ",firebase.auth().currentUser.uid)
+        console.log(this.props.creatorId, "ar trebui sa fie egal cu ", firebase.auth().currentUser.uid)
         console.log("-----------------------------------------")
         console.log(this.state.date)
         console.log("-----------------------------------------")
@@ -59,39 +59,76 @@ const { height, width } = Dimensions.get('window')
         //     })
     }
 
+    _renderDayTimestamp = (timestamp) => {
+        let date = new Date(timestamp)
+        let day = date.getDate()
+        let month = date.getMonth() + 1
+        switch (month) {
+            case 1: month = 'Jan'
+                break;
+            case 2: month = 'Feb'
+                break;
+            case 3: month = 'Mar'
+                break;
+            case 4: month = 'Apr'
+                break;
+            case 5: month = 'May'
+                break;
+            case 6: month = 'Jun'
+                break;
+            case 7: month = 'Jul'
+                break;
+            case 8: month = 'Aug'
+                break;
+            case 9: month = 'Sep'
+                break;
+            case 10: month = 'Oct'
+                break;
+            case 11: month = 'Nov'
+                break;
+            case 12: month = 'Dec'
+                break;
+        }
+        return day + ' ' + month
+    }
+
     render() {
         const { navigation } = this.props
 
         return (
             <TouchableOpacity
-                activeOpacity={0.8} 
-                style={{ alignItems:(this.props.creatorId == firebase.auth().currentUser.uid)?'flex-end':"flex-start", marginVertical: 10 }}
+                activeOpacity={0.8}
+                style={{ alignItems: (this.props.creatorId == firebase.auth().currentUser.uid) ? 'flex-end' : "flex-start", marginVertical: 10 }}
                 onPress={() => navigation.push('ChatRoomPostDetail', { image: this.props.image, timestamp: this.props.timestamp })}>
-                 <ImageBackground
+                {this.props.newDay ? <View style={{ backgroundColor: '#66ccff', alignSelf: 'center', borderRadius: 10, padding: 10, marginTop: 10, marginBottom: 10 }}>
+                    <Text style={{ alignSelf: 'center' }}>{this._renderDayTimestamp(this.props.timestamp)}</Text>
+                </View> : null}
+                <ImageBackground
                     style={[styles.flex, styles.destination, styles.shadow]}
                     imageStyle={{ borderRadius: theme.sizes.radius }}
                     source={{ uri: this.props.image }}
                 >
                     <View style={[styles.column, { justifyContent: 'center' }]}>
-                    <SharedElement id={this.props.image}>
+                        <SharedElement id={this.props.image}>
 
-                        <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
-                    </SharedElement>
+                            <Image source={{ uri: this.state.profilePicture }} style={styles.avatar} />
+                        </SharedElement>
 
-                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', marginLeft: theme.sizes.padding - 4 }}>{this.props.creatorId !== firebase.auth().currentUser.uid ? this.state.displayName : "me"}</Text>
+                        <Text style={{ color: theme.colors.white, fontWeight: 'bold', alignSelf: 'center' }}>{this.props.creatorId !== firebase.auth().currentUser.uid ? this.state.displayName : "me"}</Text>
                         <Text style={{ color: theme.colors.white, marginLeft: theme.sizes.padding - 4 }}>
-                            <Octicons
-                                name="smiley"
-                                size={theme.sizes.font * 0.8}
-                                color={theme.colors.white}
-                            />
+                            {this.props.mood === '' ? null :
+                                <Octicons
+                                    name="smiley"
+                                    size={theme.sizes.font * 0.8}
+                                    color={theme.colors.white}
+                                />}
                             <Text> {this.props.mood}</Text>
                         </Text>
 
 
                     </View>
                 </ImageBackground>
-               
+
 
             </TouchableOpacity>
 

@@ -4,7 +4,12 @@
     "slug": "Witties",
     "android": {
       "package": "com.h44x.witties",
-      "versionCode": 1
+      "versionCode": 1,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDrTgx_qs92i9-k6sczbADUx7_Lhqi0uWk"
+        }
+      }
     },
     "platforms": [
       "ios",
@@ -27,8 +32,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-        "bundleIdentifier": "com.h44x.witties",
-        "buildNumber": "1.0.0"
+      "bundleIdentifier": "com.h44x.witties",
+      "buildNumber": "1.0.0",
+      "config": {
+        "googleMapsApiKey":"AIzaSyDAAa-U2_INJLPaThYjmx3cWiiKoQ82mw4"
+        
+      }
     },
     "description": ""
   }

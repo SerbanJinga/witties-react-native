@@ -53,17 +53,17 @@ export default class LoadingScreen extends Component {
             font1: require('../../assets/SourceSansPro-Black.ttf')
         })
 
+        let t = await this.verifyVersions()
+        if(!t){
+            this.props.navigation.navigate('UpdateScreen')
+        }
+
 
 
         firebase.auth().onAuthStateChanged(async user => {
             if (user) {
-                let t = await this.verifyVersions()
-                if(t){
                 await this.setUpSettingsFirebase().then(
                         this.props.navigation.navigate('Home'))
-                } else{
-                    this.props.navigation.navigate('UpdateScreen')
-                }
                                         
             }else {
                 this.props.navigation.navigate('SignUp')

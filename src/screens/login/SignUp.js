@@ -10,7 +10,7 @@ import {
     TouchableWithoutFeedback,
     ImageBackground,
     Dimensions,
-    Image
+    Image, Alert
 
 } from 'react-native';
 import * as Facebook from 'expo-facebook'
@@ -20,7 +20,6 @@ import { Notifications } from 'expo'
 import * as Font from 'expo-font'
 import * as Expo from 'expo'
 
-import Toast from 'react-native-toast-message'
 import { Text, Input, Button } from 'react-native-elements'
 import firebase from 'firebase'
 import 'firebase/firestore'
@@ -129,7 +128,14 @@ class SignUp extends Component {
             friends: this.state.friends,
             uid: firebase.auth().currentUser.uid,
             status: "",
-            customActivities: []
+            customActivities: [],
+            chatRoomsIn: [],
+            blockedFriends: [],
+            sentRequests: [],
+            receivedRequests: [],
+            albums: [],
+            blockedUsers: [],
+            blockedBy: []
         }).then(this._retrieveDisplayName(), (error) => {
             console.log(error)
             alert(error)
@@ -143,16 +149,8 @@ class SignUp extends Component {
             loading: false
         })
         const err = this.state.errorMessage
-        // this.refs.error.show(err)
-        Toast.show({
-            text1: 'Error signing in',
-            text2: err,
-            type: 'error',
-            position: 'bottom',
-            visibilityTime: 2000,
-            autoHide: true,
-            bottomOffset: 40
-        })
+        
+        Alert.alert(err)
     }
 
     renderLoading() {
@@ -400,7 +398,6 @@ class SignUp extends Component {
                         </Text>
 
                     </SafeAreaView>
-                    <Toast ref={(ref) => Toast.setRef(ref)} />
 
                 </ScrollView>
             );

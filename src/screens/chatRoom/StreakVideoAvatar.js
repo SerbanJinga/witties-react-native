@@ -64,22 +64,24 @@ class StreakVideoAvatar extends Component {
 
     componentDidMount = async () => {
         this.retrieveMore()
-        setInterval(()=>{
-            this.retrieveMore()
+
+        setInterval(async() => {
+            await this.retrieveMore()
         }, 4000)
+
         // await this.retrieveData()
         // console.log(this.state.documentData, 'da;da;dla;dla')
 
     }
 
-    retrieveMore = async() => {
+    retrieveMore = async () => {
         firebase.firestore().collection('streak-video').doc(this.state.roomId).collection('videos').orderBy("timestamp", "desc").startAfter(this.state.lastSeen).limit(4).onSnapshot((doc) => {
-            if(doc.empty){
+            if (doc.empty) {
                 return
             }
             let data = doc.docs.map(doc => doc.data())
             let idMap = doc.docs.map(doc => doc.id)
-            for(let i = 0; i < idMap.length; i++){
+            for (let i = 0; i < idMap.length; i++) {
                 data[i].id = idMap[i]
             }
             this.setState({
@@ -163,6 +165,7 @@ class StreakVideoAvatar extends Component {
         return (
             <SafeAreaView style={styles.container}>
                 <FlatList
+            showsHorizontalScrollIndicator={false}
                     horizontal
                     style={{ flex: 1 }}
                     data={this.state.documentData}
@@ -195,7 +198,7 @@ const styles = StyleSheet.create({
     },
     cell: {
         width: cellWidth,
-        height: cellHeight ,
+        height: cellHeight,
         backgroundColor: '#eee',
         borderRadius: 20,
         overflow: 'hidden',

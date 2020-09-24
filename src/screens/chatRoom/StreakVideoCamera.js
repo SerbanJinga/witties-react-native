@@ -598,7 +598,7 @@ class StreakVideoCamera extends Component {
     })
   }
   sendImage = async () => {
-    Alert.alert('Your video is loading')
+    Alert.alert('Your video is loading. It may take a while.')
 
     const path = `photos/${this.state.roomId}/${firebase.auth().currentUser.uid}`
     const response = await fetch(this.state.captures[0].uri)
@@ -628,7 +628,7 @@ class StreakVideoCamera extends Component {
     })
     firebase.firestore().collection('messages').doc(this.state.roomId).update({
       groupScore: firebase.firestore.FieldValue.increment(1)
-    })
+    }).then(this.props.navigation.navigate('Home'))
   }
 
   closeSendTo = () => {
@@ -709,7 +709,7 @@ class StreakVideoCamera extends Component {
             style={{ color: "#fff", fontSize: 30 }}
           />
         </TouchableOpacity>
-        <Text style={{ fontSize: 20, fontFamily: "font1", paddingTop: 0, color: '#fff' }}>Sending To {this.state.chatRoomName}</Text>
+        <Text style={{ fontSize: 20, fontFamily: "font1", paddingTop: 0, color: '#fff' }}>{this.state.chatRoomName}</Text>
         <Avatar onPress={() => console.log('da')} rounded source={{ uri: this.state.groupProfilePicture }} />
       </View>
         <Video source={{ uri: this.state.captures[0].uri }} resizeMode="cover" style={{ transform: [{ scaleX: this.state.flipVideo ? -1 : 1 }, { scaleY: 1 }], width: width, height: screenHeight }} shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping />
@@ -912,7 +912,7 @@ class StreakVideoCamera extends Component {
                 color="#b2b8c2"
               />
             </View>
-            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={"nu merge"} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
+            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={""} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} />
           </SafeAreaView>
         </Overlay>
 

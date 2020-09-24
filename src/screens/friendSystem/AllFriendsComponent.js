@@ -212,8 +212,8 @@ const { width, height } = Dimensions.get('window')
         const message = {
             to: token,
             sound: 'default',
-            title: uid,
-            body: 'Ai primit cerere de la ' + this.state.currentUser,
+            // title: uid,
+            body: this.state.currentUser + ' sent you a friend request.',
             data: {data: 'goes here'},
             _displayInForeground: true
         }
@@ -253,7 +253,7 @@ const { width, height } = Dimensions.get('window')
         if(this.state.fontsLoaded){
         return(
            
-            <TouchableOpacity style={{width: width / 3, height: 40}} onPress={() => this._pressTouchableOpacity()}>
+            <TouchableOpacity style={{width: width / 3, height: 40}}>
         
         <View style={{flex: 0, padding: 10, width: width, height: 40}}>
             <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>

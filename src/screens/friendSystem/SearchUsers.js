@@ -274,8 +274,8 @@ let addedMe = []
         const message = {
             to: token,
             sound: 'default',
-            title: uid,
-            body: 'Ai primit cerere de la ' + this.state.currentUser,
+            // title: uid,
+            body: this.state.currentUser + ' sent you a friend request.',
             data: {data: 'goes here'},
             _displayInForeground: true
         }
@@ -507,23 +507,6 @@ let addedMe = []
    
             <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-around', paddingLeft: 10, paddingRight: 10, paddingBottom: 10, paddingTop: 10,}}>  
             <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5, marginRight: 'auto'}}>Witties</Text>
-
-
-{/* 
-            <TouchableOpacity
-                    onPress={()=> this.props.navigation.navigate('Timeline')}
-                  style={{
-                    backgroundColor: 'transparent',
-                    margin: 4,
-                    marginRight: 20,
-                 }}>
-              <MaterialIcons
-                  name="history"
-                  style={{fontSize: 26, fontWeight: "bold"}}  
-              />
-            </TouchableOpacity>    */}
-
-
 
             <TouchableOpacity
                     onPress={()=> this._onPressSearch()}

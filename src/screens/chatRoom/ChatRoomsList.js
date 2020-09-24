@@ -35,7 +35,8 @@ class ChatRoomsList extends Component {
             filter: false,
             index: null,
             filterBy: "",
-            type: 2
+            type: 2,
+            tempArr: []
         }
         this.mama = this.mama.bind(this)
         this.tata = this.tata.bind(this)
@@ -51,7 +52,7 @@ class ChatRoomsList extends Component {
         // })
         // this.setState({filteredData: filteredData})
 
-        let filteredData = this.state.documentData.filter(item => item.chatName.toLowerCase().includes(searchChats.toLowerCase()))
+        let filteredData = this.state.documentData.filter(item => item.chatRoomName.toLowerCase().includes(searchChats.toLowerCase()))
 
         this.setState({
         filteredData: filteredData
@@ -88,60 +89,68 @@ class ChatRoomsList extends Component {
     }
 
     _retrieveChats = async () => {
-        firebase.firestore().collection('messages').where('usersParticipating', 'array-contains', firebase.auth().currentUser.uid).orderBy('lastUpdated', 'desc').onSnapshot((doc) => {
-            arr = []
+        firebase.firestore().collection('messages').where('usersParticipating', 'array-contains', firebase.auth().currentUser.uid).orderBy('lastUpdated', 'desc').limit(12).onSnapshot((doc) => {
+            if(doc.empty){
+                return
+            }
+            // arr = []
 
             let documentData = doc.docs.map(doc => doc.data())
-            documentData.forEach(async document => {
-                let foo = {
-                    chatName: document.chatRoomName,
-                    chatPicture: document.profilePicture,
-                    roomId: document.roomId
-                }
-                if (document.userWhoCreated !== firebase.auth().currentUser.uid && document.twoUserChat === true) {
-                    let otherQuery = await firebase.firestore().collection('users').doc(document.userWhoCreated).get()
-                    let displayName = await otherQuery.data().displayName
-                    foo.chatName = displayName
-                }
-                arr.push(foo)
-                console.log(arr)
-
-                this.setState({
-                    documentData: arr,
-                    lastVisible: arr[arr.length - 1].chatName
-                })
+            let idMap = doc.docs.map(doc => doc.id)
+            for(let i = 0; i < idMap.length; i++){
+                documentData[i].id = idMap[i]
+            }
+            this.setState({
+                documentData: documentData,
+                lastVisible: documentData[documentData.length - 1].lastUpdated
             })
+
+            // console.log('ultimul pe care il vezi este chiar...', this.state.lastVisible)
+            // documentData.forEach(async document => {
+            //     let foo = {
+            //         chatName: document.chatRoomName,
+            //         chatPicture: document.profilePicture,
+            //         roomId: document.roomId
+            //     }
+            //     if (document.userWhoCreated !== firebase.auth().currentUser.uid && document.twoUserChat === true) {
+            //         let otherQuery = await firebase.firestore().collection('users').doc(document.userWhoCreated).get()
+            //         let displayName = await otherQuery.data().displayName
+            //         foo.chatName = displayName
+            //     }
+            //     arr.push(foo)
+            //     // console.log(arr)
+
+            //     this.setState({
+            //         documentData: arr,
+            //     })
+            // })
+
 
         })
     }
 
+
     _retrieveMoreChats = async () => {
+       
+
+        console.log('intra macar?')
+        arr = []
         firebase.firestore().collection('messages').where('usersParticipating', 'array-contains', firebase.auth().currentUser.uid).orderBy('lastUpdated', 'desc').startAfter(this.state.lastVisible).limit(12).onSnapshot((doc) => {
             if(doc.empty){
                 return
             }
 
             let documentData = doc.docs.map(doc => doc.data())
-            documentData.forEach(async document => {
-                let foo = {
-                    chatName: document.chatRoomName,
-                    chatPicture: document.profilePicture,
-                    roomId: document.roomId
-                }
-                if (document.userWhoCreated !== firebase.auth().currentUser.uid && document.twoUserChat === true) {
-                    let otherQuery = await firebase.firestore().collection('users').doc(document.userWhoCreated).get()
-                    let displayName = await otherQuery.data().displayName
-                    foo.chatName = displayName
-                }
-                arr.push(foo)
-                console.log(arr)
-
-                this.setState({
-                    documentData: [...this.state.documentData, ...arr],
-                    lastVisible: arr[arr.length - 1].chatName
-                })
+            let idMap = doc.docs.map(doc => doc.id)
+            for(let i = 0; i < idMap.length; i++){
+                documentData[i].id = idMap[i]
+            }
+            this.setState({
+                documentData: [...this.state.documentData, ...documentData],
+                lastVisible: documentData[documentData.length - 1].lastUpdated
             })
-
+           
+            
     })
     }
 
@@ -325,17 +334,15 @@ class ChatRoomsList extends Component {
                         /> */}
                         {this.state.documentData.length !== 0 ?
                             <FlatList
-
+                            refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={() => this.componentDidMount()}/>}
                                 data={this.state.filteredData && this.state.filteredData.length > 0 ? this.state.filteredData : this.state.documentData}
                                 renderItem={({ item, index }) => (
-
-
-                                    <Room profilePicture={item.chatPicture} roomId={item.roomId} chatRoomName={item.chatName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatName, roomId: item.roomId, profilePicture: item.chatPicture })} />
+                                    
+                                    <Room twoUserChat={item.twoUserChat} userWhoCreated={item.userWhoCreated} profilePicture={item.profilePicture} roomId={item.roomId} chatRoomName={item.chatRoomName} press={() => this.props.navigation.navigate("ChatRoom", { iqdif: item.chatRoomName, roomId: item.roomId, profilePicture: item.profilePicture })} />
                                 )}
                                 keyExtractor={(item, index) => String(index)}
-                                // ListHeaderComponent={this.renderHeader}
-                                ListFooterComponent={this.renderFooter}
                                 onEndReachedThreshold={0}
+                                ListFooterComponent={<TouchableOpacity style={{fontFamily: 'font1', fontSize: 14, margin: 4, alignSelf: 'center'}} onPress={() => this._retrieveMoreChats()}><Text style={{color: '#0984e3'}}>Load more</Text></TouchableOpacity>}
                                 refreshing={this.state.refreshing}
                             /> : <Text style={{ fontFamily: 'font1', fontSize: 15, margin: 4, alignSelf: 'center' }}>You have no active chats.</Text>}
                     </ScrollView>

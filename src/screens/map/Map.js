@@ -16,7 +16,7 @@ import {
     Dimensions,
     FlatList,
     ScrollView,
-    Image
+    Image, Platform, Alert
 
 } from 'react-native';
 import Geocoder from 'react-native-geocoding'
@@ -27,15 +27,14 @@ import * as theme from '../../styles/theme'
 import SwipeablePanel from 'rn-swipeable-panel';
 import Status from "../../components/Status"
 import { AntDesign } from '@expo/vector-icons'
-const { width, height } = Dimensions.get('window')
+const { width } = Dimensions.get('window')
+const { height } = Dimensions.get('screen')
 let arr = []
 import firebase from 'firebase';
-const screenHeight = Dimensions.get('screen').height;
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Toast from 'react-native-toast-message'
 let circle = {}
 
-import MapView from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Marker, Circle } from 'react-native-maps';
 import { Avatar } from 'react-native-elements'
 export default class Map extends React.Component {
@@ -100,22 +99,15 @@ export default class Map extends React.Component {
     }
 
     async componentDidMount() {
+        await this.getProfilePicture()
 
         arr = []
         this.findCurrentLocationAsync()
-        if (typeof this.props.users === 'undefined') {
-            console.log("iau toate postarile de la public")
-            await this.getAllImages()
-            console.log('ce caut eu este egal cu', this.state.users)
+        console.log("iau toate postarile de la public")
+        await this.getAllImages()
+        console.log('ce caut eu este egal cu', this.state.users)
 
-        } else {
-            console.log('iau doar astea transmise din props')
-            this.props.users.forEach(element => this.retrieveImageFromOneUser(element))
-            this.setState({ users: arr })
-            console.log('ce caut eu este egal cu', this.state.users)
 
-        }
-        this.getProfilePicture()
 
     }
     async getProfilePicture() {
@@ -139,11 +131,20 @@ export default class Map extends React.Component {
 
         let initialQuery2 = await firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).get()
         let documentData2 = await initialQuery2.data().futureLocation
-        if (documentData2) {
+        if (typeof documentData2.lat !== 'undefined') {
             this.setState({
-                flButton: true
+                futureLocation: true,
+                // longitude: documentData2.long,
+                // latitude: documentData2.lat,
+                futureLocationCoords: documentData2,
+                valueOfPicker: documentData2.time - Date.now()
+
             })
-            arr.push(documentData2)
+            // arr.push(documentData2)
+        }else{
+            this.setState({
+                futureLocation: false
+            })
         }
     }
 
@@ -258,22 +259,30 @@ export default class Map extends React.Component {
         firebase.firestore().collection('status-public').doc(firebase.auth().currentUser.uid).update({
             futureLocation: {}
         })
+        this.setState({
+            futureLocation: false
+        })
 
     }
 
     confirmFutureLocation = (date) => {
         console.log(date.valueOf())
+        circle.name = this.state.currentUserName
+        circle.pic = this.state.currentUserProfilePic
+        
         if (date.valueOf() < Date.now() - 14400000) { //daca pun data cu pana 4 ore in trecut se pune azi, daca nu se pune maine
 
             this.setState({ pickTime: false, })
-            Toast.show({
-                text1: 'Cannot add future location!',
-                type: 'error',
-                position: 'top',
-                visibilityTime: 2000,
-                autoHide: true,
-                bottomOffset: 40
-            })
+          
+            // Toast.show({
+            //     text1: 'Cannot add future location!',
+            //     type: 'error',
+            //     position: 'top',
+            //     visibilityTime: 2000,
+            //     autoHide: true,
+            //     bottomOffset: 40
+            // })
+            Alert.alert('Can not add future location!')
             return
             // circle.time = date.valueOf() + 86400000
         }
@@ -346,18 +355,17 @@ export default class Map extends React.Component {
         else if (this.state.location)
             text = JSON.stringify(this.state.location)
 
-        return (<View style={{ flex: 1 }}>
+        return (<View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' }}>
 
             {this.state.hasLoadedMap ? <MapView
-                style={{ marginTop: 30, height: screenHeight, width: width }}
+                provider={PROVIDER_GOOGLE}
+                style={{ height: height, width: width }}
                 showsUserLocation={true}
                 showsMyLocationButton={false}
                 onLongPress={e => {
                     console.log(e.nativeEvent.coordinate)
-                    if (this.state.futureLocation)
-                        this.setState({ futureLocation: false })
-                    else
-                        this.addFutureLocationCircle(e.nativeEvent.coordinate)
+
+                    this.addFutureLocationCircle(e.nativeEvent.coordinate)
                 }}
                 initialRegion={this.state.region}
                 ref={(map) => { this.map = map; }}
@@ -422,7 +430,7 @@ export default class Map extends React.Component {
                         backgroundColor: '#f5f6fa',
                     }} />
                 </SafeAreaView>
-                {this.state.flButton ?
+                {this.state.futureLocation ?
                     <SafeAreaView style={{ position: 'absolute', top: 40, right: 10, zIndex: 4 }}>
                         <Button onPress={() => this.deleteFutureLocation()} title="" type='clear' icon={<MaterialIcons name={'location-off'} color='red' size={18} />} containerStyle={{
                             borderRadius: 30,
@@ -460,7 +468,6 @@ export default class Map extends React.Component {
 
                 <DateTimePickerModal date={new Date()} minuteInterval={15} isVisible={this.state.pickTime} mode="time" onConfirm={this.confirmFutureLocation}
                     onCancel={() => this.setState({ pickTime: false, futureLocation: false })} />
-                <Toast ref={(ref) => Toast.setRef(ref)} />
 
             </>
         </View>)

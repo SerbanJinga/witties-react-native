@@ -53,7 +53,9 @@ class ChatRoom extends Component {
             lastVisible: 0,
             extraMessages: [],
             updateInMata: false,
-            addParticipants: false
+            addParticipants: false,
+            scrollDown: true,
+            currentUserName: ''
         }
 
 
@@ -134,8 +136,8 @@ class ChatRoom extends Component {
         const message = {
             to: token,
             sound: 'default',
-            title: user,
-            body: uid + " : " + messageSent,
+            title: this.state.currentUserName + ' @ ' + user,
+            body: messageSent,
             data: { data: 'goes here' },
             _displayInForeground: true
         }
@@ -208,6 +210,11 @@ class ChatRoom extends Component {
 
 
     retrieveData = async () => {
+        let queryNume = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get()
+        let dataNume = await queryNume.data().displayName
+        this.setState({
+            currentUserName: dataNume
+        })
         let query = await firebase.firestore().collection('messages').doc(this.state.roomId).collection('chats').get()
         if (query.empty) { return }
 
@@ -399,7 +406,8 @@ class ChatRoom extends Component {
     refresh = () => {
 
         this.setState({
-            refreshing: true
+            refreshing: true,
+            scrollDown: false
         })
         setTimeout(async () => {
 
@@ -425,11 +433,13 @@ class ChatRoom extends Component {
             this.setState({
                 messages: data,
                 // lastVisible: data[data.length - 1].timestamp,
-                refreshing: false
+                refreshing: false,
+                // scrollDown: true
             })
             })
         
         }, 500)
+       
     }
     openAddParticipants = () => {
         this.setState({
@@ -452,6 +462,14 @@ class ChatRoom extends Component {
             return true
         }
         return false
+    }
+
+    contentSize = () => {
+        if(this.state.scrollDown){
+            this.flatList.scrollToEnd({animated: true})
+        }else{
+            return
+        }
     }
 
     render() {
@@ -568,7 +586,7 @@ class ChatRoom extends Component {
 
                                 placeholderTextColor="#B1B1B1"
                                 returnKeyType="done"
-                                rightIcon={this.state.currentMessage.length !== 0 ? <Button title="Send" type="clear" onPress={() => {
+                                rightIcon={(this.state.currentMessage.trim().length !== 0 || !this.state.currentMessage.replace((/\s/g, '')).length) ? <Button title="Send" type="clear" onPress={() => {
                                     if (this.state.currentMessage != "")
                                         this.createMessage(this.state.currentMessage)
                                     this.setState({ currentMessage: '' })
@@ -595,6 +613,7 @@ class ChatRoom extends Component {
                                 // initialScrollIndex={this.state.messages.length - 1}
                                 // onScrollToIndexFailed={() => console.log('failed')}
                                 // ref="flatList"
+                                onContentSizeChange={this.contentSize}
                                 extraData={this.state.updateInMata}
                                 data={this.state.messages}
                                 renderItem={({ item, index }) => (
@@ -611,8 +630,9 @@ class ChatRoom extends Component {
                                                     creatorId={item.creatorId}
                                                     timestamp={item.timestamp}
                                                     image={item.image}
+                                                    newDay={(this.state.messages.length >= 2 && index >= 1) ? (this.compareForNextDay(item.timestamp, this.state.messages[index - 1].timestamp)) : false}
                                                 /> :
-                                                <VideoComponent shouldFlip={item.shouldFlip} timestamp={item.timestamp} item={item} video={item.video} creatorId={item.creatorId} msg={item.msg} />
+                                                <VideoComponent mood={item.mood} shouldFlip={item.shouldFlip} newDay={(this.state.messages.length >= 2 && index >= 1) ? (this.compareForNextDay(item.timestamp, this.state.messages[index - 1].timestamp)) : false} timestamp={item.timestamp} item={item} video={item.video} creatorId={item.creatorId} msg={item.msg} />
                                         }
 
                                         {/* <MessageComponent msg={item.msg} date={item.timestamp} sender={item.sender} /> */}

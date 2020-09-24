@@ -7,7 +7,7 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     ScrollView,
-    Image
+    Image, Alert
 } from 'react-native';
 import { Text, Input, Button } from 'react-native-elements'
 import firebase from 'firebase'
@@ -15,7 +15,6 @@ import 'firebase/firestore'
 import * as Font from 'expo-font'
 import * as Google from 'expo-google-app-auth'
 import * as Facebook from 'expo-facebook'
-import Toast from 'react-native-toast-message'
 
 class Login extends Component {
     constructor(props) {
@@ -116,15 +115,8 @@ class Login extends Component {
             loading: false
         })
         const err = this.state.errorMessage
-        Toast.show({
-            text1: 'Error signing in',
-            text2: err,
-            type: 'error',
-            position: 'bottom',
-            visibilityTime: 2000,
-            autoHide: true,
-            bottomOffset: 40
-        })
+       
+        Alert.alert(err)
     }
 
     renderLoading() {
@@ -253,7 +245,6 @@ class Login extends Component {
                     </Text>
 
                 </View>
-                <Toast ref={(ref) => Toast.setRef(ref)} />
 
             </ScrollView>
         );
