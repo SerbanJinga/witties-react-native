@@ -5,6 +5,7 @@
     "android": {
       "package": "com.h44x.witties",
       "versionCode": 1,
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyDrTgx_qs92i9-k6sczbADUx7_Lhqi0uWk"
@@ -35,8 +36,7 @@
       "bundleIdentifier": "com.h44x.witties",
       "buildNumber": "1.0.0",
       "config": {
-        "googleMapsApiKey":"AIzaSyDAAa-U2_INJLPaThYjmx3cWiiKoQ82mw4"
-        
+        "googleMapsApiKey": "AIzaSyDAAa-U2_INJLPaThYjmx3cWiiKoQ82mw4"
       }
     },
     "description": ""

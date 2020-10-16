@@ -30,10 +30,13 @@ class SendPhoto extends Component {
         upload.on("state_changed", snapshot => {}, err => {
 
         }, async () => {
+            this.props.navigation.goBack(null)
+
             const url = await upload.snapshot.ref.getDownloadURL()
             this.setState({
                 imageUri: url
             })
+
             this.sendToChat()
         })
     }
@@ -63,7 +66,7 @@ class SendPhoto extends Component {
             creatorId: firebase.auth().currentUser.uid,
             taggedUsers: [],
             albums: []
-        }).then(() => this.props.navigation.goBack(null))
+        })
     }
     render(){
         return(

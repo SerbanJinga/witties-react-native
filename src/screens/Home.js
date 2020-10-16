@@ -4,11 +4,12 @@ import firebase from 'firebase'
 import Swiper from 'react-native-swiper'
 import SearchUsers from '../screens/friendSystem/SearchUsers'
 import * as Permissions from 'expo-permissions'
-import { Notifications } from 'expo'
+// import * as Notifications from 'expo-notifications'
 import CameraScreen from '../screens/camera/Camera'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { withNavigation } from 'react-navigation'
 import Timeline from './Timeline/Timeline'
+import { Constants } from 'expo-camera'
 
 class Home extends Component {
 
@@ -88,17 +89,21 @@ class Home extends Component {
   }
 
   _getToken = async () => {
-    let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-    if (status !== 'granted') {
-      console.log('n a mers')
-    }
+    console.log('intri ba?')
+    // const { status: existingStatus } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+    // if(existingStatus !== 'granted') {
+    //   const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    //   console.log(status)
+    // }
 
-    let token = await Notifications.getExpoPushTokenAsync()
-
-
-    firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
-      tokens: token
-    })
+    // Notifications.getDevicePushTokenAsync().then(data =>firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
+    //   tokens: data,
+    //   estibine: "aia zic"
+    // }) )
+    
+    
+    // const token = await Notifications.getDevicePushTokenAsync()
+    
   }
 
 
@@ -114,16 +119,18 @@ class Home extends Component {
         <Swiper
           scrollEnabled={this.state.scrollEnabled}
           ref={(swiper) => { this.swiper = swiper; }}
-          onIndexChanged={(index) => { console.log(index) }}
+          onIndexChanged={(index) => { this.setState({ index: index }) }}
           loop={false}
           showsPagination={false}
           // onScrollBeginDrag={(e) =>{console.log(' se misca')}}
-          
+
           index={this.state.index}>
           <View style={{ flex: 1 }}>
-            <CameraScreen salut={this.changeIndexToMain} stopScroll={this.stopIndexChanging} resumeScroll={this.resumeIndexChanging} 
-            onStartShouldSetResponderCapture={(evt) => true} 
-            onMoveShouldSetResponderCapture={(evt) => true} />
+            {this.state.index === 0 ?
+              <CameraScreen val={this.state.index} salut={this.changeIndexToMain} stopScroll={this.stopIndexChanging} resumeScroll={this.resumeIndexChanging}
+                onStartShouldSetResponderCapture={(evt) => true}
+                onMoveShouldSetResponderCapture={(evt) => true} />
+              : null}
           </View>
 
 

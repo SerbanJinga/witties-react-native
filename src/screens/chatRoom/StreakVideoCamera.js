@@ -251,7 +251,7 @@ class StreakVideoCamera extends Component {
 
   takePicture = async () => {
     if (this.camera) {
-      this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved })
+      this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved, quality: 0.4 })
     }
   }
 
@@ -352,7 +352,7 @@ class StreakVideoCamera extends Component {
       this.setState({ flipVideo: false })
       console.log(' FLIP', this.state.flipVideo)
     }
-    const videoData = await this.camera.recordAsync({ maxDuration: this.state.streakVideoDuration }).then(this.manageElapsedTime());
+    const videoData = await this.camera.recordAsync({ maxDuration: this.state.streakVideoDuration, quality: Camera.Constants.VideoQuality['480p'] }).then(this.manageElapsedTime());
 
     videoData.shouldFlip = this.state.flipVideo
     console.log(videoData, ' asta chiar ma intereseazaaaaa')
@@ -380,7 +380,7 @@ class StreakVideoCamera extends Component {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
         <DoubleTap onDoubleTap={() => this.handleCameraType()}>
-          <Camera mirror={false} ratio="2:1" style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
+        <Camera  mirror={false} ratio="18:9" style={{ width: width, aspectRatio: Platform.OS === 'android' ? 9/18: 9/16 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
 
             <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
               {/* <TouchableOpacity
@@ -612,8 +612,9 @@ class StreakVideoCamera extends Component {
     },
       async () => {
         const url = await upload.snapshot.ref.getDownloadURL()
-        this.sendImageFunction(url)
         this._pressOverlay()
+       this.props.navigation.navigate('Home')
+        this.sendImageFunction(url)
 
       })
   }
@@ -628,7 +629,7 @@ class StreakVideoCamera extends Component {
     })
     firebase.firestore().collection('messages').doc(this.state.roomId).update({
       groupScore: firebase.firestore.FieldValue.increment(1)
-    }).then(this.props.navigation.navigate('Home'))
+    })
   }
 
   closeSendTo = () => {

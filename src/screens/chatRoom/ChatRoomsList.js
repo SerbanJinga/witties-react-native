@@ -184,7 +184,9 @@ class ChatRoomsList extends Component {
                 if (chatCreator !== firebase.auth().currentUser.uid && twoUserChat === true) {
                     let otherQuery = await firebase.firestore().collection('users').doc(doc.data().userWhoCreated).get()
                     let displayName = await otherQuery.data().displayName
+                    let displayPicture = await otherQuery.data().profilePicture
                     chatName = displayName
+                    chatPicture = displayPicture
                     // console.log('asta merge')
                 }
                 let foo = {

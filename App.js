@@ -34,7 +34,6 @@ import SeeAllFriends from './src/screens/friendSystem/SeeAllFriends'
 import SeeAllChats from './src/screens/friendSystem/SeeAllChats'
 import VideoComponent from './src/screens/chatRoom/VideoComponent'
 import AsyncStorage from '@react-native-community/async-storage';
-import { user } from 'firebase-functions/lib/providers/auth';
 
 require('firebase/firestore');
 

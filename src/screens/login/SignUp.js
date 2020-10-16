@@ -16,7 +16,6 @@ import {
 import * as Facebook from 'expo-facebook'
 import * as Google from 'expo-google-app-auth'
 import * as Permissions from 'expo-permissions'
-import { Notifications } from 'expo'
 import * as Font from 'expo-font'
 import * as Expo from 'expo'
 
@@ -328,7 +327,7 @@ class SignUp extends Component {
 
                         <Input
                             autoCapitalize={false}
-                            label="Name"
+                            label="Username"
                             labelStyle={{ fontFamily: "font1" }}
                             style={styles.inputTitle}
                             returnKeyType="next"

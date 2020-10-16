@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "838954882783",
+    "firebase_url": "https://witties.firebaseio.com",
+    "project_id": "witties",
+    "storage_bucket": "witties.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838954882783:android:b51348c03b8a4d7f1bbb6a",
+        "android_client_info": {
+          "package_name": "com.h44x.witties"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrTgx_qs92i9-k6sczbADUx7_Lhqi0uWk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "838954882783-9tadjipm574n35f5hekienp47acbk5bb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "838954882783-s37nhutielf4dkvut504e5ii9ud8pcmv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "host.exp.exponent"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

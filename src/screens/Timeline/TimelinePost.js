@@ -91,10 +91,7 @@ export default class TimelinePost extends Component {
             <TouchableOpacity
                 activeOpacity={0.8}
                 style={{}}
-                onLongPress={() => {
-                    console.log("Saluttt")
-                    this.props.showOverlay(this.props.id)
-                }}
+              
                 onPressIn={() => { console.log("Press In") }}
             onPress={() => this.props.press()}
             >

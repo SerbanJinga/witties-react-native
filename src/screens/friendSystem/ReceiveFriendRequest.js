@@ -3,7 +3,6 @@ import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, Button }
 import { Text, Divider } from 'react-native-elements'
 import firebase from 'firebase'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
-import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 import ReceiveFriend from './ReceiveFriend'

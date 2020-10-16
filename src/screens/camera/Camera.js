@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import { Overlay } from 'react-native-elements'
-import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView, Animated, StyleSheet, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ImageBackground, Dimensions, ActivityIndicator, ScrollView, Animated, StyleSheet, Alert, Platform } from 'react-native'
 import { Camera } from 'expo-camera'
 import * as Permissions from 'expo-permissions'
 import { FontAwesome, MaterialCommunityIcons, Ionicons, Feather, AntDesign, MaterialIcons } from '@expo/vector-icons'
@@ -26,6 +26,7 @@ import ListActivities from '../ActivityPop/ListActivities'
 import AlbumPopup from '../ActivityPop/AlbumPopup'
 import { first } from 'lodash'
 const { width, height } = Dimensions.get('window')
+const screenRatio = height / width
 const screenWidth = Dimensions.get('screen').width
 const screenHeight = Dimensions.get('screen').height
 
@@ -80,13 +81,57 @@ class CameraScreen extends Component {
       capturing: false,
       captures: [],
       duration: 0,
-      flipVideo: false
+      flipVideo: false,
+      cameraRatio: '2:1',
+      imagePadding: 0
     }
     this.selectAlbum = this.selectAlbum.bind(this)
     this.handleCaptureIn = this.handleCaptureIn.bind(this)
     this.handleCaptureOut = this.handleCaptureOut.bind(this)
     this.handleShortCapture = this.handleShortCapture.bind(this)
     this.handleLongCapture = this.handleLongCapture.bind(this)
+  }
+
+  prepareRatio = async () => {
+    console.log('prepara baiatu')
+    let desiredRatio = '4:3'
+    if (Platform.OS === 'android') {
+
+      // Calculate the width/height of each of the supported camera ratios
+      // These width/height are measured in landscape mode
+      // find the ratio that is closest to the screen ratio without going over
+      let distances = {};
+      let realRatios = {};
+      let minDistance = null;
+      for (const ratio of ratios) {
+        const parts = ratio.split(':');
+        const realRatio = parseInt(parts[0]) / parseInt(parts[1]);
+        realRatios[ratio] = realRatio;
+        // ratio can't be taller than screen, so we don't want an abs()
+        const distance = screenRatio - realRatio;
+        distances[ratio] = realRatio;
+        if (minDistance == null) {
+          minDistance = ratio;
+        } else {
+          if (distance >= 0 && distance < distances[minDistance]) {
+            minDistance = ratio;
+          }
+        }
+      }
+
+      desiredRatio = minDistance
+
+      //  calculate the difference between the camera width and the screen height
+      const remainder = Math.floor(
+        (height - realRatios[desiredRatio] * width) / 2
+      );
+      // set the preview padding and preview ratio
+      // setImagePadding(remainder / 2);
+      this.setState({
+        cameraRatio: desiredRatio,
+        imagePadding: remainder / 2
+      })
+    }
   }
 
   openActivityOverlay = () => {
@@ -200,6 +245,10 @@ class CameraScreen extends Component {
 
   }
   componentDidMount = async () => {
+
+
+
+    console.log(this.props.isFocused)
     await Permissions.askAsync(Permissions.CAMERA, Permissions.AUDIO_RECORDING)
     await Font.loadAsync({
       font1: require('../../../assets/SourceSansPro-Black.ttf')
@@ -217,6 +266,11 @@ class CameraScreen extends Component {
     } else if (this.state.hasPermission === false) {
       console.log('n a mers')
     }
+
+
+    console.log('coaie coaie coaie coaie')
+
+
   }
 
 
@@ -232,11 +286,7 @@ class CameraScreen extends Component {
   }
 
 
-  takePicture = async () => {
-    if (this.camera) {
-      this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved })
-    }
-  }
+
 
 
 
@@ -313,7 +363,6 @@ class CameraScreen extends Component {
   };
 
   handleCaptureOut = () => {
-
     if (this.state.capturing)
       this.camera.stopRecording();
     finalPress = Date.now()
@@ -323,16 +372,18 @@ class CameraScreen extends Component {
   handleShortCapture = async () => {
     this.props.stopScroll()
     console.log("picture")
-    const photoData = await this.camera.takePictureAsync();
+    const photoData = await this.camera.takePictureAsync({ quality: 0.4 });
     if (this.state.type === Camera.Constants.Type.front) {
       const result = await ImageManipulator.manipulateAsync(
         photoData.uri, [{ rotate: 0 }, { flip: ImageManipulator.FlipType.Horizontal }],
-        { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+        { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG }
       )
       this.setState({ pictureTaken: result.uri, capturing: false, captures: [result, ...this.state.captures], showPhoto: true })
 
-
     } else {
+      // const result = await ImageManipulator.manipulateAsync(
+      //   photoData.uri, [{ rotate: 0 }],
+      //   { compress: 0.1, format: ImageManipulator.SaveFormat.PNG })
       this.setState({ pictureTaken: photoData.uri, capturing: false, captures: [photoData, ...this.state.captures], showPhoto: true })
 
     }
@@ -348,7 +399,7 @@ class CameraScreen extends Component {
       this.setState({ flipVideo: false })
       console.log(' FLIP', this.state.flipVideo)
     }
-    const videoData = await this.camera.recordAsync();
+    const videoData = await this.camera.recordAsync({ quality: Camera.Constants.VideoQuality['480p'] });
     videoData.shouldFlip = this.state.flipVideo
     console.log(videoData, ' asta chiar ma intereseazaaaaa')
     this.setState({ capturing: false, captures: [videoData, ...this.state.captures] });
@@ -372,19 +423,34 @@ class CameraScreen extends Component {
     })
   }
 
+  getRatio = async () => {
+    console.log('tudor tudor')
+    const ratio = await this.camera.getSupportedRatiosAsync()
+    console.log(ratio[ratio.length - 1])
+    if (Platform.OS === 'android') {
+      if (ratio === '20:9') {
+        this.setState({
+          cameraRatio: '20:9'
+        })
+      }
+      this.setState({
+        cameraRatio: ratio[ratio.length - 1]
+      })
+    }
+  }
+
   renderCamera = () => {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
-        <DoubleTap onDoubleTap={() => this.handleCameraType()}>
-          <Camera mirror={false} ratio="2:1" style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center' }}>
+        <Camera  mirror={false} ratio="18:9" style={{ width: width, aspectRatio: Platform.OS === 'android' ? 9/18: 9/16 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
 
-            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
-              {/* <TouchableOpacity
+          <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
+            {/* <TouchableOpacity
                 onPress={() => this.openSettings()}
                 activeOpacity={0.8}
                 style={{
                   alignSelf: 'flex-end',
-                  alignItems: 'center',
+                alignItems: 'center',
                   backgroundColor: 'transparent',
                 }}>
                 <Feather
@@ -392,20 +458,20 @@ class CameraScreen extends Component {
                   style={{ color: "#fff", fontSize: 30 }}
                 />
               </TouchableOpacity> */}
-              <TouchableOpacity
-                style={{
-                  alignSelf: 'flex-end',
-                  alignItems: 'center',
-                  backgroundColor: 'transparent',
-                }}>
-                <MaterialCommunityIcons
-                  onPress={() => this.changeFlashIcon()}
-                  name={this.state.flashIcon}
-                  style={{ color: "#fff", fontSize: 30 }}
-                />
-              </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}>
+              <MaterialCommunityIcons
+                onPress={() => this.changeFlashIcon()}
+                name={this.state.flashIcon}
+                style={{ color: "#fff", fontSize: 30 }}
+              />
+            </TouchableOpacity>
 
-              {/* <TouchableOpacity
+            {/* <TouchableOpacity
                 style={{
                   alignSelf: 'flex-end',
                   alignItems: 'center',
@@ -418,78 +484,77 @@ class CameraScreen extends Component {
                 />
               </TouchableOpacity> */}
 
-              <TouchableOpacity
-                onPress={() => this.props.salut()}
-                style={{
-                  alignSelf: 'flex-end',
-                  alignItems: 'center',
-                  backgroundColor: 'transparent',
-                }}>
-                <MaterialCommunityIcons
-                  name="close"
-                  style={{ color: "#fff", fontSize: 30 }}
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", margin: 20 }}>
-              <TouchableOpacity
-                onPress={() => this.pickImage()}
-                style={{
-                  alignSelf: 'flex-end',
-                  alignItems: 'center',
-                  backgroundColor: 'transparent',
-                }}>
-                <Ionicons
-                  name="ios-photos"
-                  style={{ color: "#fff", fontSize: 30 }}
-                />
-              </TouchableOpacity>
-              <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center' }}>
-                <Toolbar
-                  capturing={this.state.capturing}
-                  // flashMode={flashMode}
-                  // cameraType={cameraType}
-                  onCaptureIn={this.handleCaptureIn}
-                  onCaptureOut={this.handleCaptureOut}
-                  onLongCapture={this.handleLongCapture}
-                  onShortCapture={this.handleShortCapture}
-                /></View>
-              {this.state.capturing ? (<TouchableOpacity
+            <TouchableOpacity
+              onPress={() => this.props.salut()}
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}>
+              <MaterialCommunityIcons
+                name="close"
+                style={{ color: "#fff", fontSize: 30 }}
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", margin: 20 }}>
+            <TouchableOpacity
+              onPress={() => this.pickImage()}
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}>
+              <Ionicons
+                name="ios-photos"
+                style={{ color: "#fff", fontSize: 30 }}
+              />
+            </TouchableOpacity>
+            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center' }}>
+              <Toolbar
+                capturing={this.state.capturing}
+                // flashMode={flashMode}
+                // cameraType={cameraType}
+                onCaptureIn={this.handleCaptureIn}
+                onCaptureOut={this.handleCaptureOut}
+                onLongCapture={this.handleLongCapture}
+                onShortCapture={this.handleShortCapture}
+              /></View>
+            {this.state.capturing ? (<TouchableOpacity
+              style={{ alignSelf: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' }}
+            >
+              <MaterialCommunityIcons
+                name="camera-switch"
+                style={{ color: "#7f7f7f", fontSize: 30 }}
+              />
+            </TouchableOpacity>) :
+              (<TouchableOpacity
                 style={{ alignSelf: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' }}
+                onPress={() => this.handleCameraType()}
               >
                 <MaterialCommunityIcons
                   name="camera-switch"
-                  style={{ color: "#7f7f7f", fontSize: 30 }}
+                  style={{ color: "#fff", fontSize: 30 }}
                 />
-              </TouchableOpacity>) :
-                (<TouchableOpacity
-                  style={{ alignSelf: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' }}
-                  onPress={() => this.handleCameraType()}
-                >
-                  <MaterialCommunityIcons
-                    name="camera-switch"
-                    style={{ color: "#fff", fontSize: 30 }}
-                  />
-                </TouchableOpacity>)}
-            </View>
-            <Overlay isVisible={this.state.settings} animationType="slide" fullScreen>
-              <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
+              </TouchableOpacity>)}
+          </View>
+          <Overlay isVisible={this.state.settings} animationType="slide" fullScreen>
+            <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
 
-                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
-                  <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
-                    <TouchableOpacity onPress={() => this.closeSettings()}>
-                      <AntDesign name="close" size={20} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => console.log(this.state.captures)}>
-                      <Text>Print shit</Text>
-                    </TouchableOpacity>
+              <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
+                <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
+                  <TouchableOpacity onPress={() => this.closeSettings()}>
+                    <AntDesign name="close" size={20} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => console.log(this.state.captures)}>
+                    <Text>Print shit</Text>
+                  </TouchableOpacity>
 
-                  </View>
                 </View>
-              </ScrollView>
-            </Overlay>
-          </Camera>
-        </DoubleTap>
+              </View>
+            </ScrollView>
+          </Overlay>
+        </Camera>
       </SafeAreaView>)
   }
 
@@ -1028,7 +1093,7 @@ class CameraScreen extends Component {
         </Overlay>
 
         <Overlay fullScreen animationType="slide" isVisible={this.state.openSend}>
-          <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} shouldFlip={this.state.captures[0].shouldFlip}/>
+          <SendToList close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} shouldFlip={this.state.captures[0].shouldFlip} />
         </Overlay>
       </Overlay>
     )
@@ -1436,7 +1501,7 @@ class CameraScreen extends Component {
                 color="#b2b8c2"
               />
             </View>
-            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={""} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} shouldFlip={this.state.captures[0].shouldFlip}/>
+            <SendToList duration={this.state.duration} image={''} close={() => this.closeSendTo()} closeEvery={() => this._pressOverlay()} albums={this.state.album} mood={this.state.mood} text={""} taggedUsers={this.state.taggedUsers} activity={this.state.selectedActivity} videoFile={this.state.captures[0].uri} hoursPosted={this.state.selectedValueHours} location={this.state.location} creatorId={firebase.auth().currentUser.uid} shouldFlip={this.state.captures[0].shouldFlip} />
           </SafeAreaView>
         </Overlay>
 
@@ -1466,16 +1531,19 @@ class CameraScreen extends Component {
   }
 
   render() {
-    const { isFocused } = this.props
+
+    let { isFocused } = this.props
     if (this.state.fontsLoaded) {
       if (this.state.captures.length === 0) {
         console.log('n am poza nici video')
-        if (isFocused)
+        if (isFocused) {
           return this.renderCamera()
-        else
+        }
+        else {
           return (<View>
             <Text style={{ fontSize: 50 }}>salut frate nu e camera</Text>
           </View>)
+        }
       } else if (typeof this.state.captures[0].height !== 'undefined') {
         console.log('am poza')
 

@@ -237,7 +237,7 @@ class ChatCameraScreen extends Component {
 
   takePicture = async () => {
     if (this.camera) {
-      this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved })
+      this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved, quality: 0.4 })
     }
   }
 
@@ -309,7 +309,7 @@ class ChatCameraScreen extends Component {
   _rotateAndFlip = async (uri) => {
     const mainResult = await ImageManipulator.manipulateAsync(
       uri, [{ rotate: 0 }, { flip: ImageManipulator.FlipType.Vertical }],
-      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+      { compress: 0.2, format: ImageManipulator.SaveFormat.PNG }
     )
     this.setState({
       pictureTaken: mainResult.uri
@@ -335,11 +335,11 @@ class ChatCameraScreen extends Component {
 
   handleShortCapture = async () => {
     console.log("picture")
-    const photoData = await this.camera.takePictureAsync();
+    const photoData = await this.camera.takePictureAsync({ quality: 0.4 });
     if (this.state.type === Camera.Constants.Type.front) {
       const result = await ImageManipulator.manipulateAsync(
         photoData.uri, [{ rotate: 0 }, { flip: ImageManipulator.FlipType.Horizontal }],
-        { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+        { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG }
       )
       this.setState({ pictureTaken: result.uri, capturing: false, captures: [result, ...this.state.captures], showPhoto: true })
 
@@ -359,7 +359,7 @@ class ChatCameraScreen extends Component {
       this.setState({ flipVideo: false })
       console.log(' FLIP', this.state.flipVideo)
     }
-    const videoData = await this.camera.recordAsync();
+    const videoData = await this.camera.recordAsync({ quality: Camera.Constants.VideoQuality['480p'] });
     videoData.shouldFlip = this.state.flipVideo
     console.log(videoData, ' asta chiar ma intereseazaaaaa')
     this.setState({ capturing: false, captures: [videoData, ...this.state.captures] });
@@ -381,6 +381,8 @@ class ChatCameraScreen extends Component {
     },
       async () => {
         const url = await upload.snapshot.ref.getDownloadURL()
+      this.props.navigation.goBack(null)
+
         this.sendPost(url)
       })
     console.log('intra bine')
@@ -396,6 +398,7 @@ class ChatCameraScreen extends Component {
     upload.on("state_changed", snapshot => { }, err => {
     }, async () => {
       const url = await upload.snapshot.ref.getDownloadURL()
+      this.props.navigation.goBack(null)
       this.upload(url)
     })
   }
@@ -448,7 +451,7 @@ class ChatCameraScreen extends Component {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
         <DoubleTap onDoubleTap={() => this.handleCameraType()}>
-          <Camera mirror={false} ratio="2:1" style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
+          <Camera mirror={false} ratio="16:9" style={{ flex: 1 }} type={this.state.type} ref={(ref) => { this.camera = ref }} flashMode={this.state.withFlash}>
 
             <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
               {/* <TouchableOpacity
@@ -694,7 +697,7 @@ class ChatCameraScreen extends Component {
   renderGallery = () => {
     return (
       <Overlay isVisible={this.state.showPhoto}>
-        <ImageBackground source={{ uri: this.state.captures[0].uri }} style={{ width: width + 5, height: screenHeight, backgroundColor: 'transparent' }}>
+        <ImageBackground source={{ uri: this.state.captures[0].uri }} style={{ width: width + 5, height: screenHeight, backgroundColor: 'transparent', marginVertical: 10 }}>
           <SafeAreaView style={{ flex: 1, flexDirection: 'row', margin: 10 }}>
             <View style={{ flex: 0, margin: 0, alignItems: 'flex-start' }}>
               <TouchableOpacity
@@ -714,20 +717,20 @@ class ChatCameraScreen extends Component {
             </View>
 
 
-            <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 0, alignItems: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 20, right: 20}}>
+            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 0, alignItems: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 20, right: 20 }}>
 
 
               {/* <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.uploadPhoto()}>
                 <Avatar size={40} rounded source={{ uri: this.state.groupProfilePicture }} />
               </TouchableOpacity> */}
-              
-              <TouchableOpacity
-                  style={{alignSelf: 'flex-end'}}
-                    onPress={() => this.uploadPhoto()}
-                 >
-                    <MaterialCommunityIcons name="send-circle" size={48} color="#0984e3"/>
 
-                          </TouchableOpacity> 
+              <TouchableOpacity
+                style={{ alignSelf: 'flex-end' }}
+                onPress={() => this.uploadPhoto()}
+              >
+                <MaterialCommunityIcons name="send-circle" size={48} color="#0984e3" />
+
+              </TouchableOpacity>
 
             </View>
             <Overlay isVisible={this.state.moodOverlay} fullScreen animationType="slide">
@@ -1090,8 +1093,8 @@ class ChatCameraScreen extends Component {
 
 
           <TouchableOpacity style={{ marginRight: width / 4.6 }} onPress={() => this.uploadVideo()}>
-            {/* <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} /> */}
-            <Avatar size={40} rounded source={{ uri: this.state.groupProfilePicture }} />
+            <Ionicons name="ios-send" style={{ color: '#fff', fontSize: 30 }} />
+            {/* <Avatar size={40} rounded source={{ uri: this.state.groupProfilePicture }} /> */}
           </TouchableOpacity>
 
         </View>

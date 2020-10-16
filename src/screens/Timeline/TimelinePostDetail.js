@@ -24,8 +24,8 @@ class TimelinePostDetail extends Component {
         if(typeof this.state.imageUri !== 'undefined'){
         return (
             
-            <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-            <View style={{flexDirection: 'row', flex: 0, justifyContent: 'space-between', padding: 10, alignItems: 'center', backgroundColor: '#000'}}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#000', marginTop: 30 }}>
+            <SafeAreaView style={{flexDirection: 'row', flex: 0, justifyContent: 'space-between', padding: 10, alignItems: 'center', backgroundColor: '#000'}}>
             <TouchableOpacity
                             onPress={() => this.props.navigation.goBack(null)}
                             style={{
@@ -39,12 +39,12 @@ class TimelinePostDetail extends Component {
                                 style={{ fontSize: 24, fontWeight: "bold" }}
                             />
                         </TouchableOpacity>
-            </View>
-
-                <Image source={{ uri: this.state.imageUri }} style={{width: width, height: height}} />
             </SafeAreaView>
-        )}else { return(<SafeAreaView style={{flex: 1, backgroundColor: '#000'}}>
-        <View style={{flexDirection: 'row', flex: 0, justifyContent: 'space-between', padding: 10, alignItems: 'center', backgroundColor: '#000'}}>
+
+                <Image source={{ uri: this.state.imageUri }} style={{ aspectRatio: 9/16}} />
+            </SafeAreaView>
+        )}else { return(<SafeAreaView style={{flex: 1, backgroundColor: '#000', marginTop: 30}}>
+        <SafeAreaView style={{flexDirection: 'row', flex: 0, justifyContent: 'space-between', padding: 10, alignItems: 'center', backgroundColor: '#000'}}>
             <TouchableOpacity
                             onPress={() => this.props.navigation.goBack(null)}
                             style={{
@@ -58,8 +58,8 @@ class TimelinePostDetail extends Component {
                                 style={{ fontSize: 24, fontWeight: "bold" }}
                             />
                         </TouchableOpacity>
-            </View>
-                <Video source={{uri: this.state.videoUri}} resizeMode="cover" style={{ transform: [{ scaleX: this.state.shouldFlip ? -1 : 1 }, { scaleY: 1 }], width: width, height: height }}  shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
+            </SafeAreaView>
+                <Video source={{uri: this.state.videoUri}} resizeMode="cover" style={{ transform: [{ scaleX: this.state.shouldFlip ? -1 : 1 }, { scaleY: 1 }], aspectRatio: 9/16 }}  shouldPlay isMuted={false} rate={1.0} volume={1.0} isLooping/>
             </SafeAreaView>)
         }
     }

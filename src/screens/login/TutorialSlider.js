@@ -48,11 +48,13 @@ https://ibb.co/r3jsqjp*/
     rendertext() {
         if(this.state.indOfP === 0)
         return (
-            <View>
+            <View style={{flex: 1}}>
                 <Text style={{ fontFamily: 'font1', fontSize: 14, color: 'black' }}>🔵 Introducing future location!</Text>
                 <Text style={{ fontFamily: 'font1', fontSize: 14, color: 'black' }}>🔵 Instantly see where all of your friends will be!</Text>
                 <Text style={{ fontFamily: 'font1', fontSize: 14, color: 'black' }}>🔵 Start by holding anywhere on the map to begin!</Text>
-
+                <TouchableOpacity onPress={this.changeindex}>
+                        <Text style={{ fontFamily: 'font1', fontSize: 16, color: '#0984e3', alignSelf: 'center' }}>Continue</Text>
+                    </TouchableOpacity>
             </View>
         )
 
@@ -63,7 +65,9 @@ https://ibb.co/r3jsqjp*/
                 <Text style={{ fontFamily: 'font1', fontSize: 14, color: 'black' }}>🔵 You can filter by album, mood</Text>
                 
                 <Text style={{ fontFamily: 'font1', fontSize: 14, color: 'black' }}> activity and tagged Friends</Text>
-               
+                <TouchableOpacity onPress={this.changeindex}>
+                        <Text style={{ fontFamily: 'font1', fontSize: 16, color: '#0984e3', alignSelf: 'center' }}>Continue</Text>
+                    </TouchableOpacity>
             </View>
         )
 
@@ -73,7 +77,9 @@ https://ibb.co/r3jsqjp*/
                 <Text style={{ fontFamily: 'font1', fontSize: 14, color: 'black' }}>🔵 Introducing a new timeline!</Text>
                 <Text style={{ fontFamily: 'font1', fontSize: 14, color: 'black' }}>🔵 Easily create new memories with a press of a button!</Text>
                 
-
+                <TouchableOpacity onPress={this.changeindex}>
+                        <Text style={{ fontFamily: 'font1', fontSize: 16, color: '#0984e3', alignSelf: 'center' }}>Continue</Text>
+                    </TouchableOpacity>
             </View>
         )
     }
@@ -82,16 +88,16 @@ https://ibb.co/r3jsqjp*/
 
             return (
 
-                <View style={{ flex: 1, alignItems: 'center', }}>
-                    <Image style={{ width: width, height: height * 0.8}} resizeMode='stretch' source={{ uri: this.state.picture[this.state.indOfP] }} />
+                <SafeAreaView style={{ flex: 1, alignItems: 'center', flexDirection: 'column'}}>
+                    <Image style={{ width: width, height: height * 0.8}} resizeMode="stretch" source={{ uri: this.state.picture[this.state.indOfP] }} />
                     <View style={{ marginHorizontal: 25, marginVertical:10 }}>
                         {this.rendertext()}
-                    </View>
-                    <TouchableOpacity onPress={this.changeindex}>
+                    {/* <TouchableOpacity onPress={this.changeindex}>
                         <Text style={{ fontFamily: 'font1', fontSize: 16, color: '#0984e3' }}>Continue</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
+                    </View>
 
-                </View>
+                </SafeAreaView>
 
 
 

@@ -3,7 +3,6 @@ import { View, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, Touchabl
 import { Text, Divider, CheckBox, Input, Overlay, Avatar } from 'react-native-elements'
 import firebase from 'firebase'
 import { FlatList,  } from 'react-native-gesture-handler'
-import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import Constants from 'expo-constants';
 import ChatRoom from '../../screens/chatRoom/ChatRoom'

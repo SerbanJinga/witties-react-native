@@ -506,7 +506,7 @@ let addedMe = []
             <View style={styles.container}>
    
             <View style={{flex: 0, flexDirection: 'row', justifyContent: 'space-around', paddingLeft: 10, paddingRight: 10, paddingBottom: 10, paddingTop: 10,}}>  
-            <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5, marginRight: 'auto'}}>Witties</Text>
+            <Text style={{fontSize: 20, fontFamily: "font1", paddingTop: 5, marginRight: 'auto'}}>Witties22</Text>
 
             <TouchableOpacity
                     onPress={()=> this._onPressSearch()}
