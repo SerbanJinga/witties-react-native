@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
-import { View } from 'react-native'
+import { View, Button } from 'react-native'
 import firebase from 'firebase'
 import Swiper from 'react-native-swiper'
 import SearchUsers from '../screens/friendSystem/SearchUsers'
 import * as Permissions from 'expo-permissions'
-// import * as Notifications from 'expo-notifications'
+import { Notifications } from 'expo'
 import CameraScreen from '../screens/camera/Camera'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { withNavigation } from 'react-navigation'
 import Timeline from './Timeline/Timeline'
-import { Constants } from 'expo-camera'
+import Constants from 'expo-constants'
+
 
 class Home extends Component {
 
@@ -35,6 +36,16 @@ class Home extends Component {
 
   }
 
+  makeRequest = async () => {
+    const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+    if(status === 'granted'){
+      // if (Constants.isDevice && Constants.appOwnership ==='expo'){
+
+      this.sendNotification()
+      console.log('esti bun rau')}
+    // }
+  }
+
   changeIndexTimeline = () => {
 
     this.swiper.scrollTo(2)
@@ -51,6 +62,29 @@ class Home extends Component {
     this.swiper.context
   }
 
+  sendNotification = async() => {
+    console.log('intra')
+    const token = (await Notifications.getDevicePushTokenAsync()).data
+  
+
+  await fetch('https://fcm.googleapis.com/fcm/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'key=AAAAw1Wblt8:APA91bHwqbDtmfWeDxXrcnUyhKN7s5uTJ-ItXVCRJet4aRb8NZVg0a0E24CQqmRRoDQiqJdV9N6q6docwnG92FoxCjji0gIFcGCMlGkxl-7fCWxUqjcs8axcvHKkBKpl8zHfPJkkE__K',
+    },
+    body: JSON.stringify({
+      to: token,
+      priority: 'normal',
+      data: {
+        experienceId: '@jinga_serban/Witties',
+        title: "\uD83D\uDCE7 You've got mail",
+        message: 'Hello world! \uD83C\uDF10',
+      },
+    }),
+  });
+}
+
   stopIndexChanging = () => {
     console.log(' s a oprit nu se mai misca!')
     this.setState({ scrollEnabled: false })
@@ -66,11 +100,10 @@ class Home extends Component {
   componentDidMount = async () => {
     arr = []
     finalArr = []
-    await this._getToken()
     await this._getProfilePicture()
-    setTimeout(() => {
-      this.componentDidMount()
-    }, 4000)
+    // setTimeout(() => {
+    //   this.componentDidMount()
+    // }, 4000)
   }
 
 
@@ -88,24 +121,7 @@ class Home extends Component {
 
   }
 
-  _getToken = async () => {
-    console.log('intri ba?')
-    // const { status: existingStatus } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-    // if(existingStatus !== 'granted') {
-    //   const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-    //   console.log(status)
-    // }
-
-    // Notifications.getDevicePushTokenAsync().then(data =>firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).update({
-    //   tokens: data,
-    //   estibine: "aia zic"
-    // }) )
-    
-    
-    // const token = await Notifications.getDevicePushTokenAsync()
-    
-  }
-
+  
 
 
 
@@ -135,6 +151,7 @@ class Home extends Component {
 
 
           <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+          <Button onPress={()=> this.makeRequest()} titleStyle={{fontFamily: 'font1', fontSize: 15, margin: 0}} type="clear" title="Add to story"/>
             <SearchUsers aia={() => this.componentDidMount()} changeIndex={() => this.changeIndexTimeline()} />
           </SafeAreaView>
 
