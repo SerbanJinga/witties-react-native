@@ -33,7 +33,7 @@
     "expo-permissions": "^8.1.0",
     "expo-video-thumbnails": "~4.1.0",
     "firebase": "7.9.0",
-    "firebase-admin": "^8.12.0",
+    "firebase-admin": "^11.4.1",
     "lodash": "^4.17.15",
     "native-base": "^2.13.12",
     "react": "~16.9.0",
